@@ -166,6 +166,10 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     return _formKey.currentState!.value;
   }
 
+  void patchValue(Map<String, dynamic> value) {
+    _formKey.currentState?.patchValue(value);
+  }
+
   /// generates a default UI schema which shows all fields of the JSON schema
   /// The Layout Type is a vertical one and for each element a Control Element with the scope of the JSON Schema Element is created
   UiSchemaModel _generateDefaultUISchema() {
