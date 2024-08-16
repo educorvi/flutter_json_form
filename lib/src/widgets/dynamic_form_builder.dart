@@ -235,8 +235,8 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     if (properties == null) return;
     for (String key in properties.keys) {
       final element = properties[key];
-      if (widget.formData != null && widget.formData!.containsKey("$path/$key")) {
-        _showOnDependencies["$path/$key"] = widget.formData!["$path/$key"];
+      if (widget.formData != null && widget.formData!.containsKey("#$path/$key")) {
+        _showOnDependencies["$path/$key"] = widget.formData!["#$path/$key"];
       } else if (element.containsKey('default')) {
         _showOnDependencies["$path/$key"] = element["default"];
       }
