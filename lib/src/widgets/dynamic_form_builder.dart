@@ -112,12 +112,9 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     return !validJsonSchema || !validUISchema;
   }
 
-  late bool initialized;
-
   @override
   initState() {
     super.initState();
-    initialized = false;
     // if (widget.formData != null) {
     //   _formKey.currentState?.patchValue(widget.formData!);
     // }
@@ -318,16 +315,13 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         );
       }
     }
-    if(!initialized){
-      initialized = true;
-      _formKey.currentState?.patchValue(widget.formData!);
-    }
     return _getFormBuilder();
   }
 
   /// Returns the FormBuilder widget with the form fields and submit buttons
   FormBuilder _getFormBuilder() {
     return FormBuilder(
+      initialValue: widget.formData ?? {},
       key: _formKey,
       child: _generateForm(),
       // child: Column(
