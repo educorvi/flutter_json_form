@@ -48,13 +48,16 @@ class DynamicJsonForm extends StatefulWidget {
 
   // TODO maybe form key, maybe debug (default off, ignore tolerable errors or log them to the debug console, or: show them in the ui)
 
-  const DynamicJsonForm({
-    super.key,
-    required this.jsonSchema,
-    this.uiSchema,
-    // this.onFormSubmit,
-    this.validate = true,
-    this.parseJson = false});
+  final Map<String, dynamic>? formData;
+
+  const DynamicJsonForm(
+      {super.key,
+      required this.jsonSchema,
+      this.uiSchema,
+      // this.onFormSubmit,
+      this.validate = true,
+      this.parseJson = false,
+      this.formData});
 
   @override
   State<DynamicJsonForm> createState() => DynamicJsonFormState();
@@ -111,6 +114,10 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   @override
   initState() {
+    super.initState();
+    if (widget.formData != null) {
+      _formKey.currentState?.patchValue(widget.formData!);
+    }
     // parse and validate the json Schema
     final Map<String, dynamic> jsonSchemaMap = _getMap(widget.jsonSchema, "jsonSchema");
     if (widget.validate && !_validateJsonSchema(jsonSchemaMap)) {
@@ -134,7 +141,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     // initialize the _showOnDependencies with the default values in order
     // to correctly render form field which are dependent on other fields
     _initShowOnDependencies(_properties, "/properties");
-    super.initState();
   }
 
   /// Save form values and validate all fields of form
@@ -423,22 +429,22 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     }
 
     return Card.outlined(
-
-      child: Padding(
-        padding: const EdgeInsets.all(UIConstants.groupPadding),
-        child: label != null ? Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: UIConstants.groupTitleSpacing),
-            generateGroupElements(),
-          ],
-        ) : generateGroupElements(),
-      )
-    );
+        child: Padding(
+      padding: const EdgeInsets.all(UIConstants.groupPadding),
+      child: label != null
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: UIConstants.groupTitleSpacing),
+                generateGroupElements(),
+              ],
+            )
+          : generateGroupElements(),
+    ));
 
     // if (label != null) {
     //   return Column(
@@ -460,20 +466,16 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// generates a horizontal layout with the elements in a row. A Wrap is used to warp the elements around
   /// if they need more horizontal space than available
   LayoutBuilder _generateHorizontalLayout(List<LayoutElement> elements) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return Wrap(
-            // make elements align left and right (space between)
-            alignment: WrapAlignment.spaceBetween,
-            spacing: UIConstants.horizontalLayoutItemPadding,
-            runSpacing: UIConstants.verticalLayoutItemPadding,
-            children: elements
-                .map((item) {
-              return _generateItem(item);
-            })
-                .toList());
-      }
-    );
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      return Wrap(
+          // make elements align left and right (space between)
+          alignment: WrapAlignment.spaceBetween,
+          spacing: UIConstants.horizontalLayoutItemPadding,
+          runSpacing: UIConstants.verticalLayoutItemPadding,
+          children: elements.map((item) {
+            return _generateItem(item);
+          }).toList());
+    });
   }
 
   /// generates a vertical layout with the elements in a column
@@ -495,7 +497,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       },
       separatorBuilder: (BuildContext context, int index) {
         // return Container();
-        return  _handleShowOn(elements[index].showOn, const SizedBox(height: UIConstants.verticalLayoutItemPadding));
+        return _handleShowOn(elements[index].showOn, const SizedBox(height: UIConstants.verticalLayoutItemPadding));
       },
     );
   }
@@ -539,40 +541,37 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         duration: const Duration(milliseconds: 500),
         sizeCurve: Curves.easeInOut,
         firstChild: child,
-        secondChild: Container(), // Invisible child
+        secondChild: Container(),
+        // Invisible child
         crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       );
     }
   }
 
   /// generates a button group control based on the type of the button group
-  Widget _generateButtonGroupControl(LayoutElement element){
-    if(element.vertical != null && element.vertical!){
+  Widget _generateButtonGroupControl(LayoutElement element) {
+    if (element.vertical != null && element.vertical!) {
       return Column(
-        children: element.buttons!
-            .map((item) {
+        children: element.buttons!.map((item) {
           return _generateButtonControl(item);
-        })
-            .toList(),
+        }).toList(),
       );
     } else {
       return Wrap(
-        children: element.buttons!
-            .map((item) {
+        children: element.buttons!.map((item) {
           return _generateButtonControl(item);
-        })
-            .toList(),
+        }).toList(),
       );
     }
   }
 
   /// generates a button control based on the type of the button
-  Widget _generateButtonControl(Button button){
+  Widget _generateButtonControl(Button button) {
     // TODO: I dont get variant here, this most likely is an error with the generated type. Adjust the parsing process
     // if(button.options.nativeSubmitOptions.
     return FilledButton(
       onPressed: () {
-        switch (button.buttonType){
+        switch (button.buttonType) {
           case TheButtonsType.RESET:
             _formKey.currentState?.reset();
           case TheButtonsType.SUBMIT:
