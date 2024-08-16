@@ -112,12 +112,15 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     return !validJsonSchema || !validUISchema;
   }
 
+  late bool initialized;
+
   @override
   initState() {
     super.initState();
-    if (widget.formData != null) {
-      _formKey.currentState?.patchValue(widget.formData!);
-    }
+    initialized = false;
+    // if (widget.formData != null) {
+    //   _formKey.currentState?.patchValue(widget.formData!);
+    // }
     // parse and validate the json Schema
     final Map<String, dynamic> jsonSchemaMap = _getMap(widget.jsonSchema, "jsonSchema");
     if (widget.validate && !_validateJsonSchema(jsonSchemaMap)) {
@@ -314,6 +317,10 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
           ],
         );
       }
+    }
+    if(!initialized){
+      initialized = true;
+      _formKey.currentState?.patchValue(widget.formData!);
     }
     return _getFormBuilder();
   }
