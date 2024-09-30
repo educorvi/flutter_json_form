@@ -16,8 +16,10 @@ class FormElementFormControl extends StatefulWidget {
   final Map<String, dynamic> property;
   final bool required;
   final void Function(dynamic)? onChanged;
+  final dynamic initialValue;
+  final bool isShown;
 
-  const FormElementFormControl({super.key, this.options, required this.scope, required this.required, this.onChanged, required this.property});
+  const FormElementFormControl({super.key, this.options, required this.scope, required this.required, this.onChanged, required this.property, this.initialValue, required this.isShown});
 
   @override
   State<FormElementFormControl> createState() => _FormElementFormControlState();
@@ -52,7 +54,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     type = property["type"];
     placeholder = options?.placeholder;
     enabled = options?.disabled != true;
-    initialValue = property['default'];
+    initialValue = widget.initialValue ?? property['default'];
     super.initState();
   }
 
@@ -161,6 +163,11 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         return generateCheckboxGroup(values);
       }
     }
+    if(options?.tags?.enabled == true){
+      // TODO implement variants and proper tags support
+      return generateTextField();
+    }
+
     if(!itemsInitialized){
       itemsInitialized = true;
       items.add(ListItem<String>(id: _idCounter++, value: initialValue != null ? initialValue.toString() : ''));
@@ -216,13 +223,14 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         ),
         ReorderableListView.builder(
           shrinkWrap: true,
+          // buildDefaultDragHandles: false,
           physics: const ClampingScrollPhysics(),
           itemCount: items.length,
           itemBuilder: (context, index) {
-            return ListTile(
+            return Padding(
               key: Key('${items[index].id}'),
-              // leading: Icon(Icons.drag_handle), // This is the drag indicator
-              title: FormBuilderTextField(
+              padding: const EdgeInsets.only(right: 40, top: 5, bottom: 5),
+              child: FormBuilderTextField(
                 name: '$scope/${items[index].id}',
                 initialValue: items[index].value.toString(),
                 decoration: InputDecoration(
@@ -238,10 +246,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                   items[index].value = value;
                 },
               ),
-              // trailing: IconButton(
-              //   icon: Icon(Icons.close),
-              //   onPressed: () => removeItem(index),
-              // ),
             );
           },
           onReorder: (oldIndex, newIndex) {
@@ -263,7 +267,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     List<Widget> elements = [];
     if(property['properties'] != null){
       for(var key in property['properties'].keys) {
-        elements.add(FormElementFormControl(scope: "$scope/properties/$key", property: property['properties'][key], required: required));
+        // TODO: add default values recursively here
+        bool childRequired = property['required'] != null ? property['required'].contains(key) : false;
+        elements.add(FormElementFormControl(scope: "$scope/properties/$key", property: property['properties'][key], required: childRequired && widget.isShown, isShown: widget.isShown));
       }
     }
 
@@ -597,7 +603,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         validator: _composeBaseValidator(),
         decoration: _getInputDecoration(),
         // filled: true
-        initialValue: property['default'],
+        initialValue: initialValue,
         items: values.map((value) => DropdownMenuItem(value: value, child: Text(value))).toList(growable: false),
       ),
     );

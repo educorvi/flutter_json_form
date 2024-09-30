@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../flutter_json_forms.dart';
 import 'form_elements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -169,7 +170,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     // TODO here, preprocessing can be done in order to e.g. sort array correctly, return a nested object instead of a flat one, etc.
     // TODO when doing this, all operation have to be implemented in reverse when a state is being set for the form. See form_builder for reference on how to do this
     // TODO not visible fields should be filtered out here. Also, array field preprocessing should happen.
-    return _formKey.currentState!.value;
+    return processFormValuesEllaV2(_formKey.currentState!.value);
   }
 
   void patchValue(Map<String, dynamic> value) {
@@ -235,9 +236,10 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     if (properties == null) return;
     for (String key in properties.keys) {
       final element = properties[key];
-      if (widget.formData != null && widget.formData!.containsKey("#$path/$key")) {
-        _showOnDependencies["$path/$key"] = widget.formData!["#$path/$key"];
-      } else if (element.containsKey('default')) {
+      // set default values for fields. If a form data is provided, use this
+      if (widget.formData != null && widget.formData!.containsKey("$key")) {
+        _showOnDependencies["$path/$key"] = widget.formData!["$key"];
+      } else if (element.containsKey('default')) { // check if the jsonSchema defines a default value for the field
         _showOnDependencies["$path/$key"] = element["default"];
       }
       if (element["type"] == "object") {
@@ -324,7 +326,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// Returns the FormBuilder widget with the form fields and submit buttons
   FormBuilder _getFormBuilder() {
     return FormBuilder(
-      initialValue: widget.formData ?? {},
+      // initialValue: widget.formData ?? {},
       key: _formKey,
       child: _generateForm(),
       // child: Column(
@@ -643,16 +645,21 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       return _getErrorTextWidget("Control element must have a valid scope. Scope $scope not found in json schema.");
     }
 
+    bool isShown = item.showOn == null || _evaluateCondition(item.showOn!.type, _showOnDependencies[item.showOn!.scope], item.showOn!.referenceValue);
+
     return FormElementFormControl(
         options: options,
         scope: scope,
-        required: _isRequired(scope),
+        isShown: isShown,
+        required: _isRequired(scope) && isShown, // only evaluate the second expression if the field is required and the field has a showOn condition
         onChanged: (value) {
           setState(() {
             _showOnDependencies[scope] = value;
           });
         },
-        property: property);
+        property: property,
+        initialValue: _showOnDependencies[scope],
+    );
   }
 
   /// gets an object from the jsonSchema
