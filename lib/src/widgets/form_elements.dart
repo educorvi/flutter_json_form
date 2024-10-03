@@ -9,7 +9,6 @@ import '../constants.dart';
 import '../models/ui_schema.dart';
 import 'custom_form_fields/form_builder_segmented_button.dart';
 
-
 class FormElementFormControl extends StatefulWidget {
   final LayoutElementOptions? options;
   final String scope;
@@ -19,7 +18,21 @@ class FormElementFormControl extends StatefulWidget {
   final dynamic initialValue;
   final bool isShown;
 
-  const FormElementFormControl({super.key, this.options, required this.scope, required this.required, this.onChanged, required this.property, this.initialValue, required this.isShown});
+  // used for array elements which should not generate a label
+  final bool showLabel;
+  final void Function(dynamic)? onSavedCallback;
+
+  const FormElementFormControl(
+      {super.key,
+      this.options,
+      required this.scope,
+      required this.required,
+      this.onChanged,
+      required this.property,
+      this.initialValue,
+      required this.isShown,
+      this.onSavedCallback,
+      this.showLabel = true});
 
   @override
   State<FormElementFormControl> createState() => _FormElementFormControlState();
@@ -58,9 +71,13 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     super.initState();
   }
 
+  // Array
   List<ListItem> items = [];
   bool itemsInitialized = false;
   int _idCounter = 0;
+
+  // Object
+  final Map<String, dynamic> formSubmitValues = {};
 
   @override
   Widget build(BuildContext context) {
@@ -153,9 +170,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   /// handles the generation of array elements in the jsonSchema
   Widget _generateArrayControl() {
     var type = null;
-    if (property['items'] != null ) {
+    if (property['items'] != null) {
       type = property['items']['type'];
-      if(property['items']['enum'] != null){
+      if (property['items']['enum'] != null) {
         List<String> values = [];
         for (var item in property['items']['enum']) {
           values.add(item);
@@ -163,14 +180,21 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         return generateCheckboxGroup(values);
       }
     }
-    if(options?.tags?.enabled == true){
+    if (options?.tags?.enabled == true) {
       // TODO implement variants and proper tags support
       return generateTextField();
     }
 
-    if(!itemsInitialized){
+    if (!itemsInitialized) {
       itemsInitialized = true;
-      items.add(ListItem<String>(id: _idCounter++, value: initialValue != null ? initialValue.toString() : ''));
+      // initialize items with default value
+      if(initialValue != null && initialValue is List){
+        for (var item in initialValue) {
+          items.add(ListItem<dynamic>(id: _idCounter++, value: item));
+        }
+      } else {
+        items.add(ListItem<dynamic>(id: _idCounter++, value: null));
+      }
     }
     // generate an array with string elements
     return _getArrayWidget();
@@ -189,7 +213,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   // TODO: put this in an extra file and also allow to next object and other arrays within arrays and not only primitive types
   Widget _getArrayWidget() {
-
     void addItem() {
       setState(() {
         _idCounter++;
@@ -230,22 +253,49 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
             return Padding(
               key: Key('${items[index].id}'),
               padding: const EdgeInsets.only(right: 40, top: 5, bottom: 5),
-              child: FormBuilderTextField(
-                name: '$scope/${items[index].id}',
-                initialValue: items[index].value.toString(),
-                decoration: InputDecoration(
-                  // prefixIcon: Icon(Icons.drag_handle), // This is the drag indicator
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () => removeItem(index),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FormElementFormControl(
+                      scope: '$scope/${items[index].id}',
+                      property: property['items'],
+                      required: false,
+                      isShown: widget.isShown,
+                      initialValue: items[index].value,
+                      onSavedCallback: (value) {
+                        items[index].value = value;
+                        // call widget.onSavedCallback with the new value when last element is saved
+                        if (widget.onSavedCallback != null && index == items.length - 1) {
+                          widget.onSavedCallback!(items.map((e) => e.value).toList());
+                        }
+                      },
+                        showLabel: false,
+                    ),
                   ),
-                  //labelText: 'Item ${index + 1}',
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (value) {
-                  items[index].value = value;
-                },
+                  if (items.length > 1) SizedBox(width: 10),
+                  if (items.length > 1)
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () => removeItem(index),
+                    ),
+                ],
               ),
+              // FormBuilderTextField(
+              //   name: '$scope/${items[index].id}',
+              //   initialValue: items[index].value.toString(),
+              //   decoration: InputDecoration(
+              //     // prefixIcon: Icon(Icons.drag_handle), // This is the drag indicator
+              //     suffixIcon: items.length > 1 ? IconButton(
+              //       icon: Icon(Icons.close),
+              //       onPressed: () => removeItem(index),
+              //     ): null,
+              //     //labelText: 'Item ${index + 1}',
+              //     border: OutlineInputBorder(),
+              //   ),
+              //   onChanged: (value) {
+              //     items[index].value = value;
+              //   },
+              // ),
             );
           },
           onReorder: (oldIndex, newIndex) {
@@ -265,11 +315,34 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   Widget _generateObject() {
     // TODO use version from dynamic_form_builder.dart
     List<Widget> elements = [];
-    if(property['properties'] != null){
-      for(var key in property['properties'].keys) {
+    if (property['properties'] != null) {
+      for (var key in property['properties'].keys) {
         // TODO: add default values recursively here
         bool childRequired = property['required'] != null ? property['required'].contains(key) : false;
-        elements.add(FormElementFormControl(scope: "$scope/properties/$key", property: property['properties'][key], required: childRequired && widget.isShown, isShown: widget.isShown));
+        onSavedCallback(value) {
+          if (value != null && value != "" && widget.isShown) {
+            formSubmitValues[key] = value;
+          } else {
+            formSubmitValues.remove(key);
+          }
+          // if last element is saved, submit the form
+          if (widget.onSavedCallback != null && key == property['properties'].keys.last) {
+            // dont submit an empty object
+            if(formSubmitValues.isNotEmpty){
+              widget.onSavedCallback!(formSubmitValues);
+            }
+          }
+        }
+
+        // formSubmitValues[key] = property['properties'][key]['default'];
+        elements.add(FormElementFormControl(
+          scope: "$scope/properties/$key",
+          property: property['properties'][key],
+          required: childRequired && widget.isShown,
+          initialValue: initialValue != null ? initialValue[key] : null, // TODO: error handling, most likely at another place in the code. If no object is provided here, an error should be rendered in the ui before
+          isShown: widget.isShown,
+          onSavedCallback: onSavedCallback,
+        ));
       }
     }
 
@@ -297,6 +370,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         ),
       );
     }
+
     if (property['title'] != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,9 +391,11 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   /// Material Switch
   Widget generateSwitch() {
     return FormBuilderSwitch(
+      initialValue: initialValue ?? false,
       name: scope,
       onChanged: onChanged,
       enabled: enabled,
+      onSaved: widget.onSavedCallback,
       validator: _composeBaseValidator(),
       title: Text(_getLabel()),
       contentPadding: const EdgeInsets.all(0),
@@ -351,7 +427,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       if (maxLines > 1) return TextInputType.multiline;
       switch (options?.format) {
         case Format.TEXT:
-          if(type == "integer" || type == "number"){
+          if (type == "integer" || type == "number") {
             return TextInputType.number;
           }
           return TextInputType.text;
@@ -366,7 +442,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         case Format.TEL:
           return TextInputType.phone;
         default:
-          if(type == "integer" || type == "number"){
+          if (type == "integer" || type == "number") {
             return TextInputType.number;
           }
           return TextInputType.text;
@@ -496,23 +572,23 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     }
 
     return _wrapFieldTitle(
-      child: FormBuilderTextField(
-        name: scope,
-        onChanged: onChanged,
-        enabled: enabled,
-        validator: FormBuilderValidators.compose([
-          if (required) FormBuilderValidators.required(),
-          if (type == 'number') FormBuilderValidators.numeric(),
-        ]),
-        // TODO generelle Funktion nutzen, hier passt type aber noch nicht
-        decoration: _getInputDecoration(),
-        initialValue: initialValue,
-        textInputAction: maxLines > 1 ? TextInputAction.newline : null,
-        maxLines: maxLines,
-        keyboardType: getKeyboardType(),
-        autofillHints: getAutocompleteValues(),
-      )
-    );
+        child: FormBuilderTextField(
+      name: scope,
+      onChanged: onChanged,
+      enabled: enabled,
+      onSaved: widget.onSavedCallback,
+      validator: FormBuilderValidators.compose([
+        if (required) FormBuilderValidators.required(),
+        if (type == 'number') FormBuilderValidators.numeric(),
+      ]),
+      // TODO generelle Funktion nutzen, hier passt type aber noch nicht
+      decoration: _getInputDecoration(),
+      initialValue: initialValue,
+      textInputAction: maxLines > 1 ? TextInputAction.newline : null,
+      maxLines: maxLines,
+      keyboardType: getKeyboardType(),
+      autofillHints: getAutocompleteValues(),
+    ));
   }
 
   /// generate Color Picker using [FormBuilderColorPickerField]
@@ -521,6 +597,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       child: FormBuilderColorPickerField(
         name: scope,
         onChanged: onChanged,
+        onSaved: widget.onSavedCallback,
         enabled: enabled,
         validator: _composeBaseValidator(),
         decoration: _getInputDecoration(),
@@ -548,6 +625,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       child: FormBuilderFilePicker(
         name: scope,
         onChanged: onChanged,
+        onSaved: widget.onSavedCallback,
         enabled: enabled,
         validator: _composeBaseValidator(),
         decoration: _getInputDecoration(),
@@ -565,6 +643,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       child: FormBuilderRadioGroup(
         name: scope,
         onChanged: onChanged,
+        onSaved: widget.onSavedCallback,
         enabled: enabled,
         validator: _composeBaseValidator(),
         decoration: _getInputDecoration(border: false),
@@ -583,6 +662,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         child: FormBuilderCheckboxGroup(
           name: scope,
           onChanged: onChanged,
+          onSaved: widget.onSavedCallback,
           enabled: enabled,
           validator: _composeBaseValidator(),
           decoration: _getInputDecoration(border: false),
@@ -599,6 +679,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       child: FormBuilderDropdown(
         name: scope,
         onChanged: onChanged,
+        onSaved: widget.onSavedCallback,
         enabled: enabled,
         validator: _composeBaseValidator(),
         decoration: _getInputDecoration(),
@@ -631,7 +712,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           onChanged: onChanged,
           enabled: enabled,
           validator: _composeBaseValidator(),
-          decoration: _getInputDecoration(), //  ?? getDefaultDatetime().toString()
+          decoration: _getInputDecoration(),
+          //  ?? getDefaultDatetime().toString()
           initialDate: getDefaultDatetime(),
           inputType: inputType,
           // locale: const Locale('de', 'DE'),
@@ -673,6 +755,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       child: FormBuilderSegmentedButton<String>(
         name: scope,
         onChanged: onChanged,
+        onSaved: widget.onSavedCallback,
+        initialValue: initialValue,
         enabled: enabled,
         decoration: _getInputDecoration(border: false),
         segments: values.map((value) => ButtonSegment(value: value, label: Text(value))).toList(growable: false),
@@ -706,19 +790,21 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   }
 
   Widget _wrapFieldTitle({required Widget child}) {
-    return labelSeparateText ? Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          _getLabel(),
-        ),
-        // const SizedBox(height: UIConstants.groupTitleSpacing),
-        child,
-      ],
-    ): child;
+    return labelSeparateText && widget.showLabel
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _getLabel(),
+              ),
+              // const SizedBox(height: UIConstants.groupTitleSpacing),
+              child,
+            ],
+          )
+        : child;
   }
 
-  InputDecoration _getInputDecoration({bool border = true}){
+  InputDecoration _getInputDecoration({bool border = true}) {
     return InputDecoration(
       labelText: labelSeparateText ? null : _getLabel(),
       hintText: placeholder,
@@ -726,7 +812,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       helperText: description,
       helperMaxLines: 10,
     );
-
   }
 }
 

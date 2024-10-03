@@ -92,6 +92,10 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// The dependencies of the form fields which are dependent on other fields
   final Map<String, dynamic> _showOnDependencies = {};
 
+  final Map<String, dynamic> _formSubmitValues = {};
+
+  late final Map<String, dynamic> formData;
+
   /// return true if the widget is in the loading state (the validation is not finished yet
   /// (async part comes form reading the files. The validation is done synchronously))
   get isLoading {
@@ -116,9 +120,10 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   @override
   initState() {
     super.initState();
-    // if (widget.formData != null) {
-    //   _formKey.currentState?.patchValue(widget.formData!);
-    // }
+    if (widget.formData != null) {
+      // _formKey.currentState?.patchValue(widget.formData!);
+      formData = widget.formData!;
+    }
     // parse and validate the json Schema
     final Map<String, dynamic> jsonSchemaMap = _getMap(widget.jsonSchema, "jsonSchema");
     if (widget.validate && !_validateJsonSchema(jsonSchemaMap)) {
@@ -162,7 +167,15 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// Reset form to `initialValue`
   void reset() {
-    _formKey.currentState?.reset();
+    setState(() {
+      formData.clear();
+      for (String key in _showOnDependencies.keys) {
+        _showOnDependencies[key] = null;
+      }
+      // _showOnDependencies.clear();
+      _initShowOnDependencies(_properties, "/properties");
+      _formKey.currentState!.patchValue(_showOnDependencies);
+    });
   }
 
   /// Returns the saved value only
@@ -170,7 +183,8 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     // TODO here, preprocessing can be done in order to e.g. sort array correctly, return a nested object instead of a flat one, etc.
     // TODO when doing this, all operation have to be implemented in reverse when a state is being set for the form. See form_builder for reference on how to do this
     // TODO not visible fields should be filtered out here. Also, array field preprocessing should happen.
-    return processFormValuesEllaV2(_formKey.currentState!.value);
+    // return processFormValuesEllaV2(_formKey.currentState!.value);
+    return processFormValuesEllaV2(_formSubmitValues);
   }
 
   void patchValue(Map<String, dynamic> value) {
@@ -237,9 +251,10 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     for (String key in properties.keys) {
       final element = properties[key];
       // set default values for fields. If a form data is provided, use this
-      if (widget.formData != null && widget.formData!.containsKey("$key")) {
-        _showOnDependencies["$path/$key"] = widget.formData!["$key"];
-      } else if (element.containsKey('default')) { // check if the jsonSchema defines a default value for the field
+      if (formData.containsKey("$key")) {
+        _showOnDependencies["$path/$key"] = formData[key];
+      } else if (element.containsKey('default')) {
+        // check if the jsonSchema defines a default value for the field
         _showOnDependencies["$path/$key"] = element["default"];
       }
       if (element["type"] == "object") {
@@ -399,12 +414,17 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       case LayoutType.HORIZONTAL_LAYOUT:
         return _generateHorizontalLayout(layout.elements);
       case LayoutType.GROUP:
-        return _generateGroup(layout.elements, layout.label);
+        return _generateGroup(layout as LayoutElement);
     }
   }
 
   /// generates a group of elements with an optional label at the top
-  Widget _generateGroup(List<LayoutElement> elements, String? label) {
+  Widget _generateGroup(LayoutElement item) {
+    List<LayoutElement> elements = item.elements!;
+    String? label = item.label;
+
+    bool? isShown = item.showOn == null ? null : _evaluateCondition(item.showOn!.type, _showOnDependencies[item.showOn!.scope], item.showOn!.referenceValue);
+
     ListView generateGroupElements() {
       // return Padding(
       //   padding: const EdgeInsets.symmetric(horizontal: UIConstants.groupPadding),
@@ -425,7 +445,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         // padding: const EdgeInsets.symmetric(horizontal: UIConstants.groupPadding),
         itemCount: elements.length,
         itemBuilder: (BuildContext context, int index) {
-          return _generateItem(elements[index]);
+          return _generateItem(elements[index], isShownFromParent: isShown);
         },
         separatorBuilder: (BuildContext context, int index) {
           // return _handleShowOn(elements[index].showOn, const SizedBox(height: UIConstants.verticalLayoutItemPadding));
@@ -509,7 +529,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 
   /// generates an layoutElement based on the type of the element
-  Widget _generateItem(LayoutElement item) {
+  Widget _generateItem(LayoutElement item, {bool? isShownFromParent}) {
     LayoutElementType? type = item.type;
     Widget child;
     switch (type) {
@@ -518,11 +538,11 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       case LayoutElementType.BUTTONGROUP:
         return _generateButtonGroupControl(item);
       case LayoutElementType.CONTROL:
-        child = _generateControl(item);
+        child = _generateControl(item, isShownFromParent: isShownFromParent);
       case LayoutElementType.DIVIDER:
         child = _generateDivider(item);
       case LayoutElementType.GROUP:
-        child = _generateGroup(item.elements!, item.label);
+        child = _generateGroup(item);
       case LayoutElementType.HORIZONTAL_LAYOUT:
         child = _generateHorizontalLayout(item.elements!);
       case LayoutElementType.HTML:
@@ -634,7 +654,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// generates a control element based on the type of the property
   /// TODO use typing here for the referenced elements in schema.json
-  Widget _generateControl(LayoutElement item) {
+  Widget _generateControl(LayoutElement item, {bool? isShownFromParent}) {
     if (item.scope == null) {
       return _getErrorTextWidget("Control element must have a scope");
     }
@@ -644,29 +664,60 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     if (property == null) {
       return _getErrorTextWidget("Control element must have a valid scope. Scope $scope not found in json schema.");
     }
+    // dynamic formDataForScope = _getObjectFromJsonFormData;
 
-    bool isShown = item.showOn == null || _evaluateCondition(item.showOn!.type, _showOnDependencies[item.showOn!.scope], item.showOn!.referenceValue);
+    bool isShown = isShownFromParent ?? item.showOn == null || _evaluateCondition(item.showOn!.type, _showOnDependencies[item.showOn!.scope], item.showOn!.referenceValue);
 
     return FormElementFormControl(
-        options: options,
-        scope: scope,
-        isShown: isShown,
-        required: _isRequired(scope) && isShown, // only evaluate the second expression if the field is required and the field has a showOn condition
-        onChanged: (value) {
-          setState(() {
-            _showOnDependencies[scope] = value;
-          });
-        },
-        property: property,
-        initialValue: _showOnDependencies[scope],
+      options: options,
+      scope: scope,
+      isShown: isShown,
+      required: _isRequired(scope) && isShown,
+      // only evaluate the second expression if the field is required and the field has a showOn condition
+      onChanged: (value) {
+        setState(() {
+          _showOnDependencies[scope] = value;
+        });
+      },
+      property: property,
+      initialValue: _showOnDependencies[scope],
+      // formDataForScope,
+      onSavedCallback: (value) {
+        if (isShown && value != null && value != "") {
+          _formSubmitValues[scope] = value;
+        } else {
+          _formSubmitValues.remove(scope);
+        }
+      },
     );
+  }
+
+  dynamic _getObjectFromJsonFormData(String path) {
+    if (formData.isEmpty) {
+      return null;
+    }
+    return _getObjectFromJson(formData, path);
   }
 
   /// gets an object from the jsonSchema
   /// [path] the path of the object in the json schema
   Map<String, dynamic>? _getObjectFromJsonSchema(String path) {
+    dynamic object = _getObjectFromJson(_properties, path);
+    if (object is! Map<String, dynamic>?) {
+      return null;
+    }
+    return object;
+  }
+
+  /// gets an object from a json
+  /// [path] the path of the object in the json
+  /// [json] the json object
+  dynamic _getObjectFromJson(
+    Map<String, dynamic> json,
+    String path,
+  ) {
     List<String> pathParts = _getPathWithoutPrefix(path).split('/');
-    dynamic object = _properties;
+    dynamic object = json;
     try {
       for (String part in pathParts) {
         object = object[part];

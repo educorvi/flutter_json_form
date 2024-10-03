@@ -83,7 +83,16 @@ class _MyHomePageState extends State<MyHomePage> {
     Map<String, dynamic> formData = {
       "name": "John Doe",
       "title": "Mr.",
-      "groupSelect": "Object",
+      "group_selector": "Object",
+      "testArray": [
+        "Test 1",
+        "Test 2",
+      ],
+      "testObject": {
+        "petName": "1",
+        "age": "2",
+        "flauschig": true,
+      },
     };
 
     return Scaffold(
