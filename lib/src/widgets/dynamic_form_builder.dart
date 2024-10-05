@@ -315,15 +315,15 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         final formDataKey = formData[key];
         if(formDataKey is List){
           int id = 0;
-          dependencies["/properties/$key"] = formDataKey.map((item) => ListItem(id: id++, value: item)).toList();
+          dependencies["$key"] = formDataKey.map((item) => ListItem(id: id++, value: item)).toList();
         } else {
-          dependencies["/properties/$key"] = formData[key];
+          dependencies["$key"] = formData[key];
         }
       } else if (element.containsKey('default')) {
         // check if the jsonSchema defines a default value for the field
-        dependencies["/properties/$key"] = element["default"];
+        dependencies["$key"] = element["default"];
       } else {
-        dependencies["/properties/$key"] = null;
+        dependencies["$key"] = null;
       }
     }
     return dependencies;
