@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../flutter_json_forms.dart';
+import 'data/list_item.dart';
 import 'form_elements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -90,7 +91,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   late final UiSchemaModel uiSchemaModel;
 
   /// The dependencies of the form fields which are dependent on other fields
-  final Map<String, dynamic> _showOnDependencies = {};
+  Map<String, dynamic> _showOnDependencies = {};
 
   final Map<String, dynamic> _formSubmitValues = {};
 
@@ -123,6 +124,8 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     if (widget.formData != null) {
       // _formKey.currentState?.patchValue(widget.formData!);
       formData = widget.formData!;
+    } else {
+      formData = {}; // TODO mark formData empty and do not use it in the form
     }
     // parse and validate the json Schema
     final Map<String, dynamic> jsonSchemaMap = _getMap(widget.jsonSchema, "jsonSchema");
@@ -146,7 +149,8 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
     // initialize the _showOnDependencies with the default values in order
     // to correctly render form field which are dependent on other fields
-    _initShowOnDependencies(_properties, "/properties");
+    _showOnDependencies = _initShowOnDependencies(_properties, formData);
+    print(_showOnDependencies);
   }
 
   /// Save form values and validate all fields of form
@@ -162,6 +166,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// In this case, the automatic scroll happens because is a behavior inside the framework,
   /// not because [autoScrollWhenFocusOnInvalid] is `true`.
   bool saveAndValidate() {
+    _formSubmitValues.clear();
     return _formKey.currentState!.saveAndValidate();
   }
 
@@ -169,12 +174,59 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   void reset() {
     setState(() {
       formData.clear();
-      for (String key in _showOnDependencies.keys) {
-        _showOnDependencies[key] = null;
+      _resetShowOnDependencies(_showOnDependencies);
+      _formKey.currentState!.patchValue(flattenShowOnDependencies(_showOnDependencies));
+      // final arrayElementsToDelete = _resetShowOnDependencies(_showOnDependencies);
+      _showOnDependencies = _initShowOnDependencies(_properties, formData);
+      _formKey.currentState!.patchValue(flattenShowOnDependencies(_showOnDependencies));
+    });
+  }
+
+  Map<String, dynamic> flattenShowOnDependencies(Map<String, dynamic> dependencies, {String prefix = ""}) {
+    Map<String, dynamic> flattened = {};
+    dependencies.forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        flattened.addAll(flattenShowOnDependencies(value, prefix: "$prefix$key"));
+      } else if (value is List) {
+        for (int i = 0; i < value.length; i++) {
+          final item = value[i];
+          if (item is ListItem) {
+            final value = item.value;
+            final path = "$prefix$key/$i";
+            if (value is Map<String, dynamic>) {
+              flattened.addAll(flattenShowOnDependencies(value, prefix: path));
+            } else {
+              flattened[path] = value;
+            }
+          }
+        }
+      } else {
+        flattened["$prefix$key"] = value;
       }
-      // _showOnDependencies.clear();
-      _initShowOnDependencies(_properties, "/properties");
-      _formKey.currentState!.patchValue(_showOnDependencies);
+    });
+    return flattened;
+  }
+
+  /// Recursively resets the _showOnDependencies map
+  /// most likely no longer needed as all elements are reset when initShowOnDependencies is called
+  void _resetShowOnDependencies(Map<String, dynamic> dependencies) {
+    dependencies.forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        _resetShowOnDependencies(value);
+      } else if (value is List) {
+        for (var item in value) {
+          if (item is ListItem) {
+            final value = item.value;
+            if (value is Map<String, dynamic>) {
+              _resetShowOnDependencies(value);
+            } else {
+              item.value = null;
+            }
+          }
+        }
+      } else {
+        dependencies[key] = null;
+      }
     });
   }
 
@@ -246,21 +298,35 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// initialize _showDependencies with the default values
   /// this function gets called recursively for objects in the jsonSchema which are nested into each other
-  void _initShowOnDependencies(Map<String, dynamic>? properties, String path) {
-    if (properties == null) return;
+  Map<String, dynamic> _initShowOnDependencies(Map<String, dynamic>? properties, Map<String, dynamic>? formData) {
+    if (properties == null) return {};
+    final Map<String, dynamic> dependencies = {};
     for (String key in properties.keys) {
       final element = properties[key];
       // set default values for fields. If a form data is provided, use this
-      if (formData.containsKey("$key")) {
-        _showOnDependencies["$path/$key"] = formData[key];
+      if (element["type"] == "object") {
+        final recursiveFormData = formData == null
+            ? null
+            : formData.containsKey(key)
+                ? formData[key]
+                : null;
+        dependencies["/properties/$key"] = _initShowOnDependencies(element['properties'], recursiveFormData);
+      } else if (formData != null && formData.containsKey(key)) {
+        final formDataKey = formData[key];
+        if(formDataKey is List){
+          int id = 0;
+          dependencies["/properties/$key"] = formDataKey.map((item) => ListItem(id: id++, value: item)).toList();
+        } else {
+          dependencies["/properties/$key"] = formData[key];
+        }
       } else if (element.containsKey('default')) {
         // check if the jsonSchema defines a default value for the field
-        _showOnDependencies["$path/$key"] = element["default"];
-      }
-      if (element["type"] == "object") {
-        _initShowOnDependencies(element['properties'], "$path/$key/properties");
+        dependencies["/properties/$key"] = element["default"];
+      } else {
+        dependencies["/properties/$key"] = null;
       }
     }
+    return dependencies;
   }
 
   /// Validates the JSON schema against the JSON meta schema
@@ -423,7 +489,8 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     List<LayoutElement> elements = item.elements!;
     String? label = item.label;
 
-    bool? isShown = item.showOn == null ? null : _evaluateCondition(item.showOn!.type, _showOnDependencies[item.showOn!.scope], item.showOn!.referenceValue);
+    bool? isShown =
+        item.showOn == null ? null : _evaluateCondition(item.showOn!.type, _showOnDependencies[item.showOn!.scope], item.showOn!.referenceValue);
 
     ListView generateGroupElements() {
       // return Padding(
@@ -563,13 +630,24 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       return child;
     } else {
       bool isVisible = _evaluateCondition(showOn.type, _showOnDependencies[showOn.scope], showOn.referenceValue);
-      return AnimatedCrossFade(
-        duration: const Duration(milliseconds: 500),
-        sizeCurve: Curves.easeInOut,
-        firstChild: child,
-        secondChild: Container(),
-        // Invisible child
-        crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      // return AnimatedCrossFade(
+      //   duration: const Duration(milliseconds: 500),
+      //   sizeCurve: Curves.easeInOut,
+      //   firstChild: child,
+      //   secondChild: Container(),
+      //   // Invisible child
+      //   crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      // );
+      return Visibility(
+        visible: isVisible,
+        // maintainAnimation: true,
+        // maintainState: true,
+        child: AnimatedOpacity(
+            opacity: isVisible ? 1.0 : 0.0,
+            // maintainState: true,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+            child: child),
       );
     }
   }
@@ -666,7 +744,9 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     }
     // dynamic formDataForScope = _getObjectFromJsonFormData;
 
-    bool isShown = isShownFromParent ?? item.showOn == null || _evaluateCondition(item.showOn!.type, _showOnDependencies[item.showOn!.scope], item.showOn!.referenceValue);
+    bool isShown = isShownFromParent ?? true
+        ? item.showOn == null || _evaluateCondition(item.showOn!.type, _showOnDependencies[item.showOn!.scope], item.showOn!.referenceValue)
+        : false;
 
     return FormElementFormControl(
       options: options,

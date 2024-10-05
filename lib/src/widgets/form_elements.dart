@@ -8,6 +8,7 @@ import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
 import '../constants.dart';
 import '../models/ui_schema.dart';
 import 'custom_form_fields/form_builder_segmented_button.dart';
+import 'data/list_item.dart';
 
 class FormElementFormControl extends StatefulWidget {
   final LayoutElementOptions? options;
@@ -68,6 +69,17 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     placeholder = options?.placeholder;
     enabled = options?.disabled != true;
     initialValue = widget.initialValue ?? property['default'];
+    if (widget.initialValue is Map<String, dynamic>) {
+      // print("initialValue is Map<String, dynamic>, this should be a object");
+      _showOnDependencies = widget.initialValue;
+    } else if (widget.initialValue is List) {
+      // print("initialValue is List, this should be a array");
+      // _showOnDependencies = widget.initialValue;
+    } else {
+      _showOnDependencies = {};
+      // print("neither a object nor a array");
+    }
+    // _showOnDependencies = widget.initialValue is Map<String, dynamic> || ? widget.initialValue : {};
     super.initState();
   }
 
@@ -78,6 +90,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   // Object
   final Map<String, dynamic> formSubmitValues = {};
+  late final Map<String, dynamic> _showOnDependencies;
 
   @override
   Widget build(BuildContext context) {
@@ -188,13 +201,21 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     if (!itemsInitialized) {
       itemsInitialized = true;
       // initialize items with default value
-      if(initialValue != null && initialValue is List){
-        for (var item in initialValue) {
-          items.add(ListItem<dynamic>(id: _idCounter++, value: item));
+      if (initialValue != null && initialValue is List<ListItem>) {
+        for (ListItem item in initialValue) {
+          items.add(ListItem<dynamic>(id: item.id, value: item.value));
+          _idCounter++;
         }
       } else {
         items.add(ListItem<dynamic>(id: _idCounter++, value: null));
       }
+      // if (widget.initialValue is List){
+      //   List<dynamic> initialValueList= widget.initialValue;
+      //   initialValueList.clear();
+      //   for (var item in items) {
+      //     initialValueList.add(item);
+      //   }
+      // }
     }
     // generate an array with string elements
     return _getArrayWidget();
@@ -216,7 +237,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     void addItem() {
       setState(() {
         _idCounter++;
-        items.add(ListItem<String>(id: _idCounter, value: ''));
+        items.add(ListItem<dynamic>(id: _idCounter, value: null));
       });
     }
 
@@ -269,7 +290,13 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                           widget.onSavedCallback!(items.map((e) => e.value).toList());
                         }
                       },
-                        showLabel: false,
+                      onChanged: (value) {
+                        items[index].value = value;
+                        if (widget.onChanged != null) {
+                          widget.onChanged!(items);
+                        }
+                      },
+                      showLabel: false,
                     ),
                   ),
                   if (items.length > 1) SizedBox(width: 10),
@@ -328,8 +355,17 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           // if last element is saved, submit the form
           if (widget.onSavedCallback != null && key == property['properties'].keys.last) {
             // dont submit an empty object
-            if(formSubmitValues.isNotEmpty){
+            if (formSubmitValues.isNotEmpty) {
               widget.onSavedCallback!(formSubmitValues);
+            }
+          }
+        }
+
+        onChangedCallback(value) {
+          if (value != null && value != "" && widget.isShown) {
+            _showOnDependencies[key] = value;
+            if (widget.onChanged != null) {
+              widget.onChanged!(_showOnDependencies);
             }
           }
         }
@@ -339,9 +375,11 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           scope: "$scope/properties/$key",
           property: property['properties'][key],
           required: childRequired && widget.isShown,
-          initialValue: initialValue != null ? initialValue[key] : null, // TODO: error handling, most likely at another place in the code. If no object is provided here, an error should be rendered in the ui before
+          initialValue: initialValue is Map<String, dynamic> ? initialValue["/properties/$key"] : null,
+          // TODO: error handling, most likely at another place in the code. If no object is provided here, an error should be rendered in the ui before
           isShown: widget.isShown,
           onSavedCallback: onSavedCallback,
+          onChanged: onChangedCallback,
         ));
       }
     }
@@ -391,7 +429,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   /// Material Switch
   Widget generateSwitch() {
     return FormBuilderSwitch(
-      initialValue: initialValue ?? false,
+      initialValue: initialValue,
       name: scope,
       onChanged: onChanged,
       enabled: enabled,
@@ -574,14 +612,10 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     return _wrapFieldTitle(
         child: FormBuilderTextField(
       name: scope,
-      onChanged: onChanged,
+      onSubmitted: onChanged,
       enabled: enabled,
       onSaved: widget.onSavedCallback,
-      validator: FormBuilderValidators.compose([
-        if (required) FormBuilderValidators.required(),
-        if (type == 'number') FormBuilderValidators.numeric(),
-      ]),
-      // TODO generelle Funktion nutzen, hier passt type aber noch nicht
+      validator: _composeBaseValidator(additionalValidators: (type == 'number') ? [FormBuilderValidators.numeric()] : null),
       decoration: _getInputDecoration(),
       initialValue: initialValue,
       textInputAction: maxLines > 1 ? TextInputAction.newline : null,
@@ -766,10 +800,30 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     );
   }
 
-  /// composes a base validator for the form element based on the required property
+  /// composes a base validator for the form element which validates the required property
   /// additional validators can be added to the list
-  FormFieldValidator<dynamic> _composeBaseValidator({List<FormFieldValidator<dynamic>>? additionalValidators}) {
-    return FormBuilderValidators.compose([if (required) FormBuilderValidators.required(), ...?additionalValidators]);
+  /// validation is only done when the element is shown
+  /// [additionalValidators] list of additional validators to be added to the base validator
+  FormFieldValidator<dynamic>? _composeBaseValidator({List<FormFieldValidator<String?>>? additionalValidators}) {
+    // FormBuilderValidator.compose can't be used here as the value of isShown can change dynamically after the validator is created
+    // Therefore the callback function for the validator is created here and the value of isShown is checked before any validators are called
+    return (valueCandidate) {
+      if (!widget.isShown) {
+        return null;
+      }
+      if (required) {
+        return FormBuilderValidators.required().call(valueCandidate);
+      }
+      if (additionalValidators != null) {
+        for (final validator in additionalValidators) {
+          final validatorResult = validator.call(valueCandidate);
+          if (validatorResult != null) {
+            return validatorResult;
+          }
+        }
+      }
+      return null;
+    };
   }
 
   /// generates the label text marked as required when the field is required
@@ -813,11 +867,4 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       helperMaxLines: 10,
     );
   }
-}
-
-class ListItem<T> {
-  final int id;
-  T? value;
-
-  ListItem({required this.id, this.value});
 }

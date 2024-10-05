@@ -84,10 +84,10 @@ class _MyHomePageState extends State<MyHomePage> {
       "name": "John Doe",
       "title": "Mr.",
       "group_selector": "Object",
-      "testArray": [
-        "Test 1",
-        "Test 2",
-      ],
+      // "testArray": [
+      //   "Test 1",
+      //   "Test 2",
+      // ],
       "testObject": {
         "petName": "1",
         "age": "2",
