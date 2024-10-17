@@ -173,39 +173,66 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// Reset form to `initialValue`
   void reset() {
     setState(() {
-      formData.clear();
+      // formData.clear();
       _resetShowOnDependencies(_showOnDependencies);
-      _formKey.currentState!.patchValue(flattenShowOnDependencies(_showOnDependencies));
+      _showOnDependencies = _initShowOnDependencies(_properties, null);
+      // _formKey.currentState!.reset();
+      _formKey.currentState!.patchValue(convertShowOnDependenciesToFormBuilderValues(_showOnDependencies));
       // final arrayElementsToDelete = _resetShowOnDependencies(_showOnDependencies);
-      _showOnDependencies = _initShowOnDependencies(_properties, formData);
-      _formKey.currentState!.patchValue(flattenShowOnDependencies(_showOnDependencies));
+      // _showOnDependencies = _initShowOnDependencies(_properties, null);
+      // _formKey.currentState!.patchValue(convertShowOnDependenciesToFormBuilderValues(_showOnDependencies));
     });
   }
 
-  Map<String, dynamic> flattenShowOnDependencies(Map<String, dynamic> dependencies, {String prefix = ""}) {
-    Map<String, dynamic> flattened = {};
+  /// converts the form values to the format of the JSON schema
+  /// handles array elements by getting each element and generating the form builder elements with their ids and contained values
+  Map<String, dynamic> convertShowOnDependenciesToFormBuilderValues(Map<String, dynamic> dependencies) {
+    Map<String, dynamic> formBuilderValues = {};
     dependencies.forEach((key, value) {
-      if (value is Map<String, dynamic>) {
-        flattened.addAll(flattenShowOnDependencies(value, prefix: "$prefix$key"));
-      } else if (value is List) {
+      if (value is List) {
         for (int i = 0; i < value.length; i++) {
           final item = value[i];
           if (item is ListItem) {
             final value = item.value;
-            final path = "$prefix$key/$i";
+            final path = "$key/$i";
             if (value is Map<String, dynamic>) {
-              flattened.addAll(flattenShowOnDependencies(value, prefix: path));
+              formBuilderValues.addAll(convertShowOnDependenciesToFormBuilderValues(value));
             } else {
-              flattened[path] = value;
+              formBuilderValues[path] = value;
             }
           }
         }
       } else {
-        flattened["$prefix$key"] = value;
+        formBuilderValues[key] = value;
       }
     });
-    return flattened;
+    return formBuilderValues;
   }
+
+  // Map<String, dynamic> flattenShowOnDependencies(Map<String, dynamic> dependencies, {String prefix = ""}) {
+  //   Map<String, dynamic> flattened = {};
+  //   dependencies.forEach((key, value) {
+  //     if (value is Map<String, dynamic>) {
+  //       flattened.addAll(flattenShowOnDependencies(value, prefix: "$prefix$key"));
+  //     } else if (value is List) {
+  //       for (int i = 0; i < value.length; i++) {
+  //         final item = value[i];
+  //         if (item is ListItem) {
+  //           final value = item.value;
+  //           final path = "$prefix$key/$i";
+  //           if (value is Map<String, dynamic>) {
+  //             flattened.addAll(flattenShowOnDependencies(value, prefix: path));
+  //           } else {
+  //             flattened[path] = value;
+  //           }
+  //         }
+  //       }
+  //     } else {
+  //       flattened["$prefix$key"] = value;
+  //     }
+  //   });
+  //   return flattened;
+  // }
 
   /// Recursively resets the _showOnDependencies map
   /// most likely no longer needed as all elements are reset when initShowOnDependencies is called
@@ -298,6 +325,38 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// initialize _showDependencies with the default values
   /// this function gets called recursively for objects in the jsonSchema which are nested into each other
+  // Map<String, dynamic> _initShowOnDependencies(Map<String, dynamic>? properties, Map<String, dynamic>? formData) {
+  //   if (properties == null) return {};
+  //   final Map<String, dynamic> dependencies = {};
+  //   for (String key in properties.keys) {
+  //     final element = properties[key];
+  //     // set default values for fields. If a form data is provided, use this
+  //     if (element["type"] == "object") {
+  //       final recursiveFormData = formData == null
+  //           ? null
+  //           : formData.containsKey(key)
+  //               ? formData[key]
+  //               : null;
+  //       dependencies["/properties/$key"] = _initShowOnDependencies(element['properties'], recursiveFormData);
+  //     } else if (formData != null && formData.containsKey(key)) {
+  //       final formDataKey = formData[key];
+  //       if(formDataKey is List){
+  //         int id = 0;
+  //         dependencies["#/properties/$key"] = formDataKey.map((item) => ListItem(id: id++, value: item)).toList();
+  //       } else {
+  //         dependencies["#/properties/$key"] = formData[key];
+  //       }
+  //     } else if (element.containsKey('default')) {
+  //       // check if the jsonSchema defines a default value for the field
+  //       dependencies["#/properties/$key"] = element["default"];
+  //     } else {
+  //       dependencies["#/properties/$key"] = null;
+  //     }
+  //   }
+  //   return dependencies;
+  // }
+
+  /// flattened
   Map<String, dynamic> _initShowOnDependencies(Map<String, dynamic>? properties, Map<String, dynamic>? formData) {
     if (properties == null) return {};
     final Map<String, dynamic> dependencies = {};
@@ -308,22 +367,25 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         final recursiveFormData = formData == null
             ? null
             : formData.containsKey(key)
-                ? formData[key]
-                : null;
-        dependencies["/properties/$key"] = _initShowOnDependencies(element['properties'], recursiveFormData);
+            ? formData[key]
+            : null;
+        final nestedDependencies = _initShowOnDependencies(element['properties'], recursiveFormData);
+        nestedDependencies.forEach((nestedKey, nestedValue) {
+          dependencies["/properties/$key$nestedKey"] = nestedValue;
+        });
       } else if (formData != null && formData.containsKey(key)) {
         final formDataKey = formData[key];
-        if(formDataKey is List){
+        if (formDataKey is List) {
           int id = 0;
-          dependencies["#/properties/$key"] = formDataKey.map((item) => ListItem(id: id++, value: item)).toList();
+          dependencies["/properties/$key"] = formDataKey.map((item) => ListItem(id: id++, value: item)).toList();
         } else {
-          dependencies["#/properties/$key"] = formData[key];
+          dependencies["/properties/$key"] = formData[key];
         }
       } else if (element.containsKey('default')) {
         // check if the jsonSchema defines a default value for the field
-        dependencies["#/properties/$key"] = element["default"];
+        dependencies["/properties/$key"] = element["default"];
       } else {
-        dependencies["#/properties/$key"] = null;
+        dependencies["/properties/$key"] = null;
       }
     }
     return dependencies;
@@ -490,7 +552,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     String? label = item.label;
 
     bool? isShown =
-        item.showOn == null ? null : _evaluateCondition(item.showOn!.type, _showOnDependencies[item.showOn!.scope], item.showOn!.referenceValue);
+        item.showOn == null ? null : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.scope), item.showOn!.referenceValue);
 
     ListView generateGroupElements() {
       // return Padding(
@@ -629,7 +691,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     if (showOn == null) {
       return child;
     } else {
-      bool isVisible = _evaluateCondition(showOn.type, _showOnDependencies[showOn.scope], showOn.referenceValue);
+      bool isVisible = _evaluateCondition(showOn.type, checkValueForShowOn(showOn.scope), showOn.referenceValue);
       // return AnimatedCrossFade(
       //   duration: const Duration(milliseconds: 500),
       //   sizeCurve: Curves.easeInOut,
@@ -736,34 +798,39 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     if (item.scope == null) {
       return _getErrorTextWidget("Control element must have a scope");
     }
-    final String scope = item.scope!;
+    String scope = item.scope!;
+    if(scope.startsWith("#")){
+      scope = scope.substring(1);
+    }
     final LayoutElementOptions? options = item.options;
     final Map<String, dynamic>? property = _getObjectFromJsonSchema(scope);
     if (property == null) {
       return _getErrorTextWidget("Control element must have a valid scope. Scope $scope not found in json schema.");
     }
     // dynamic formDataForScope = _getObjectFromJsonFormData;
-
-    bool isShown = isShownFromParent ?? true
-        ? item.showOn == null || _evaluateCondition(item.showOn!.type, _showOnDependencies[item.showOn!.scope], item.showOn!.referenceValue)
-        : false;
+    // if isShownFromParent == false then the field is not shown
+    // if isShownFromParent == true or not set, check if showOn condition exists. If so, evaluate it
+    // bool isShown = isShownFromParent == false ? false : item.showOn == null ? true : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.scope), item.showOn!.referenceValue);
 
     return FormElementFormControl(
       options: options,
       scope: scope,
-      isShown: isShown,
-      required: _isRequired(scope) && isShown,
+      // isShown: isShown,
+      required: _isRequired(scope), // && isShown
       // only evaluate the second expression if the field is required and the field has a showOn condition
       onChanged: (value) {
         setState(() {
-          _showOnDependencies[scope] = value;
+          setValueForShowOn(scope, value);
         });
       },
       property: property,
-      initialValue: _showOnDependencies[scope],
+      initialValue: checkValueForShowOn(scope),
+      isShownCallback: () {
+        return isShownFromParent == false ? false : item.showOn == null ? true : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.scope), item.showOn!.referenceValue);
+      },
       // formDataForScope,
       onSavedCallback: (value) {
-        if (isShown && value != null && value != "") {
+        if (value != null && value != "" && isShownFromParent == false ? false : item.showOn == null ? true : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.scope), item.showOn!.referenceValue)) {
           _formSubmitValues[scope] = value;
         } else {
           _formSubmitValues.remove(scope);
@@ -789,6 +856,26 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     return object;
   }
 
+  /// gets a value for a showOn condition
+  /// [path] the path of the object in the json schema
+  /// returns the value if it is set, otherwise null
+  /// it doesn't matter if the path starts with a # or not
+  dynamic checkValueForShowOn(String path) {
+    return _showOnDependencies[path] ?? (path.startsWith("#") ? _showOnDependencies[path.substring(1)] : null);
+  }
+
+  /// sets a value for a showOn condition
+  /// [path] the path of the object in the json schema
+  /// [value] the value to set
+  /// it doesn't matter if the path starts with a # or not
+  void setValueForShowOn(String path, dynamic value) {
+    if(path.startsWith("#")){
+      _showOnDependencies[path.substring(1)] = value;
+    } else {
+      _showOnDependencies[path] = value;
+    }
+  }
+
   /// gets an object from a json
   /// [path] the path of the object in the json
   /// [json] the json object
@@ -811,7 +898,17 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// checks if a field is required
   /// [path] the path of the field in the json schema
   bool _isRequired(String path) {
-    return _requiredFields.contains(_getPathWithoutPrefix(path));
+    String parentPath = path.substring(0, path.lastIndexOf('/', path.lastIndexOf('/') - 1));
+
+    if (parentPath == "#" || parentPath.isEmpty) {
+      return _requiredFields.contains(_getFieldNameFromPath(path));
+    } else {
+      dynamic object = _getObjectFromJson(_properties, parentPath);
+      if (object is! Map<String, dynamic>?) {
+        return false;
+      }
+      return object!["required"]?.contains(_getFieldNameFromPath(path)) ?? false;
+    }
   }
 
   /// get path without prefix /properties or #/properties
@@ -823,6 +920,10 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       }
     }
     return path;
+  }
+
+  String _getFieldNameFromPath(String path) {
+    return path.split('/').last;
   }
 
   Text _getErrorTextWidget(String message) {

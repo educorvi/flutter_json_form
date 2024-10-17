@@ -16,8 +16,9 @@ class FormElementFormControl extends StatefulWidget {
   final Map<String, dynamic> property;
   final bool required;
   final void Function(dynamic)? onChanged;
+  final bool Function() isShownCallback;
   final dynamic initialValue;
-  final bool isShown;
+  // final bool isShown;
 
   // used for array elements which should not generate a label
   final bool showLabel;
@@ -31,9 +32,11 @@ class FormElementFormControl extends StatefulWidget {
       this.onChanged,
       required this.property,
       this.initialValue,
-      required this.isShown,
+      // required this.isShown,
       this.onSavedCallback,
-      this.showLabel = true});
+      this.showLabel = true,
+        required this.isShownCallback
+      });
 
   @override
   State<FormElementFormControl> createState() => _FormElementFormControlState();
@@ -52,6 +55,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   late final bool enabled;
   late final dynamic initialValue;
   late final void Function(dynamic)? onChanged;
+  late final bool Function() isShownCallback;
+  late final void Function(dynamic)? onSavedCallback;
 
   final bool labelSeparateText = true;
 
@@ -62,6 +67,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     property = widget.property;
     required = widget.required;
     onChanged = widget.onChanged;
+    isShownCallback = widget.isShownCallback;
     title = property['title'] ?? _getNameFromPath(scope);
     label = options?.label ?? true;
     description = property['description'];
@@ -69,6 +75,12 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     placeholder = options?.placeholder;
     enabled = options?.disabled != true;
     initialValue = widget.initialValue ?? property['default'];
+    // on saved should only be called when the element is shown
+    onSavedCallback = (dynamic value) {
+      if (widget.onSavedCallback != null && isShownCallback()) {
+        widget.onSavedCallback!(value);
+      }
+    };
     if (widget.initialValue is Map<String, dynamic>) {
       // print("initialValue is Map<String, dynamic>, this should be a object");
       _showOnDependencies = widget.initialValue;
@@ -267,7 +279,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         ),
         ReorderableListView.builder(
           shrinkWrap: true,
-          // buildDefaultDragHandles: false,
+          // buildDefaultDragHandles: true,
           physics: const ClampingScrollPhysics(),
           itemCount: items.length,
           itemBuilder: (context, index) {
@@ -280,8 +292,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                     child: FormElementFormControl(
                       scope: '$scope/${items[index].id}',
                       property: property['items'],
-                      required: false,
-                      isShown: widget.isShown,
+                      required: required,
+                      // isShown: widget.isShown,
                       initialValue: items[index].value,
                       onSavedCallback: (value) {
                         items[index].value = value;
@@ -290,6 +302,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                           widget.onSavedCallback!(items.map((e) => e.value).toList());
                         }
                       },
+                      isShownCallback: isShownCallback,
                       onChanged: (value) {
                         items[index].value = value;
                         if (widget.onChanged != null) {
@@ -307,22 +320,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                     ),
                 ],
               ),
-              // FormBuilderTextField(
-              //   name: '$scope/${items[index].id}',
-              //   initialValue: items[index].value.toString(),
-              //   decoration: InputDecoration(
-              //     // prefixIcon: Icon(Icons.drag_handle), // This is the drag indicator
-              //     suffixIcon: items.length > 1 ? IconButton(
-              //       icon: Icon(Icons.close),
-              //       onPressed: () => removeItem(index),
-              //     ): null,
-              //     //labelText: 'Item ${index + 1}',
-              //     border: OutlineInputBorder(),
-              //   ),
-              //   onChanged: (value) {
-              //     items[index].value = value;
-              //   },
-              // ),
             );
           },
           onReorder: (oldIndex, newIndex) {
@@ -347,7 +344,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         // TODO: add default values recursively here
         bool childRequired = property['required'] != null ? property['required'].contains(key) : false;
         onSavedCallback(value) {
-          if (value != null && value != "" && widget.isShown) {
+          if (value != null && value != "" && isShownCallback()) {
             formSubmitValues[key] = value;
           } else {
             formSubmitValues.remove(key);
@@ -360,13 +357,10 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
             }
           }
         }
-
         onChangedCallback(value) {
-          if (value != null && value != "" && widget.isShown) {
-            _showOnDependencies[key] = value;
-            if (widget.onChanged != null) {
-              widget.onChanged!(_showOnDependencies);
-            }
+          _showOnDependencies[key] = value;
+          if (widget.onChanged != null) {
+            widget.onChanged!(_showOnDependencies);
           }
         }
 
@@ -374,10 +368,11 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         elements.add(FormElementFormControl(
           scope: "$scope/properties/$key",
           property: property['properties'][key],
-          required: childRequired && widget.isShown,
+          required: childRequired,
           initialValue: initialValue is Map<String, dynamic> ? initialValue["/properties/$key"] : null,
           // TODO: error handling, most likely at another place in the code. If no object is provided here, an error should be rendered in the ui before
-          isShown: widget.isShown,
+          // isShown: widget.isShown,
+          isShownCallback: isShownCallback,
           onSavedCallback: onSavedCallback,
           onChanged: onChangedCallback,
         ));
@@ -434,7 +429,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       onChanged: onChanged,
       enabled: enabled,
       onSaved: widget.onSavedCallback,
-      validator: _composeBaseValidator(),
+      validator: _composeBaseValidator(additionalValidators: required ? [FormBuilderValidators.equal(true)] : null),
       title: Text(_getLabel()),
       contentPadding: const EdgeInsets.all(0),
       decoration: _getInputDecoration(border: false),
@@ -615,7 +610,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       onSubmitted: onChanged,
       enabled: enabled,
       onSaved: widget.onSavedCallback,
-      validator: _composeBaseValidator(additionalValidators: (type == 'number') ? [FormBuilderValidators.numeric()] : null),
+      validator: _composeBaseValidator(additionalValidators: (type == 'number') ? [FormBuilderValidators.numeric() as FormFieldValidator<dynamic>] : null),
       decoration: _getInputDecoration(),
       initialValue: initialValue,
       textInputAction: maxLines > 1 ? TextInputAction.newline : null,
@@ -804,15 +799,22 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   /// additional validators can be added to the list
   /// validation is only done when the element is shown
   /// [additionalValidators] list of additional validators to be added to the base validator
-  FormFieldValidator<dynamic>? _composeBaseValidator({List<FormFieldValidator<String?>>? additionalValidators}) {
+  FormFieldValidator<dynamic>? _composeBaseValidator({List<FormFieldValidator>? additionalValidators}) {
     // FormBuilderValidator.compose can't be used here as the value of isShown can change dynamically after the validator is created
     // Therefore the callback function for the validator is created here and the value of isShown is checked before any validators are called
     return (valueCandidate) {
-      if (!widget.isShown) {
+      if (!isShownCallback()) {
         return null;
       }
+      // if(!widget.isShown){
+      //   return null;
+      // }
+
       if (required) {
-        return FormBuilderValidators.required().call(valueCandidate);
+        final validatorResult = FormBuilderValidators.required().call(valueCandidate);
+        if(validatorResult != null){
+          return validatorResult;
+        }
       }
       if (additionalValidators != null) {
         for (final validator in additionalValidators) {

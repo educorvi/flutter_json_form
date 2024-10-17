@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -43,8 +44,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> loadSchemas() async {
-    final jsonSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/showcase/schema.json');
-    final uiSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/showcase/ui.json');
+    // final jsonSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/showcase/schema.json');
+    // final uiSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/showcase/ui.json');
+    final jsonSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/test/gfk1-schema.json');
+    final uiSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/test/gfk1-ui.json');
+
 
     setState(() {
       jsonSchema = json.decode(jsonSchemaString);
@@ -66,6 +70,13 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           actions: <Widget>[
             TextButton(
+              child: const Text('Copy'),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: const JsonEncoder.withIndent('  ').convert(jsonData)));
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
               child: const Text('Close'),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -84,15 +95,44 @@ class _MyHomePageState extends State<MyHomePage> {
       "name": "John Doe",
       "title": "Mr.",
       "group_selector": "Object",
-      // "testArray": [
-      //   "Test 1",
-      //   "Test 2",
-      // ],
+      "testArray": [
+        "Test 1",
+        "Test 2",
+      ],
       "testObject": {
         "petName": "1",
         "age": "2",
         "flauschig": true,
       },
+    };
+
+    Map<String,dynamic> formData2 = {
+      "edi8b505fbc30dc4886ac64c349ac69e6bd": "eine externe Betreuung",
+      "edi53eeed3e5bfe4535875b0e726286ada0": "Maßnahme durchgeführt",
+      "edif75daee98a2a441fab451a57fd3f9d8a": "Maßnahme veranlasst",
+      "edi9d17a5183df84951a6299a99fdc5e9d3": "Maßnahme veranlasst",
+      "edia2d018bbe168436bb8a1aa3bc3c4ad03": "Maßnahme veranlasst",
+      "edi200f233ff7014bcf8402e2da79092955": "Maßnahme veranlasst",
+      "edia19fd4a2e3bb4783b79d323d2bde86d0": "Maßnahme veranlasst",
+      "edi98ff05f6adf04f38938784827156734b": "Maßnahme veranlasst",
+      "ediadc30e5a7357430a978a9787c565edb9": "Maßnahme veranlasst",
+      "edi939e8b8bf478458296adce761b606406": "Maßnahme veranlasst",
+      "edi2602f7372a9a4b889df830f127eef94f": "Maßnahme veranlasst",
+      "edib16799233e0d44be8a25346a28faba9d": "Maßnahme veranlasst",
+      "edi05ed54521489439dbc8af11cf7922460": "Maßnahme veranlasst",
+      "edi983e099be3d4490aaee11c843e414dbd": "Maßnahme veranlasst",
+      "edi2e1a24d9190b4b6c90d0730d477c34b5": "Maßnahme veranlasst",
+      "edi9f7346b16e2f4b458c0ed18bea737293": {
+        "edi5c58446c8aad47d5afde2baae293ad2c": "Maßnahme durchgeführt",
+        "edi388a83c4b652492590445f30283d1780": "Maßnahme veranlasst",
+        "edi87b00b6afd0645b8933a898d34b9af9b": {
+          "edi87b00b6afd0645b8933a898d34b9af9b_ref1": false
+        }
+      },
+      "edi1ceb1850266e4b24a027cb041363b3fd": {
+        "edi1ceb1850266e4b24a027cb041363b3fd_ref0": "Test",
+        "edi1ceb1850266e4b24a027cb041363b3fd_ref1": true
+      }
     };
 
     return Scaffold(
@@ -134,7 +174,8 @@ class _MyHomePageState extends State<MyHomePage> {
             validate: false,
             jsonSchema: jsonSchema,
             uiSchema: uiSchema,
-            formData: formData,
+            formData: formData2
+            // formData: formData,
           ),
           Divider(),
           Row(
