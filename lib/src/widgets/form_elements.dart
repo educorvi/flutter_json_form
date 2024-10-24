@@ -6,18 +6,20 @@ import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
 
 // import 'package:form_builder_cupertino_fields/form_builder_cupertino_fields.dart';
 import '../constants.dart';
-import '../models/ui_schema.dart';
+import '../models/ui-schema.dart';
 import 'custom_form_fields/form_builder_segmented_button.dart';
 import 'data/list_item.dart';
 
 class FormElementFormControl extends StatefulWidget {
-  final LayoutElementOptions? options;
+  final Options? options;
+  final Format? format;
   final String scope;
   final Map<String, dynamic> property;
   final bool required;
   final void Function(dynamic)? onChanged;
   final bool Function() isShownCallback;
   final dynamic initialValue;
+
   // final bool isShown;
 
   // used for array elements which should not generate a label
@@ -35,8 +37,8 @@ class FormElementFormControl extends StatefulWidget {
       // required this.isShown,
       this.onSavedCallback,
       this.showLabel = true,
-        required this.isShownCallback
-      });
+      required this.isShownCallback,
+      this.format});
 
   @override
   State<FormElementFormControl> createState() => _FormElementFormControlState();
@@ -46,7 +48,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   late final String title;
   late final String? description;
   late final String? type;
-  late final LayoutElementOptions? options;
+  late final Options? options;
+  late final Format? format;
   late final String scope;
   late final Map<String, dynamic> property;
   late final bool required;
@@ -63,6 +66,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   @override
   void initState() {
     options = widget.options;
+    format = widget.format;
     scope = widget.scope;
     property = widget.property;
     required = widget.required;
@@ -73,7 +77,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     description = property['description'];
     type = property["type"];
     placeholder = options?.placeholder;
-    enabled = options?.disabled != true;
+    enabled = true; // options?.disabled != true;
     initialValue = widget.initialValue ?? property['default'];
     // on saved should only be called when the element is shown
     onSavedCallback = (dynamic value) {
@@ -110,7 +114,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     switch (type) {
       case 'string':
         child = _generateStringControl();
-      case 'integer':
+      case 'integer' || 'number':
         child = _generateIntegerControl();
       case 'boolean':
         child = _generateBooleanControl();
@@ -155,24 +159,26 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           }
         }
       }
-      if (options?.displayAs == DisplayAs.RADIOBUTTONS) {
+      if (options?.buttons == "Radiobuttons" || options?.radiobuttons == true) {
+        // DisplayAs.RADIOBUTTONS
         return generateRadioGroup(values);
-      } else if (options?.displayAs == DisplayAs.BUTTONS) {
+      } else if (options?.buttons == "Checkboxgroups") {
+        // DisplayAs.BUTTONS
         return generateSegmentedControl(values);
       } else {
         return generateDropdown(values);
       }
-    } else if (property['format'] == 'date-time' || options?.format == Format.DATETIME_LOCAL) {
+    } else if (property['format'] == 'date-time' || format == Format.DATE_TIME) {
       return generateDateTimePicker(InputType.both);
-    } else if (property['format'] == 'date' || options?.format == Format.DATE) {
+    } else if (property['format'] == 'date' || format == Format.DATE) {
       return generateDateTimePicker(InputType.date); // TODO adjust timepicker
-    } else if (property['format'] == 'time' || options?.format == Format.TIME) {
+    } else if (property['format'] == 'time' || format == Format.TIME) {
       return generateDateTimePicker(InputType.time); // TODO adjust timepicker
     } else if (property['format'] == 'uri') {
       return generateFilePicker();
     } else {
       // type is string
-      if (property['format'] == 'color' || options?.format == Format.COLOR) {
+      if (property['format'] == 'color' || format == Format.COLOR) {
         return generateColorPicker();
       }
       return generateTextField();
@@ -204,6 +210,13 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         }
         return generateCheckboxGroup(values);
       }
+    }
+    if (property['enum'] != null) {
+      List<String> values = [];
+      for (var item in property['enum']) {
+        values.add(item);
+      }
+      return generateCheckboxGroup(values);
     }
     if (options?.tags?.enabled == true) {
       // TODO implement variants and proper tags support
@@ -291,7 +304,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                   Expanded(
                     child: FormElementFormControl(
                       scope: '$scope/${items[index].id}',
-                      property: property['items'],
+                      property: property['items'] ?? {},
                       required: required,
                       // isShown: widget.isShown,
                       initialValue: items[index].value,
@@ -357,6 +370,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
             }
           }
         }
+
         onChangedCallback(value) {
           _showOnDependencies[key] = value;
           if (widget.onChanged != null) {
@@ -458,12 +472,12 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
     TextInputType getKeyboardType() {
       if (maxLines > 1) return TextInputType.multiline;
-      switch (options?.format) {
-        case Format.TEXT:
-          if (type == "integer" || type == "number") {
-            return TextInputType.number;
-          }
-          return TextInputType.text;
+      switch (format) {
+        // case Format.TEXT:
+        //   if (type == "integer" || type == "number") {
+        //     return TextInputType.number;
+        //   }
+        //   return TextInputType.text;
         case Format.EMAIL:
           return TextInputType.emailAddress;
         case Format.PASSWORD:
@@ -610,7 +624,12 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       onSubmitted: onChanged,
       enabled: enabled,
       onSaved: widget.onSavedCallback,
-      validator: _composeBaseValidator(additionalValidators: (type == 'number') ? [FormBuilderValidators.numeric() as FormFieldValidator<dynamic>] : null),
+      validator: FormBuilderValidators.compose([
+        _composeBaseValidator(),
+        if (type == 'number' || type == 'integer') FormBuilderValidators.numeric(),
+      ]),
+      // _composeBaseValidator(additionalValidators: (type == 'number' || type == 'integer') ? [FormBuilderValidators.numeric()] : null)
+
       decoration: _getInputDecoration(),
       initialValue: initialValue,
       textInputAction: maxLines > 1 ? TextInputAction.newline : null,
@@ -799,7 +818,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   /// additional validators can be added to the list
   /// validation is only done when the element is shown
   /// [additionalValidators] list of additional validators to be added to the base validator
-  FormFieldValidator<dynamic>? _composeBaseValidator({List<FormFieldValidator>? additionalValidators}) {
+  FormFieldValidator<dynamic> _composeBaseValidator({List<FormFieldValidator>? additionalValidators}) {
     // FormBuilderValidator.compose can't be used here as the value of isShown can change dynamically after the validator is created
     // Therefore the callback function for the validator is created here and the value of isShown is checked before any validators are called
     return (valueCandidate) {
@@ -812,7 +831,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
       if (required) {
         final validatorResult = FormBuilderValidators.required().call(valueCandidate);
-        if(validatorResult != null){
+        if (validatorResult != null) {
           return validatorResult;
         }
       }
