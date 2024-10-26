@@ -15,7 +15,6 @@ dependencies:
   form_builder_extra_fields: ^10.2.0
   form_builder_file_picker: ^4.1.0
   form_builder_image_picker: ^4.0.0
-  get_it: ^7.6.8
   json_schema: ^5.1.6
   path_provider: ^2.1.2
   flutter_widget_from_html: ^0.15.0
