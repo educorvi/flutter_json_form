@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_json_forms/src/widgets/utils.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
@@ -19,6 +20,7 @@ class FormElementFormControl extends StatefulWidget {
   final void Function(dynamic)? onChanged;
   final bool Function() isShownCallback;
   final dynamic initialValue;
+  final int nestingLevel;
 
   // final bool isShown;
 
@@ -38,7 +40,7 @@ class FormElementFormControl extends StatefulWidget {
       this.onSavedCallback,
       this.showLabel = true,
       required this.isShownCallback,
-      this.format});
+      this.format, required this.nestingLevel});
 
   @override
   State<FormElementFormControl> createState() => _FormElementFormControlState();
@@ -305,6 +307,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                     child: FormElementFormControl(
                       scope: '$scope/${items[index].id}',
                       property: property['items'] ?? {},
+                      nestingLevel: widget.nestingLevel,
                       required: required,
                       // isShown: widget.isShown,
                       initialValue: items[index].value,
@@ -381,6 +384,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         // formSubmitValues[key] = property['properties'][key]['default'];
         elements.add(FormElementFormControl(
           scope: "$scope/properties/$key",
+          nestingLevel: widget.nestingLevel + 1,
           property: property['properties'][key],
           required: childRequired,
           initialValue: initialValue is Map<String, dynamic> ? initialValue["/properties/$key"] : null,
@@ -393,16 +397,17 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       }
     }
 
-    Container generateGroupElements() {
-      return Container(
-        decoration: const BoxDecoration(
-          border: Border(
-            left: BorderSide(
-              color: Colors.grey, // Change this color to match your design
-              width: 2.0, // Change this width to match your design
-            ),
-          ),
-        ),
+    Card generateGroupElements() {
+      return Card.filled(
+        color: getAlternatingColor(context, widget.nestingLevel),
+        // decoration: const BoxDecoration(
+        //   border: Border(
+        //     left: BorderSide(
+        //       color: Colors.grey, // Change this color to match your design
+        //       width: 2.0, // Change this width to match your design
+        //     ),
+        //   ),
+        // ),
         child: ListView.separated(
           shrinkWrap: true,
           physics: const ClampingScrollPhysics(),
@@ -636,6 +641,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       maxLines: maxLines,
       keyboardType: getKeyboardType(),
       autofillHints: getAutocompleteValues(),
+      onTapOutside: (PointerDownEvent event) {
+        FocusScope.of(context).unfocus();
+      },
     ));
   }
 
@@ -760,7 +768,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           onChanged: onChanged,
           enabled: enabled,
           validator: _composeBaseValidator(),
-          decoration: _getInputDecoration(),
+          decoration: _getInputDecoration(suffixHardcoded: const Icon(Icons.date_range)),
           //  ?? getDefaultDatetime().toString()
           initialDate: getDefaultDatetime(),
           inputType: inputType,
@@ -879,13 +887,20 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         : child;
   }
 
-  InputDecoration _getInputDecoration({bool border = true}) {
+  InputDecoration _getInputDecoration({bool border = true, Widget? prefixHardcoded, Widget? suffixHardcoded}) {
     return InputDecoration(
       labelText: labelSeparateText ? null : _getLabel(),
       hintText: placeholder,
-      border: border ? const OutlineInputBorder() : InputBorder.none,
+      filled: border,
+      fillColor: getAlternatingColor(context, widget.nestingLevel),
+      // border: InputBorder.none,
+      border: border ? const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)), borderSide: BorderSide.none) : InputBorder.none,
       helperText: description,
       helperMaxLines: 10,
+      prefix: prefixHardcoded,
+      suffix: suffixHardcoded,
+      prefixText: prefixHardcoded != null ? null : options?.textAlign == TextAlign.LEFT || options?.textAlign == TextAlign.START ? options?.append : null,
+      suffixText: suffixHardcoded != null ? null : options?.textAlign == TextAlign.RIGHT || options?.textAlign == TextAlign.END ? options?.append : null,
     );
   }
 }

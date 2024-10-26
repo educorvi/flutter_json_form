@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
-  setupDynamicJsonForm();
+  setupDynamicJsonFormValidation();
 }
 
 class MyApp extends StatelessWidget {
@@ -46,10 +46,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> loadSchemas() async {
     // final jsonSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/showcase/schema.json');
     // final uiSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/showcase/ui.json');
-    // final jsonSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/test/gfk1-schema.json');
-    // final uiSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/test/gfk1-ui.json');
-    final jsonSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/v1/fiverules-schema.json');
-    final uiSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/v1/fiverules-ui.json');
+    final jsonSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/v1/gfk1-schema.json');
+    final uiSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/v1/gfk1-ui.json');
+    // final jsonSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/v1/fiverules-schema.json');
+    // final uiSchemaString = await rootBundle.loadString('../lib/src/schemas/examples/v1/fiverules-ui.json');
 
 
     setState(() {
@@ -173,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Divider(),
           DynamicJsonForm(
             key: formKey,
-            validate: false,
+            validate: true,
             jsonSchema: jsonSchema,
             uiSchema: uiSchema,
             // formData: formData2

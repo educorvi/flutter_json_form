@@ -1,5 +1,5 @@
 {
-  "$schema": "../../ui/ui.schema.json",
+  "$schema": "../../ui_v2/ui.schema.json",
   "version": "2.0",
   "layout": {
     "type": "VerticalLayout",

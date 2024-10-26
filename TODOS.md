@@ -1,7 +1,10 @@
 - [ ] check for # and not # paths. I think weather the path starts with # or not, it is internally stored without. So the checks in some functions for # should be removed / if this is not possible, every place where a function want to work with a path which has # has to trim it first
 - [ ] check for arrays in arrays and objects, there could still be errors
 - [ ] array elements cant be moved right now
-- [ ] strange state management
-
+- [x] strange state management
+- [x] support append text
 - [ ] showOn error: When field is dependent of a value of another field which is not shown, the other field is still shown. But the filed should not be shown
-- [ ] Space between fields when they are not shown. There is space rendered which is not needed
+- [x] Space between fields when they are not shown. There is space rendered which is not needed (workaround, dont use .separate builder, but this should be used, elements which are not shown should just not be rendered)
+- [ ] support simple css parsing to allow small adjustments to the design of e.g. Groups
+- [ ] Support Rendering of form submit, print etc. buttons (and provide a toggle option to render them)
+- 
