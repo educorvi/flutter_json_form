@@ -481,7 +481,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       if (cssClass.contains("bg-light greyBackground")) {
         return Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainer,
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(UIConstants.groupPadding),
