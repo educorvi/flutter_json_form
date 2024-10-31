@@ -1,0 +1,37 @@
+{
+  "title": "Wizard Page",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "wizard_page.schema.json",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "hideNext": {
+      "title": "Hide \"Next\" Button",
+      "description": "You can use this for example, if you want to use the last page for a submit button",
+      "type": "boolean"
+    },
+    "nextText": {
+      "title": "Text of the \"Next\" Button",
+      "description": "Changes the text of the next button",
+      "default": "Next",
+      "type": "string"
+    },
+    "content": {
+      "oneOf": [
+        {
+          "$ref": "control.schema.json"
+        },
+        {
+          "$ref": "layout.schema.json"
+        },
+        {
+          "$ref": "html.schema.json"
+        }
+      ]
+    }
+  },
+  "required": ["title","content"],
+  "additionalProperties": false
+}
