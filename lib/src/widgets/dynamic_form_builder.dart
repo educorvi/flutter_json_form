@@ -131,6 +131,13 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     }
   }
 
+  /// get the json and ui meta schema
+  /// only needed if json und ui schema should get validated
+  Future<void> _initializeSchemas() async {
+    jsonMetaSchema = await SchemaManager().getJsonMetaSchema();
+    uiMetaSchema = await SchemaManager().getUiMetaSchema();
+  }
+
   void _initializeForm() {
     if (widget.formData != null) {
       formData = widget.formData!;
@@ -156,12 +163,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     }
 
     _showOnDependencies = _initShowOnDependencies(_properties, formData);
-  }
-
-  /// get the json and ui meta schema
-  Future<void> _initializeSchemas() async {
-    jsonMetaSchema = await SchemaManager().getJsonMetaSchema();
-    uiMetaSchema = await SchemaManager().getUiMetaSchema();
+    // _formKey.currentState!.patchValue(removeEmptyKeys(_showOnDependencies));
   }
 
   /// Save form values and validate all fields of form
@@ -343,7 +345,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// sets the validation errors in the state
   /// if the validation is successful, the jsonSchema is set
   bool _validateJsonSchema(Map<String, dynamic> jsonSchemaMap) {
-    // widget.jsonSchema["properties"]= widget.jsonSchema["definitions"];
     final result = jsonMetaSchema.validate(jsonSchemaMap);
     setState(() {
       _jsonSchemaValidationErrors = result.errors;
@@ -355,24 +356,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// sets the validation errors in the state
   /// if the validation is successful, the uiSchema is set
   bool _validateUiSchema(Map<String, dynamic> uiSchemaMap) {
-    // check version
-    // final versionString = uiSchemaMap["version"];
-    // if (versionString == null) {
-    //   setState(() {
-    //     _uiSchemaValidationErrors = [ValidationError("The UI schema must have a version of 2.0 or higher")];
-    //   });
-    //   return false;
-    // } else if (versionString is String) {
-    //   final version = double.tryParse(versionString);
-    //   if (version == null || version < 2.0) {
-    //     setState(() {
-    //       _uiSchemaValidationErrors = ValidationResults("")[ValidationError("The UI schema must have a version of 2.0 or higher")];
-    //     });
-    //     return false;
-    //   }
-    // }
-    // check uiSchema against meta Schema
-    // widget.uiSchema["type"]="asA";
     final result = uiMetaSchema.validate(uiSchemaMap);
     setState(() {
       _uiSchemaValidationErrors = result.errors;
@@ -417,75 +400,19 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// Returns the FormBuilder widget with the form fields and submit buttons
   FormBuilder _getFormBuilder() {
     return FormBuilder(
-      // initialValue: widget.formData ?? {},
+      initialValue: _showOnDependencies,
       key: _formKey,
       child: _generateForm(),
-      // child: Column(
-      //   children: [
-      //     _generateForm(),
-      //     // TODO make this adjustable. Allow a custom widget to be given here or to defined custom buttons with submit callbacks (e.g. provide name, style, icon and a callback function)
-      //     Row(
-      //       mainAxisAlignment: MainAxisAlignment.center,
-      //       children: [
-      //         FilledButton.tonal(
-      //           onPressed: () {
-      //             _formKey.currentState?.reset();
-      //           },
-      //           child: const Row(
-      //             children: [
-      //               Icon(Icons.refresh),
-      //               SizedBox(width: 10),
-      //               Text('Zurücksetzen'),
-      //             ],
-      //           ),
-      //         ),
-      //         const SizedBox(width: 20),
-      //         FilledButton(
-      //           onPressed: () {
-      //             if (_formKey.currentState?.saveAndValidate() == true) {
-      //               if (widget.onFormSubmit != null) {
-      //                 Map<String, dynamic> formValues;
-      //                 switch (widget.onFormSubmitFormat) {
-      //                   case OnFormSubmitFormat.formBuilder:
-      //                     formValues = _formKey.currentState!.value;
-      //                     break;
-      //                   case OnFormSubmitFormat.ellaV1:
-      //                     formValues = processFormValuesEllaV1(_formKey.currentState!.value);
-      //                     break;
-      //                   case OnFormSubmitFormat.ellaV2:
-      //                     formValues = processFormValuesEllaV2(_formKey.currentState!.value);
-      //                     break;
-      //                 }
-      //                 widget.onFormSubmit!(formValues);
-      //               }
-      //             }
-      //             // // On another side, can access all field values without saving form with instantValues
-      //             // _formKey.currentState?.validate();
-      //             // debugPrint(_formKey.currentState?.instantValue.toString());
-      //           },
-      //           child: const Row(children: [
-      //             Icon(Icons.send),
-      //             SizedBox(width: 10),
-      //             Text('Absenden'),
-      //           ]),
-      //         ),
-      //       ],
-      //     )
-      //   ],
-      // ),
     );
   }
 
+  /// translates simple css styles to flutter widget styling
   Widget _applyCss(Widget child, {String? cssClass}) {
     if (cssClass != null) {
       if (cssClass.contains("bg-light greyBackground")) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.all(UIConstants.groupPadding),
-          child: child,
+        return Card.filled(
+          color: Theme.of(context).colorScheme.surfaceContainerLow,
+          child: Padding(padding: const EdgeInsets.all(UIConstants.groupPadding), child: child),
         );
       }
     }
@@ -598,23 +525,23 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     }
 
     return Card.filled(
-      color: getAlternatingColor(context, nestingLevel),
+        color: getAlternatingColor(context, nestingLevel),
         child: Padding(
-      padding: const EdgeInsets.all(UIConstants.groupPadding),
-      child: label != null
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: UIConstants.groupTitleSpacing),
-                generateGroupElements(),
-              ],
-            )
-          : generateGroupElements(),
-    ));
+          padding: const EdgeInsets.all(UIConstants.groupPadding),
+          child: label != null
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: UIConstants.groupTitleSpacing),
+                    generateGroupElements(),
+                  ],
+                )
+              : generateGroupElements(),
+        ));
 
     // if (label != null) {
     //   return Column(
@@ -712,11 +639,11 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       case LayoutelementType.GROUP:
         child = _generateGroupFromLayoutElement(item, nestingLevel + 1);
       case LayoutelementType.HORIZONTAL_LAYOUT:
-        child = _generateHorizontalLayout(item.elements!, nestingLevel );
+        child = _generateHorizontalLayout(item.elements!, nestingLevel + 1);
       case LayoutelementType.HTML:
         child = _generateHtml(item);
       case LayoutelementType.VERTICAL_LAYOUT:
-        child = _generateVerticalLayout(item.elements!, nestingLevel);
+        child = _generateVerticalLayout(item.elements!, nestingLevel + 1);
       case LayoutelementType.WIZARD:
         child = getNotImplementedWidget("Wizard");
       case null:
@@ -994,5 +921,4 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       style: const TextStyle(color: Colors.red),
     );
   }
-
 }

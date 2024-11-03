@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert' show json;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:json_schema/json_schema.dart' show JsonSchema, RefProvider;
@@ -7,42 +8,40 @@ const String _uiMetaSchemaPathFolder = "packages/flutter_json_forms/lib/src/sche
 
 class SchemaManager {
   static final SchemaManager _instance = SchemaManager._internal();
-  late final JsonSchema jsonMetaSchema;
-  late final JsonSchema uiMetaSchema;
-  bool _isInitialized = false;
+  late final JsonSchema _jsonMetaSchema;
+  late final JsonSchema _uiMetaSchema;
+  late final Future<void> _isInitialized;
 
   factory SchemaManager() {
     return _instance;
   }
 
-  SchemaManager._internal();
-
-  Future<void> _initialize() async {
-    final schemaFile = await jsonFromAsset(_jsonMetaSchemaPath);
-    final uiSchemaFile = await jsonFromAsset("$_uiMetaSchemaPathFolder/ui.schema.json");
-    jsonMetaSchema = JsonSchema.create(schemaFile);
-    uiMetaSchema = await JsonSchema.createAsync(uiSchemaFile, refProvider: refProvider);
-    _isInitialized = true;
+  SchemaManager._internal() {
+    _isInitialized = Future(_initialize);
   }
 
-  Future<void> setup() async {
-    if (!_isInitialized) {
-      await _initialize();
-    }
+  FutureOr<void> _initialize() async {
+    // set json Schema
+    final schemaFile = await jsonFromAsset(_jsonMetaSchemaPath);
+    _jsonMetaSchema = await JsonSchema.createAsync(schemaFile);
+
+    // set ui Schema
+    final uiSchemaFile = await jsonFromAsset("$_uiMetaSchemaPathFolder/ui.schema.json");
+    _uiMetaSchema = await JsonSchema.createAsync(uiSchemaFile, refProvider: refProvider);
   }
 
   Future<JsonSchema> getJsonMetaSchema() async {
-    if (!_isInitialized) {
-      await _initialize();
-    }
-    return jsonMetaSchema;
+    await _isInitialized;
+    return _jsonMetaSchema;
   }
 
   Future<JsonSchema> getUiMetaSchema() async {
-    if (!_isInitialized) {
-      await _initialize();
-    }
-    return uiMetaSchema;
+    await _isInitialized;
+    return _uiMetaSchema;
+  }
+
+  Future<void> isSetup() async {
+    await _isInitialized;
   }
 }
 
@@ -61,5 +60,5 @@ Future<dynamic> jsonFromAsset(String path) async {
 /// It is also not necessary to call thia function. It just loads the json and UI schema when you call in the function instead of calling it when you first create a instant of the dynamic form renderer
 /// In the future this provides mechanisms to cache already loaded schemas and improve performance by running this function in the background instead of when creating the first Form Renderer Instance
 Future<void> setupDynamicJsonFormValidation() async {
-  await SchemaManager().setup();
+  await SchemaManager().isSetup();
 }
