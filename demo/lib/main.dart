@@ -164,6 +164,31 @@ class _MyHomePageState extends State<MyHomePage> {
     //   "edi2e1a24d9190b4b6c90d0730d477c34b5": "Maßnahme veranlasst"
     // };
 
+    Map<String,dynamic> formData3 = {
+      "arbeitsstelle-arbeitsort": "we",
+      "person-in-der-rolle-des-anlagenverantwortlichen": "qe",
+      "person-in-der-rolle-des-arbeitsverantwortlichen": "we",
+      "arbeitsausfuhrende-person": "we",
+      "zusatzliche-personliche-schutzausrustung": [
+        "gegen elektrischen Schlag"
+      ],
+      "stehen-andere-anlagenteile-weiterhin-unter": "nein",
+      "edi43ba285a6396493da82241d5ecec090d": "NH-Sicherungen",
+      "edi812abac1f12d44d18d4415cb1ddb1984": "12",
+      "edi7bd23a69de5141aaa4379b4ba2b979ba": "Trafostation",
+      "edi3dc9a71b7dc547d6a55d036bd2417578": "qw",
+      "edic589597967b44e00af9e74c7c1319cb0": "ja",
+      "edi64719875ff504d6eb8fd735f12fd7d17": "ja",
+      "edi6af7fbabb2a44046b882d580080326e1": "angehängt",
+      "edi5ce0ca9d1def423c8670f650f8d6c60f": "ja",
+      "edi594b8869f8884cb4b76d376d960c3b74": "qw",
+      "ediec7dc4dfa3b646818f003c01c9f1709c": "in die NH-Sicherungsunterteile",
+      "edi8eb283983de7413b9b8b9530fb227543": "teilweiser Berührungsschutz",
+      "edid11961ed04714161961a663f2e9cae09": [
+        "isolierende Formteile",
+        "isolierende Tücher"
+      ]
+    };
 
     return Scaffold(
       appBar: AppBar(
@@ -204,6 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
             validate: true,
             jsonSchema: jsonSchema,
             uiSchema: uiSchema,
+              formData: formData3
             // formData: formData2
             // formData: formData,
           ),

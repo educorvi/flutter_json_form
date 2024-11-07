@@ -36,7 +36,6 @@ flutter:
    assets:
      - lib/src/schemas/
      - lib/src/schemas/ui/
-     - lib/src/schemas/ui/rita/
 #     - lib/src/schemas/examples/
 
   #

@@ -190,7 +190,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       _resetShowOnDependencies(_showOnDependencies);
       _showOnDependencies = _initShowOnDependencies(_properties, null);
       // _formKey.currentState!.reset();
-      _formKey.currentState!.patchValue(convertShowOnDependenciesToFormBuilderValues(_showOnDependencies));
+      _formKey.currentState!.patchValue(_showOnDependencies); // convertShowOnDependenciesToFormBuilderValues
       // final arrayElementsToDelete = _resetShowOnDependencies(_showOnDependencies);
       // _showOnDependencies = _initShowOnDependencies(_properties, null);
       // _formKey.currentState!.patchValue(convertShowOnDependenciesToFormBuilderValues(_showOnDependencies));
@@ -325,12 +325,13 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         });
       } else if (formData != null && formData.containsKey(key)) {
         final formDataKey = formData[key];
-        if (formDataKey is List) {
-          int id = 0;
-          dependencies["/properties/$key"] = formDataKey.map((item) => ListItem(id: id++, value: item)).toList();
-        } else {
-          dependencies["/properties/$key"] = formData[key];
-        }
+        // if (formDataKey is List) {
+        //   int id = 0;
+        //   dependencies["/properties/$key"] = formDataKey.map((item) => ListItem(id: id++, value: item)).toList();
+        // } else {
+        //   dependencies["/properties/$key"] = formData[key];
+        // }
+        dependencies["/properties/$key"] = formData[key];
       } else if (element.containsKey('default')) {
         // check if the jsonSchema defines a default value for the field
         dependencies["/properties/$key"] = element["default"];
@@ -400,7 +401,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// Returns the FormBuilder widget with the form fields and submit buttons
   FormBuilder _getFormBuilder() {
     return FormBuilder(
-      initialValue: _showOnDependencies,
+      initialValue: _showOnDependencies, // convertShowOnDependenciesToFormBuilderValues
       key: _formKey,
       child: _generateForm(),
     );
