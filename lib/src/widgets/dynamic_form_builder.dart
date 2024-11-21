@@ -308,6 +308,18 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// initialize _showDependencies with the default values
   /// this function gets called recursively for objects in the jsonSchema which are nested into each other
   Map<String, dynamic> _initShowOnDependencies(Map<String, dynamic>? properties, Map<String, dynamic>? formData) {
+
+    dynamic formatDateTime(dynamic input, String? format) {
+      if (format == "date-time" || format == "" || format == "") {
+        if(input == "\$now"){
+          return DateTime.now();
+        }
+        // TODO: could throw exception if invalid format. If so, print error in UI
+        return DateTime.parse(input);
+      }
+      return input;
+    }
+
     if (properties == null) return {};
     final Map<String, dynamic> dependencies = {};
     for (String key in properties.keys) {
@@ -329,12 +341,12 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
           // int id = 0;
           dependencies["/properties/$key"] = formDataKey.map((item) => item.toString()).toList(); // ListItem(id: id++, value: item)
         } else {
-          dependencies["/properties/$key"] = formData[key];
+          dependencies["/properties/$key"] = formatDateTime(formData[key], element["format"]);
         }
         // dependencies["/properties/$key"] = formData[key];
       } else if (element.containsKey('default')) {
         // check if the jsonSchema defines a default value for the field
-        dependencies["/properties/$key"] = element["default"];
+        dependencies["/properties/$key"] = formatDateTime(element["default"], element["format"]);
       } else {
         dependencies["/properties/$key"] = null;
       }

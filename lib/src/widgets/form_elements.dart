@@ -40,7 +40,8 @@ class FormElementFormControl extends StatefulWidget {
       this.onSavedCallback,
       this.showLabel = true,
       required this.isShownCallback,
-      this.format, required this.nestingLevel});
+      this.format,
+      required this.nestingLevel});
 
   @override
   State<FormElementFormControl> createState() => _FormElementFormControlState();
@@ -128,10 +129,13 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         child = _getNotImplementedWidget();
     }
     if (options?.hidden == true) {
+      // TODO: this results in a small additional gap in the ui
       return Visibility(
+        maintainState: true,
         visible: false,
         child: child,
       );
+      return child;
     } else {
       return child;
     }
@@ -478,11 +482,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     TextInputType getKeyboardType() {
       if (maxLines > 1) return TextInputType.multiline;
       switch (format) {
-        // case Format.TEXT:
-        //   if (type == "integer" || type == "number") {
-        //     return TextInputType.number;
-        //   }
-        //   return TextInputType.text;
         case Format.EMAIL:
           return TextInputType.emailAddress;
         case Format.PASSWORD:
@@ -634,7 +633,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         if (type == 'number' || type == 'integer') FormBuilderValidators.numeric(),
       ]),
       // _composeBaseValidator(additionalValidators: (type == 'number' || type == 'integer') ? [FormBuilderValidators.numeric()] : null)
-
       decoration: _getInputDecoration(),
       initialValue: initialValue,
       textInputAction: maxLines > 1 ? TextInputAction.newline : null,
@@ -764,18 +762,18 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 100),
         child: FormBuilderDateTimePicker(
-          name: scope,
-          onChanged: onChanged,
-          enabled: enabled,
-          validator: _composeBaseValidator(),
-          decoration: _getInputDecoration(suffixHardcoded: const Icon(Icons.date_range)),
-          //  ?? getDefaultDatetime().toString()
-          initialDate: getDefaultDatetime(),
-          inputType: inputType,
-          // locale: const Locale('de', 'DE'),
-          // initialValue: DateTime.now(),
-          // border decoration
-        ),
+            name: scope,
+            onChanged: onChanged,
+            enabled: enabled,
+            validator: _composeBaseValidator(),
+            decoration: _getInputDecoration(suffixHardcoded: const Icon(Icons.date_range)),
+            initialValue: getDefaultDatetime(),
+            inputType: inputType,
+            onSaved: (DateTime? dateTime) => {widget.onSavedCallback?.call((dateTime?.toIso8601String()))}
+            // locale: const Locale('de', 'DE'),
+            // initialValue: DateTime.now(),
+            // border decoration
+            ),
       ),
     );
   }
@@ -894,13 +892,22 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       filled: border,
       fillColor: getAlternatingColor(context, widget.nestingLevel),
       // border: InputBorder.none,
-      border: border ? const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)), borderSide: BorderSide.none) : InputBorder.none,
+      border:
+          border ? const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)), borderSide: BorderSide.none) : InputBorder.none,
       helperText: description,
       helperMaxLines: 10,
       prefix: prefixHardcoded,
       suffix: suffixHardcoded,
-      prefixText: prefixHardcoded != null ? null : options?.textAlign == TextAlign.LEFT || options?.textAlign == TextAlign.START ? options?.append : null,
-      suffixText: suffixHardcoded != null ? null : options?.textAlign == TextAlign.RIGHT || options?.textAlign == TextAlign.END ? options?.append : null,
+      prefixText: prefixHardcoded != null
+          ? null
+          : options?.textAlign == TextAlign.LEFT || options?.textAlign == TextAlign.START
+              ? options?.append
+              : null,
+      suffixText: suffixHardcoded != null
+          ? null
+          : options?.textAlign == TextAlign.RIGHT || options?.textAlign == TextAlign.END
+              ? options?.append
+              : null,
     );
   }
 }
