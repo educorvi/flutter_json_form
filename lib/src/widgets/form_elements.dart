@@ -639,9 +639,10 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       maxLines: maxLines,
       keyboardType: getKeyboardType(),
       autofillHints: getAutocompleteValues(),
-      onTapOutside: (PointerDownEvent event) {
-        FocusScope.of(context).unfocus();
-      },
+      // onTapOutside: (PointerDownEvent event) {
+        // print("onTapOutside");
+        // FocusScope.of(context).unfocus();
+      // },
     ));
   }
 

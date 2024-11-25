@@ -198,6 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: jsonSchema == null || uiSchema == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: EdgeInsets.all(8),
         children: [
           Text(

@@ -499,7 +499,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     //   }
     // }
 
-    ListView generateGroupElements() {
+    Column generateGroupElements() {
       // return Padding(
       //   padding: const EdgeInsets.symmetric(horizontal: UIConstants.groupPadding),
       //   child: Column(
@@ -514,9 +514,9 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       //   ),
       // );
 
-      return ListView(
-        shrinkWrap: true,
-        physics: const ClampingScrollPhysics(),
+      return Column(
+        //shrinkWrap: true,
+        //physics: const ClampingScrollPhysics(),
         children: elements.map((item) {
           return _generateItem(item, nestingLevel, isShownFromParent: isShown);
         }).toList(),
@@ -589,7 +589,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 
   /// generates a vertical layout with the elements in a column
-  ListView _generateVerticalLayout(List<LayoutElement> elements, int nestingLevel) {
+  Column _generateVerticalLayout(List<LayoutElement> elements, int nestingLevel) {
     // return Column(
     //   children: elements
     //       .map((item) => Padding(
@@ -613,9 +613,9 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     //   }
     // }
 
-    return ListView(
-      shrinkWrap: true,
-      physics: const ClampingScrollPhysics(),
+    return Column(
+      // shrinkWrap: true,
+      // physics: const ClampingScrollPhysics(),
       children: elements.map((item) {
         return _generateItem(item, nestingLevel);
       }).toList(),
