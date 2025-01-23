@@ -893,8 +893,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       // filled: border,
       // fillColor: getAlternatingColor(context, widget.nestingLevel),
       // border: InputBorder.none,
-      // border:
-      //     border ? const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)), borderSide: BorderSide.none) : InputBorder.none,
+      border:
+          !border ? InputBorder.none: Theme.of(context).inputDecorationTheme.border,
       helperText: description,
       helperMaxLines: 10,
       prefix: prefixHardcoded,
