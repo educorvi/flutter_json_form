@@ -537,8 +537,8 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       // );
     }
 
-    return Card.filled(
-        color: getAlternatingColor(context, nestingLevel),
+    return Card( //.filled(
+        // color: getAlternatingColor(context, nestingLevel),
         child: Padding(
           padding: const EdgeInsets.all(UIConstants.groupPadding),
           child: label != null

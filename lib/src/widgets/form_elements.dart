@@ -402,8 +402,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     }
 
     Card generateGroupElements() {
-      return Card.filled(
-        color: getAlternatingColor(context, widget.nestingLevel),
+      return Card( //.filled(
+        // color: getAlternatingColor(context, widget.nestingLevel),
         // decoration: const BoxDecoration(
         //   border: Border(
         //     left: BorderSide(
@@ -890,11 +890,11 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     return InputDecoration(
       labelText: labelSeparateText ? null : _getLabel(),
       hintText: placeholder,
-      filled: border,
-      fillColor: getAlternatingColor(context, widget.nestingLevel),
+      // filled: border,
+      // fillColor: getAlternatingColor(context, widget.nestingLevel),
       // border: InputBorder.none,
-      border:
-          border ? const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)), borderSide: BorderSide.none) : InputBorder.none,
+      // border:
+      //     border ? const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)), borderSide: BorderSide.none) : InputBorder.none,
       helperText: description,
       helperMaxLines: 10,
       prefix: prefixHardcoded,

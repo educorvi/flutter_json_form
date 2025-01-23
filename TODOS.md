@@ -7,4 +7,11 @@
 - [x] Space between fields when they are not shown. There is space rendered which is not needed (workaround, dont use .separate builder, but this should be used, elements which are not shown should just not be rendered)
 - [ ] support simple css parsing to allow small adjustments to the design of e.g. Groups
 - [ ] Support Rendering of form submit, print etc. buttons (and provide a toggle option to render them)
-- 
+
+
+# Theming
+- [ ] most theming is supported natively by flutter by providing a Theme Data Object. But some things have to be handled by the library
+  - [ ] support for alternative card colors (see getAlternatingColors)
+  - [ ] allow the user to specify if the text should be shown within a textbox, or above it
+  - [ ] advanced: currently, only css is supported by the ui schema, but for flutter, this has to be adjusted to allow styling of individual fields with a kind of themeData object. This new ui schema should be fully compatible with the existing one but allow additional styling options
+  - [ ] All constant values of the form renderer defined in constants.dart (but most likely even more as there are missing some) should be able to defined from the outside. Maybe a simple wrapper with a theme object works so no additional work has to be done, but it should be documented or at least some good default values should be used
