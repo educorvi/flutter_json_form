@@ -1,0 +1,120 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_json_forms/flutter_json_forms.dart';
+
+import '../jsonDialog.dart';
+
+class FormFileOld {
+  final String name;
+  final String? filename;
+  static String path = "../lib/src/schemas/examples";
+  static String schemaPostfix = ".schema.json";
+  static String uiPostfix = ".ui.json";
+  final GlobalKey<DynamicJsonFormState> formKey;
+  Map<String, dynamic>? jsonSchema;
+  Map<String, dynamic>? uiSchema;
+  Map<String, dynamic> formData;
+
+  FormFileOld({
+    required this.name,
+    required this.filename,
+    this.formData = const {},
+  }) : formKey = GlobalKey<DynamicJsonFormState>();
+
+  getFilePath() {
+    return "$path/$filename";
+  }
+
+  getSchemaPath() {
+    return "${getFilePath()}$schemaPostfix";
+  }
+
+  getUiPath() {
+    return "${getFilePath()}$uiPostfix";
+  }
+
+  Future<void> loadSchemas() async {
+    if (jsonSchema == null || uiSchema == null) {
+      final jsonSchemaString = await rootBundle.loadString(getSchemaPath());
+      final uiSchemaString = await rootBundle.loadString(getUiPath());
+      jsonSchema = json.decode(jsonSchemaString);
+      uiSchema = json.decode(uiSchemaString);
+    }
+  }
+
+  void setInitialFormData(Map<String, dynamic> data) {
+    formData = data;
+    // formKey.currentState?.reset();
+  }
+
+  void resetInitialFormData() {
+    formData = {};
+    // formKey.currentState?.reset();
+  }
+
+  FutureBuilder getForm() {
+    return FutureBuilder(
+      future: loadSchemas(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return const Center(child: Text('Error loading schemas'));
+        } else {
+          return Column(
+            children: [
+              Text(
+                name,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: () => showJsonDialog(context, 'JSON Schema', jsonSchema),
+                    child: const Text('Show JSON Schema'),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: () => showJsonDialog(context, 'UI Schema', uiSchema),
+                    child: const Text('Show UI Schema'),
+                  ),
+                ],
+              ),
+              const Divider(),
+              DynamicJsonForm(
+                key: formKey,
+                validate: false,
+                jsonSchema: jsonSchema,
+                uiSchema: uiSchema,
+                formData: formData,
+              ),
+              const Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  FilledButton(
+                    onPressed: () {
+                      if (formKey.currentState!.saveAndValidate()) {
+                        final formData = formKey.currentState!.value;
+                        showJsonDialog(context, 'Form Data', formData);
+                      }
+                    },
+                    child: const Text('Show Form Data'),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: () {
+                      formKey.currentState?.reset();
+                    },
+                    child: const Text('Reset Form'),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
+}

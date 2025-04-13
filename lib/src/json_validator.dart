@@ -31,12 +31,12 @@ class SchemaManager {
   }
 
   Future<JsonSchema> getJsonMetaSchema() async {
-    await _isInitialized;
+    await isSetup();
     return _jsonMetaSchema;
   }
 
   Future<JsonSchema> getUiMetaSchema() async {
-    await _isInitialized;
+    await isSetup();
     return _uiMetaSchema;
   }
 
@@ -57,8 +57,8 @@ Future<dynamic> jsonFromAsset(String path) async {
 
 /// Setup the dynamic json form validation
 /// Important: It is only useful to call this function when you validate your json schema
-/// It is also not necessary to call thia function. It just loads the json and UI schema when you call in the function instead of calling it when you first create a instant of the dynamic form renderer
-/// In the future this provides mechanisms to cache already loaded schemas and improve performance by running this function in the background instead of when creating the first Form Renderer Instance
+/// It is also often not necessary to call this function. It just loads the json and UI schema when you call in the function instead of calling it when you first create a instance of the dynamic form renderer
+/// In the future this provides mechanisms to cache already loaded schemas and improve performance by running this function e.g. on app startup in the background instead of when creating the first Form Renderer Instance
 Future<void> setupDynamicJsonFormValidation() async {
   await SchemaManager().isSetup();
 }

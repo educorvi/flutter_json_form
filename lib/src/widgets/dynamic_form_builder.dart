@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter_json_forms/src/widgets/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../flutter_json_forms.dart';
