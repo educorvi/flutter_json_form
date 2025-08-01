@@ -12,8 +12,10 @@ class FormSelector extends StatefulWidget {
 
   FormSelector({super.key, this.initialSelectionIndex = 0})
       : formFiles = [
+          ExampleFormFile(name: "Showcase", filename: "showcase"),
           ExampleFormFile(name: "5 Sicherheitsregeln", filename: "fiverules", formData: getFormDataFiverules()),
           ExampleFormFile(name: "Gefährdungsbeurteilung für Kleinbetriebe", filename: "gfk1", formData: getFormDataGfk1()),
+          ExampleFormFile(name: "Nested Objects", filename: "nestedObjects"),
         ],
         uploadFormFile = UploadFormFile(
           name: "Custom Form",

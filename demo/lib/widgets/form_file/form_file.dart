@@ -61,7 +61,7 @@ class FormFileOld {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return const Center(child: Text('Error loading schemas'));
+          return Center(child: Text('Error loading schemas: ${snapshot.error}'));
         } else {
           return Column(
             children: [
