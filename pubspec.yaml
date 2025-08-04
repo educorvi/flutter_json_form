@@ -36,6 +36,7 @@ flutter:
    assets:
      - lib/src/schemas/
      - lib/src/schemas/ui/
+     - lib/src/schemas/ui_v2-2/
 #     - lib/src/schemas/examples/
 
   #

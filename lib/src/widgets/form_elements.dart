@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_json_forms/src/widgets/utils.dart';
+import 'package:flutter_json_forms/src/widgets/shared_widgets.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
 
-// import 'package:form_builder_cupertino_fields/form_builder_cupertino_fields.dart';
 import '../constants.dart';
-import '../models/ui-schema.dart';
+import '../models/ui-schema-v2.dart';
 import 'custom_form_fields/form_builder_segmented_button.dart';
 import 'data/list_item.dart';
 
@@ -165,16 +164,17 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           }
         }
       }
-      if (options?.buttons == "Radiobuttons" || options?.radiobuttons == true) {
-        // DisplayAs.RADIOBUTTONS
-        return generateRadioGroup(values);
-      } else if (options?.buttons == "Checkboxgroups") {
-        // DisplayAs.BUTTONS
-        return generateSegmentedControl(values);
-      } else {
+      switch (options?.displayAs) {
+        case  DisplayAs.RADIOBUTTONS:
+          return generateRadioGroup(values);
+        case DisplayAs.SWITCHES:
+          return generateSegmentedControl(values);
+        case DisplayAs.SELECT:
+          return generateDropdown(values);
+          case null:
         return generateDropdown(values);
       }
-    } else if (property['format'] == 'date-time' || format == Format.DATE_TIME) {
+    } else if (property['format'] == 'date-time' || format == Format.DATETIME_LOCAL) {
       return generateDateTimePicker(InputType.both);
     } else if (property['format'] == 'date' || format == Format.DATE) {
       return generateDateTimePicker(InputType.date); // TODO adjust timepicker
@@ -193,6 +193,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   /// handles the generation of integer elements in the jsonSchema
   Widget _generateIntegerControl() {
+    if(options?.range == true){
+      return generateSlider();
+    }
     // if(options?.displayAs == DisplayAs.RATING) return generateRating();
     // TODO differentiate between rating and normal integer
     // return generateRating();
@@ -238,7 +241,10 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           _idCounter++;
         }
       } else {
-        items.add(ListItem<dynamic>(id: _idCounter++, value: null));
+        int min_items = safeParseInt(property['minItems']) ?? 1;
+        for (int i = 0; i < min_items; i++) {
+          items.add(ListItem<dynamic>(id: _idCounter++, value: null));
+        }
       }
       // if (widget.initialValue is List){
       //   List<dynamic> initialValueList= widget.initialValue;
@@ -278,8 +284,10 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       });
     }
 
+    int? maxItems = safeParseInt(property['maxItems']);
+
     return Column(
-      //crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -288,12 +296,10 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
               _getLabel(),
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            FilledButton.tonal(
-              onPressed: () {
-                addItem();
-              },
-              child: Icon(Icons.add),
-            ),
+              FilledButton.tonal(
+                onPressed: maxItems != null && items.length < maxItems ? () => addItem() : null,
+                child: Icon(Icons.add),
+              ),
           ],
         ),
         ReorderableListView.builder(
@@ -352,6 +358,15 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
             });
           },
         ),
+        // description
+        if (description != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              description!,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
       ],
     );
   }
@@ -401,17 +416,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       }
     }
 
-    Card generateGroupElements() {
-      return Card( //.filled(
+    Container generateGroupElements() {
+      return getLineContainer( //.filled(
         // color: getAlternatingColor(context, widget.nestingLevel),
-        // decoration: const BoxDecoration(
-        //   border: Border(
-        //     left: BorderSide(
-        //       color: Colors.grey, // Change this color to match your design
-        //       width: 2.0, // Change this width to match your design
-        //     ),
-        //   ),
-        // ),
         child: ListView.separated(
           shrinkWrap: true,
           physics: const ClampingScrollPhysics(),
@@ -424,6 +431,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
             return const SizedBox(height: UIConstants.verticalLayoutItemPadding);
           },
         ),
+
       );
     }
 
@@ -622,6 +630,13 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       return null;
     }
 
+    String initialValueString = "";
+    try {
+      initialValueString = initialValue as String;
+    } catch (e) {
+      initialValueString = "";
+    }
+
     return _wrapFieldTitle(
         child: FormBuilderTextField(
       name: scope,
@@ -634,7 +649,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       ]),
       // _composeBaseValidator(additionalValidators: (type == 'number' || type == 'integer') ? [FormBuilderValidators.numeric()] : null)
       decoration: _getInputDecoration(),
-      initialValue: initialValue,
+      initialValue: initialValueString,
       textInputAction: maxLines > 1 ? TextInputAction.newline : null,
       maxLines: maxLines,
       keyboardType: getKeyboardType(),
@@ -658,6 +673,40 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         decoration: _getInputDecoration(),
       ),
     );
+  }
+  Widget generateSlider() {
+    return _wrapFieldTitle(
+      child: FormBuilderSlider(
+        name: scope,
+        onChanged: onChanged,
+        onSaved: widget.onSavedCallback,
+        enabled: enabled,
+        validator: _composeBaseValidator(),
+        decoration: _getInputDecoration(),
+        min: safeParseDouble(property['minimum']),
+        max: safeParseDouble(property['maximum']),
+        divisions: safeParseDouble(property['maximum']).toInt() - safeParseDouble(property['minimum']).toInt(),
+        initialValue: initialValue is double ? initialValue : 0.0,
+      ),
+    );
+  }
+
+  double safeParseDouble(dynamic value) {
+    if (value is num) {
+      return value.toDouble();
+    } else if (value is String) {
+      return double.tryParse(value) ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  int? safeParseInt(dynamic value) {
+    if (value is int) {
+      return value;
+    } else if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
   }
 
   /// generate File Picker using [FormBuilderFilePicker]
@@ -899,16 +948,17 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       helperMaxLines: 10,
       prefix: prefixHardcoded,
       suffix: suffixHardcoded,
-      prefixText: prefixHardcoded != null
-          ? null
-          : options?.textAlign == TextAlign.LEFT || options?.textAlign == TextAlign.START
-              ? options?.append
-              : null,
-      suffixText: suffixHardcoded != null
-          ? null
-          : options?.textAlign == TextAlign.RIGHT || options?.textAlign == TextAlign.END
-              ? options?.append
-              : null,
+      // TODO: has to be added back
+      // prefixText: prefixHardcoded != null
+      //     ? null
+      //     : options?.textAlign == TextAlign.LEFT || options?.textAlign == TextAlign.START
+      //         ? options?.append
+      //         : null,
+      // suffixText: suffixHardcoded != null
+      //     ? null
+      //     : options?.textAlign == TextAlign.RIGHT || options?.textAlign == TextAlign.END
+      //         ? options?.append
+      //         : null,
     );
   }
 }

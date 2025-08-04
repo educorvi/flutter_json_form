@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../flutter_json_forms.dart';
-import '../models/ui-schema.dart';
+import '../models/ui-schema-v2.dart';
 import 'data/list_item.dart';
 import 'form_elements.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +50,7 @@ class DynamicJsonForm extends StatefulWidget {
 
   // TODO maybe form key, maybe debug (default off, ignore tolerable errors or log them to the debug console, or: show them in the ui)
 
+  /// [formData] defines the initial data for the form fields
   final Map<String, dynamic>? formData;
 
   const DynamicJsonForm(
@@ -88,7 +89,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// model classes for the JSON and UI schema
   late final JsonSchemaModel jsonSchemaModel;
-  late final UiSchemaModel uiSchemaModel;
+  late final UiSchemaV2Model uiSchemaModel;
 
   /// The dependencies of the form fields which are dependent on other fields
   Map<String, dynamic> _showOnDependencies = {};
@@ -152,16 +153,16 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     _properties = jsonSchemaModel.properties ?? {};
 
     if (widget.uiSchema == null) {
-      uiSchemaModel = _generateDefaultUISchema();
+      uiSchemaModel = generateDefaultUISchema(_properties);
     } else {
       final Map<String, dynamic> uiSchemaMap = _getMap(widget.uiSchema, "uiSchema");
       if (widget.validate && !_validateUiSchema(uiSchemaMap)) {
         return;
       }
-      uiSchemaModel = UiSchemaModel.fromJson(uiSchemaMap);
+      uiSchemaModel = UiSchemaV2Model.fromJson(uiSchemaMap);
     }
 
-    _showOnDependencies = _initShowOnDependencies(_properties, formData);
+    _showOnDependencies = initShowOnDependencies(_properties, formData);
     // _formKey.currentState!.patchValue(removeEmptyKeys(_showOnDependencies));
   }
 
@@ -186,8 +187,8 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   void reset() {
     setState(() {
       // formData.clear();
-      _resetShowOnDependencies(_showOnDependencies);
-      _showOnDependencies = _initShowOnDependencies(_properties, null);
+      resetShowOnDependencies(_showOnDependencies);
+      _showOnDependencies = initShowOnDependencies(_properties, null);
       // _formKey.currentState!.reset();
       _formKey.currentState!.patchValue(_showOnDependencies); // convertShowOnDependenciesToFormBuilderValues
       // final arrayElementsToDelete = _resetShowOnDependencies(_showOnDependencies);
@@ -196,53 +197,30 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     });
   }
 
-  /// converts the form values to the format of the JSON schema
-  /// handles array elements by getting each element and generating the form builder elements with their ids and contained values
-  Map<String, dynamic> convertShowOnDependenciesToFormBuilderValues(Map<String, dynamic> dependencies) {
-    Map<String, dynamic> formBuilderValues = {};
-    dependencies.forEach((key, value) {
-      if (value is List) {
-        for (int i = 0; i < value.length; i++) {
-          final item = value[i];
-          if (item is ListItem) {
-            final value = item.value;
-            final path = "$key/$i";
-            if (value is Map<String, dynamic>) {
-              formBuilderValues.addAll(convertShowOnDependenciesToFormBuilderValues(value));
-            } else {
-              formBuilderValues[path] = value;
-            }
-          }
-        }
-      } else {
-        formBuilderValues[key] = value;
-      }
-    });
-    return formBuilderValues;
-  }
-
-  /// Recursively resets the _showOnDependencies map
-  /// most likely no longer needed as all elements are reset when initShowOnDependencies is called
-  void _resetShowOnDependencies(Map<String, dynamic> dependencies) {
-    dependencies.forEach((key, value) {
-      if (value is Map<String, dynamic>) {
-        _resetShowOnDependencies(value);
-      } else if (value is List) {
-        for (var item in value) {
-          if (item is ListItem) {
-            final value = item.value;
-            if (value is Map<String, dynamic>) {
-              _resetShowOnDependencies(value);
-            } else {
-              item.value = null;
-            }
-          }
-        }
-      } else {
-        dependencies[key] = null;
-      }
-    });
-  }
+  // /// converts the form values to the format of the JSON schema
+  // /// handles array elements by getting each element and generating the form builder elements with their ids and contained values
+  // Map<String, dynamic> convertShowOnDependenciesToFormBuilderValues(Map<String, dynamic> dependencies) {
+  //   Map<String, dynamic> formBuilderValues = {};
+  //   dependencies.forEach((key, value) {
+  //     if (value is List) {
+  //       for (int i = 0; i < value.length; i++) {
+  //         final item = value[i];
+  //         if (item is ListItem) {
+  //           final value = item.value;
+  //           final path = "$key/$i";
+  //           if (value is Map<String, dynamic>) {
+  //             formBuilderValues.addAll(convertShowOnDependenciesToFormBuilderValues(value));
+  //           } else {
+  //             formBuilderValues[path] = value;
+  //           }
+  //         }
+  //       }
+  //     } else {
+  //       formBuilderValues[key] = value;
+  //     }
+  //   });
+  //   return formBuilderValues;
+  // }
 
   /// Returns the saved value only
   Map<String, dynamic> get value {
@@ -255,34 +233,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   void patchValue(Map<String, dynamic> value) {
     _formKey.currentState?.patchValue(value);
-  }
-
-  /// generates a default UI schema which shows all fields of the JSON schema
-  /// The Layout Type is a vertical one and for each element a Control Element with the scope of the JSON Schema Element is created
-  UiSchemaModel _generateDefaultUISchema() {
-    // generates the default UI schema elements based on the properties of the JSON schema
-    List<LayoutElement> generateDefaultUISchemaElements(Map<String, dynamic> properties, {String path = ""}) {
-      List<LayoutElement> elements = [];
-      for (String key in properties.keys) {
-        final element = properties[key];
-        if (element["type"] == "object") {
-          elements.add(LayoutElement(
-            type: LayoutelementType.GROUP,
-            elements: generateDefaultUISchemaElements(element['properties'], path: "$path/$key/properties"),
-            label: key,
-          ));
-        } else {
-          elements.add(LayoutElement(
-            type: LayoutelementType.CONTROL,
-            scope: "$path/$key",
-          ));
-        }
-      }
-      return elements;
-    }
-
-    // traverse the json schema and generate a default ui schema. This schema has a control element for every element in the json schema
-    return UiSchemaModel(type: UiSchemaType.VERTICAL_LAYOUT, elements: generateDefaultUISchemaElements(_properties, path: "/properties"));
   }
 
   /// [instance] can be a Map<String, dynamic> or a String
@@ -302,55 +252,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       }
     }
     return data;
-  }
-
-  /// initialize _showDependencies with the default values
-  /// this function gets called recursively for objects in the jsonSchema which are nested into each other
-  Map<String, dynamic> _initShowOnDependencies(Map<String, dynamic>? properties, Map<String, dynamic>? formData) {
-
-    dynamic formatDateTime(dynamic input, String? format) {
-      if (format == "date-time" || format == "" || format == "") {
-        if(input == "\$now"){
-          return DateTime.now();
-        }
-        // TODO: could throw exception if invalid format. If so, print error in UI
-        return DateTime.parse(input);
-      }
-      return input;
-    }
-
-    if (properties == null) return {};
-    final Map<String, dynamic> dependencies = {};
-    for (String key in properties.keys) {
-      final element = properties[key];
-      // set default values for fields. If a form data is provided, use this
-      if (element["type"] == "object") {
-        final recursiveFormData = formData == null
-            ? null
-            : formData.containsKey(key)
-                ? formData[key]
-                : null;
-        final nestedDependencies = _initShowOnDependencies(element['properties'], recursiveFormData);
-        nestedDependencies.forEach((nestedKey, nestedValue) {
-          dependencies["/properties/$key$nestedKey"] = nestedValue;
-        });
-      } else if (formData != null && formData.containsKey(key)) {
-        final formDataKey = formData[key];
-        if (formDataKey is List) {
-          // int id = 0;
-          dependencies["/properties/$key"] = formDataKey.map((item) => item.toString()).toList(); // ListItem(id: id++, value: item)
-        } else {
-          dependencies["/properties/$key"] = formatDateTime(formData[key], element["format"]);
-        }
-        // dependencies["/properties/$key"] = formData[key];
-      } else if (element.containsKey('default')) {
-        // check if the jsonSchema defines a default value for the field
-        dependencies["/properties/$key"] = formatDateTime(element["default"], element["format"]);
-      } else {
-        dependencies["/properties/$key"] = null;
-      }
-    }
-    return dependencies;
   }
 
   /// Validates the JSON schema against the JSON meta schema
@@ -384,7 +285,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   Widget build(BuildContext context) {
     if (widget.validate) {
       if (isLoading) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: CircularProgressIndicator()); //  TODO: customizable loading indicator
       } else if (hasErrors) {
         return Column(
           children: [
@@ -435,44 +336,32 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   Widget _generateForm() {
     const nestingLevel = 0;
     Widget child;
-    UiSchemaType type = uiSchemaModel.type;
-    switch (type) {
-      case UiSchemaType.VERTICAL_LAYOUT:
-        child = _generateVerticalLayout(uiSchemaModel.elements!, nestingLevel);
-      case UiSchemaType.HORIZONTAL_LAYOUT:
-        child = _generateHorizontalLayout(uiSchemaModel.elements!, nestingLevel);
-      case UiSchemaType.GROUP:
-        child = _generateGroupFromUiSchemaModel(uiSchemaModel, nestingLevel);
-      case UiSchemaType.WIZARD:
-        child = getNotImplementedWidget("Wizard not implemented yet");
+    Layout layout = uiSchemaModel.layout;
+    switch (layout.type) {
+      case LayoutType.VERTICAL_LAYOUT:
+        child = _generateVerticalLayout(layout.elements, nestingLevel);
+      case LayoutType.HORIZONTAL_LAYOUT:
+        child = _generateHorizontalLayout(layout.elements, nestingLevel);
+      case LayoutType.GROUP:
+        child = _generateGroupFromLayout(layout, nestingLevel);
     }
-    return _applyCss(child, cssClass: uiSchemaModel.options?.cssClass);
+    return _applyCss(child, cssClass: layout.options?.cssClass);
     // return _generateLayout(uiSchemaModel.layout);
   }
 
-  // /// generates a layout based on the type of the layout
-  // Widget _generateLayout(LayoutElement layout) {
-  //   LayoutelementType? type = layout.type;
-  //   switch (type) {
-  //     case LayoutelementType.VERTICAL_LAYOUT:
-  //       return _generateVerticalLayout(layout.elements!); // Bad
-  //     case LayoutelementType.HORIZONTAL_LAYOUT:
-  //       return _generateHorizontalLayout(layout.elements!); // Bad
-  //     case LayoutelementType.GROUP:
-  //       return _generateGroup(layout);
-  //   }
-  // }
-
   Widget _generateGroupFromLayoutElement(LayoutElement item, int nestingLevel) {
+    if (item.elements == null) {
+      return _getErrorTextWidget("Group element must have elements");
+    }
     List<LayoutElement> elements = item.elements!;
-    String? label = item.label;
+    String? label = item.options?.label;
     ShowOnProperty? showOn = item.showOn;
     return _generateGroup(elements, label, showOn, nestingLevel);
   }
 
-  Widget _generateGroupFromUiSchemaModel(UiSchemaModel item, int nestingLevel) {
-    List<LayoutElement> elements = item.elements!;
-    String? label = item.label;
+  Widget _generateGroupFromLayout(Layout item, int nestingLevel) {
+    List<LayoutElement> elements = item.elements;
+    String? label = item.options?.label;
     ShowOnProperty? showOn = item.showOn;
     return _generateGroup(elements, label, showOn, nestingLevel);
   }
@@ -482,7 +371,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     // List<LayoutElement> elements = item.elements!;
     // String? label = item.label;
 
-    bool? isShown = showOn == null ? null : _evaluateCondition(showOn.type, checkValueForShowOn(showOn.scope), showOn.referenceValue);
+    bool? isShown = showOn == null ? null : _evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
 
     // final List<LayoutElement> visibleElements = [];
     // for (int i = 0; i < elements.length; i++) {
@@ -637,27 +526,24 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// generates an Layoutelement based on the type of the element
   Widget _generateItem(LayoutElement item, int nestingLevel, {bool? isShownFromParent}) {
-    LayoutelementType? type = item.type;
     Widget child;
-    switch (type) {
-      case LayoutelementType.BUTTON:
+    switch (item.type) {
+      case LayoutElementType.BUTTON:
         return _generateButtonControl(item as Button);
-      case LayoutelementType.BUTTONGROUP:
+      case LayoutElementType.BUTTONGROUP:
         return _generateButtonGroupControl(item);
-      case LayoutelementType.CONTROL:
+      case LayoutElementType.CONTROL:
         child = _generateControl(item, nestingLevel, isShownFromParent: isShownFromParent);
-      case LayoutelementType.DIVIDER:
+      case LayoutElementType.DIVIDER:
         child = _generateDivider(item);
-      case LayoutelementType.GROUP:
+      case LayoutElementType.GROUP:
         child = _generateGroupFromLayoutElement(item, nestingLevel + 1);
-      case LayoutelementType.HORIZONTAL_LAYOUT:
+      case LayoutElementType.HORIZONTAL_LAYOUT:
         child = _generateHorizontalLayout(item.elements!, nestingLevel + 1);
-      case LayoutelementType.HTML:
+      case LayoutElementType.HTML:
         child = _generateHtml(item);
-      case LayoutelementType.VERTICAL_LAYOUT:
+      case LayoutElementType.VERTICAL_LAYOUT:
         child = _generateVerticalLayout(item.elements!, nestingLevel + 1);
-      case LayoutelementType.WIZARD:
-        child = getNotImplementedWidget("Wizard");
       case null:
         child = getNotImplementedWidget("Null type");
     }
@@ -672,7 +558,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     if (showOn == null) {
       return child;
     } else {
-      bool isVisible = _evaluateCondition(showOn.type, checkValueForShowOn(showOn.scope), showOn.referenceValue);
+      bool isVisible = _evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
       return AnimatedCrossFade(
         duration: const Duration(milliseconds: 500),
         sizeCurve: Curves.easeInOut,
@@ -697,7 +583,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// generates a button group control based on the type of the button group
   Widget _generateButtonGroupControl(LayoutElement element) {
-    if (element.vertical != null && element.vertical!) {
+    if (element.options?.vertical != null && element.options!.vertical!) {
       return Column(
         children: element.buttons!.map((item) {
           return _generateButtonControl(item);
@@ -752,24 +638,24 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 
   /// evaluates the condition based on the operator and the operands
-  bool _evaluateCondition(ShowOnType operator, dynamic operand1, dynamic operand2) {
+  bool _evaluateCondition(ShowOnFunctionType? operator, dynamic operand1, dynamic operand2) {
     // TODO as the types are dynamic, type error could occur here. Use stronger typing if possible!
     // maybe try to do the check and if an exception occurs, render an error in the ui
     switch (operator) {
-      case ShowOnType.EQUALS:
+      case ShowOnFunctionType.EQUALS:
         return operand1 == operand2;
-      case ShowOnType.GREATER:
+      case ShowOnFunctionType.GREATER:
         return operand1 > operand2;
-      case ShowOnType.SMALLER:
+      case ShowOnFunctionType.SMALLER:
         return operand1 < operand2;
-      case ShowOnType.GREATER_OR_EQUAL:
+      case ShowOnFunctionType.GREATER_OR_EQUAL:
         return operand1 >= operand2;
-      case ShowOnType.SMALLER_OR_EQUAL:
+      case ShowOnFunctionType.SMALLER_OR_EQUAL:
         return operand1 <= operand2;
-      case ShowOnType.NOT_EQUALS:
+      case ShowOnFunctionType.NOT_EQUALS:
         return operand1 != operand2;
-      case ShowOnType.LONGER:
-        return operand1.length > operand2;
+      case null:
+        return false;
     }
   }
 
@@ -789,7 +675,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       return _getErrorTextWidget("Control element must have a valid scope. Scope $scope not found in json schema.");
     }
 
-    final format = item.format;
+    final format = item.options?.format;
     // dynamic formDataForScope = _getObjectFromJsonFormData;
     // if isShownFromParent == false then the field is not shown
     // if isShownFromParent == true or not set, check if showOn condition exists. If so, evaluate it
@@ -816,7 +702,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
             ? false
             : item.showOn == null
                 ? true
-                : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.scope), item.showOn!.referenceValue);
+                : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.path ?? ""), item.showOn!.referenceValue);
       },
       // formDataForScope,
       onSavedCallback: (value) {
@@ -824,7 +710,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
             ? false
             : item.showOn == null
                 ? true
-                : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.scope), item.showOn!.referenceValue)) {
+                : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.path ?? ""), item.showOn!.referenceValue)) {
           _formSubmitValues[scope] = value;
         } else {
           _formSubmitValues.remove(scope);
@@ -837,13 +723,13 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     if (formData.isEmpty) {
       return null;
     }
-    return _getObjectFromJson(formData, path);
+    return getObjectFromJson(formData, path);
   }
 
   /// gets an object from the jsonSchema
   /// [path] the path of the object in the json schema
   Map<String, dynamic>? _getObjectFromJsonSchema(String path) {
-    dynamic object = _getObjectFromJson(_properties, path);
+    dynamic object = getObjectFromJson(_properties, path);
     if (object is! Map<String, dynamic>?) {
       return null;
     }
@@ -855,7 +741,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// returns the value if it is set, otherwise null
   /// it doesn't matter if the path starts with a # or not
   dynamic checkValueForShowOn(String path) {
-    return _showOnDependencies[path] ?? (path.startsWith("#") ? _showOnDependencies[path.substring(1)] : null);
+    return _showOnDependencies[getPathWithProperties(path)]; //  ?? (path.startsWith("#") ? _showOnDependencies[path.substring(1)] : null);
   }
 
   /// sets a value for a showOn condition
@@ -870,25 +756,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     }
   }
 
-  /// gets an object from a json
-  /// [path] the path of the object in the json
-  /// [json] the json object
-  dynamic _getObjectFromJson(
-    Map<String, dynamic> json,
-    String path,
-  ) {
-    List<String> pathParts = _getPathWithoutPrefix(path).split('/');
-    dynamic object = json;
-    try {
-      for (String part in pathParts) {
-        object = object[part];
-      }
-    } catch (e) {
-      return null;
-    }
-    return object;
-  }
-
   /// checks if a field is required
   /// [path] the path of the field in the json schema
   bool _isRequired(String path) {
@@ -897,23 +764,12 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     if (parentPath == "#" || parentPath.isEmpty) {
       return _requiredFields.contains(_getFieldNameFromPath(path));
     } else {
-      dynamic object = _getObjectFromJson(_properties, parentPath);
+      dynamic object = getObjectFromJson(_properties, parentPath);
       if (object is! Map<String, dynamic>?) {
         return false;
       }
       return object!["required"]?.contains(_getFieldNameFromPath(path)) ?? false;
     }
-  }
-
-  /// get path without prefix /properties or #/properties
-  String _getPathWithoutPrefix(String path) {
-    const prefixes = ['/properties/', '#/properties/'];
-    for (String prefix in prefixes) {
-      if (path.startsWith(prefix)) {
-        return path.substring(prefix.length);
-      }
-    }
-    return path;
   }
 
   String _getFieldNameFromPath(String path) {
@@ -933,4 +789,160 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       style: const TextStyle(color: Colors.red),
     );
   }
+}
+
+/// takes a [path] and transforms it to one which has properties at the beginning and between each part
+String getPathWithProperties(String path) {
+  if (path.startsWith("#")) {
+    path = path.substring(1);
+  }
+  if (path=="" || path.startsWith("/properties")) {
+    return path;
+  }
+  List<String> pathParts = path.split('/');
+  String newPath = "";
+  for (int i = 0; i < pathParts.length; i++) {
+    newPath += "/properties/${pathParts[i]}";
+  }
+  return newPath;
+}
+
+/// gets an object from a json
+/// [path] the path of the object in the json
+/// [json] the json object
+dynamic getObjectFromJson(
+    Map<String, dynamic> json,
+    String path,
+    ) {
+  List<String> pathParts = getPathWithoutPrefix(path).split('/');
+  dynamic object = json;
+  try {
+    for (String part in pathParts) {
+      object = object[part];
+    }
+  } catch (e) {
+    return null;
+  }
+  return object;
+}
+
+/// get path without prefix /properties or #/properties
+String getPathWithoutPrefix(String path) {
+  const prefixes = ['/properties/', '#/properties/'];
+  for (String prefix in prefixes) {
+    if (path.startsWith(prefix)) {
+      return path.substring(prefix.length);
+    }
+  }
+  return path;
+}
+
+/// initialize _showDependencies with the default values
+/// this function gets called recursively for objects in the jsonSchema which are nested into each other
+Map<String, dynamic> initShowOnDependencies(Map<String, dynamic>? properties, Map<String, dynamic>? formData) {
+
+  dynamic formatDateTime(dynamic input, String? format) {
+    if (format == "date-time" || format == "") {
+      if(input == "\$now"){
+        return DateTime.now();
+      }
+      // TODO: could throw exception if invalid format. If so, print error in UI
+      return DateTime.parse(input);
+    }
+    return input;
+  }
+
+  if (properties == null) return {};
+  final Map<String, dynamic> dependencies = {};
+  for (String key in properties.keys) {
+    final element = properties[key];
+    // set default values for fields. If a form data is provided, use this
+    if (element["type"] == "object") {
+      final recursiveFormData = formData == null
+          ? null
+          : formData.containsKey(key)
+          ? formData[key]
+          : null;
+      final nestedDependencies = initShowOnDependencies(element['properties'], recursiveFormData);
+      nestedDependencies.forEach((nestedKey, nestedValue) {
+        dependencies["/properties/$key$nestedKey"] = nestedValue;
+      });
+    } else if (formData != null && formData.containsKey(key)) {
+      final formDataKey = formData[key];
+      if (formDataKey is List) {
+        // int id = 0;
+        dependencies["/properties/$key"] = formDataKey.map((item) => item.toString()).toList(); // ListItem(id: id++, value: item)
+      } else {
+        dependencies["/properties/$key"] = formatDateTime(formData[key], element["format"]);
+      }
+      // dependencies["/properties/$key"] = formData[key];
+    } else if (element.containsKey('default')) {
+      // check if the jsonSchema defines a default value for the field
+      dependencies["/properties/$key"] = formatDateTime(element["default"], element["format"]);
+    } else {
+      dependencies["/properties/$key"] = null;
+    }
+  }
+  return dependencies;
+}
+
+/// Recursively resets the provided dependencies map
+/// most likely no longer needed as all elements are reset when initShowOnDependencies is called
+void resetShowOnDependencies(Map<String, dynamic> dependencies) {
+  dependencies.forEach((key, value) {
+    if (value is Map<String, dynamic>) {
+      resetShowOnDependencies(value);
+    } else if (value is List) {
+      for (var item in value) {
+        if (item is ListItem) {
+          final value = item.value;
+          if (value is Map<String, dynamic>) {
+            resetShowOnDependencies(value);
+          } else {
+            item.value = null;
+          }
+        }
+      }
+    } else {
+      dependencies[key] = null;
+    }
+  });
+}
+
+/// Generates a default UI schema for a given [jsonSchema] JSON schema.
+///
+/// This function traverses the provided JSON schema and creates a default UI schema
+/// with a vertical layout. Each field in the JSON schema is represented as a control
+/// element in the UI schema. If a field is of type `object`, it is represented as a
+/// group containing its nested properties.
+///
+/// The return value is a [UiSchemaV2Model] object that represents the generated default UI schema.
+UiSchemaV2Model generateDefaultUISchema(Map<String, dynamic> jsonSchema) {
+  // generates the default UI schema elements based on the properties of the JSON schema
+  List<LayoutElement> generateDefaultUISchemaElements(Map<String, dynamic> properties, {String path = ""}) {
+    List<LayoutElement> elements = [];
+    for (String key in properties.keys) {
+      final element = properties[key];
+      if (element["type"] == "object") {
+        elements.add(LayoutElement(
+          type: LayoutElementType.GROUP,
+          elements: generateDefaultUISchemaElements(element['properties'], path: "$path/$key/properties"),
+          options: Options(
+              label: key
+          ),
+        ));
+      } else {
+        elements.add(LayoutElement(
+          type: LayoutElementType.CONTROL,
+          scope: "$path/$key",
+        ));
+      }
+    }
+    return elements;
+  }
+
+  // traverse the json schema and generate a default ui schema. This schema has a control element for every element in the json schema
+  return UiSchemaV2Model(
+      version: "2.0",
+      layout: Layout(elements: generateDefaultUISchemaElements(jsonSchema, path: "/properties"), type: LayoutType.VERTICAL_LAYOUT));
 }
