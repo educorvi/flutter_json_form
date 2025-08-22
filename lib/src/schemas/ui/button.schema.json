@@ -1,76 +1,91 @@
 {
-  "$id": "button.schema.json",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Button",
-  "description": "Used to put a button into the form",
-  "type": "object",
-  "properties": {
-    "type": {
-      "type": "string",
-      "enum": [
-        "Button"
-      ]
-    },
-    "buttonType": {
-      "title": "The Buttons Type",
-      "description": "Submit or Reset",
-      "type": "string",
-      "enum": [
-        "submit",
-        "reset"
-      ]
-    },
-    "text": {
-      "type": "string",
-      "title": "Text",
-      "description": "The buttons text"
-    },
-    "nativeSubmitSettings": {
-      "type": "object",
-      "description": "Settings if native form submit is used",
-      "title": "Native Submit Settings",
-      "properties": {
-        "formaction": {
-          "type": "string",
-          "description": "Specifies where to send the form-data when a form is submitted"
+    "$id": "https://educorvi.github.io/vue-json-form/schemas/button.schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Button",
+    "description": "Used to put a button into the form",
+    "type": "object",
+    "properties": {
+        "type": {
+            "type": "string",
+            "enum": ["Button"]
         },
-        "formmethod": {
-          "type": "string",
-          "description": "Specifies how to send the form-data",
-          "enum": [
-            "get",
-            "post"
-          ]
+        "buttonType": {
+            "title": "The Buttons Type",
+            "description": "Submit or Reset",
+            "type": "string",
+            "enum": ["submit", "reset"]
         },
-        "formtarget": {
-          "type": "string",
-          "description": "Specifies where to display the response after submitting the form",
-          "enum": [
-            "_blank",
-            "_self",
-            "_parent",
-            "_top"
-          ]
+        "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "The buttons text"
         },
-        "formenctype": {
-          "type": "string",
-          "description": "Specifies how form-data should be encoded before sending it to a server",
-          "enum": [
-            "application/x-www-form-urlencoded",
-            "multipart/form-data",
-            "text/plain"
-          ]
+        "showOn": {
+            "$ref": "show_on.schema.json"
+        },
+        "options": {
+            "type": "object",
+            "title": "Button Options",
+            "description": "Options for the button",
+            "additionalProperties": false,
+            "properties": {
+                "cssClass": {
+                    "type": "string",
+                    "description": "The layout's CSS classes"
+                },
+                "variant": {
+                    "$ref": "variants.schema.json"
+                },
+                "formnovalidate": {
+                    "type": "boolean",
+                    "description": "Specifies that the form-data should not be validated on submission",
+                    "default": false
+                },
+                "submitOptions": {
+                    "type": "object",
+                    "title": "Submit Options",
+                    "description": "Options that are passed to the submit function. This will not change the behaviour of VueJsonForm itself, but can bes used by the application/the webcomponent to change the behaviour of the submit function.",
+                    "additionalProperties": true,
+                    "properties": {
+                        "action": {
+                            "type": "string",
+                            "description": "Action to perform when the button is clicked",
+                            "examples": [
+                                "request",
+                                "save",
+                                "print"
+                            ]
+                        },
+                        "request": {
+                            "type": "object",
+                            "description": "Settings for request actions",
+                            "properties": {
+                                "url": {
+                                    "type": "string",
+                                    "description": "The URL to send the request to"
+                                },
+                                "method": {
+                                    "type": "string",
+                                    "enum": ["GET", "POST", "PUT", "DELETE"],
+                                    "default": "POST",
+                                    "description": "The HTTP method to use for the request"
+                                },
+                                "headers": {
+                                    "type": "object",
+                                    "description": "Headers to include in the request",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": ["url"]
+                        }
+                    }
+                }
+            }
         }
-      }
     },
-    "variant": {
-      "$ref": "variants.schema.json"
-    }
-  },
-  "additionalProperties": false,
-  "required": [
-    "type",
-    "buttonType",
-    "text"
-  ]
+    "additionalProperties": false,
+    "required": ["type", "buttonType", "text"]
 }

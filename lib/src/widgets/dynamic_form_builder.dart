@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../flutter_json_forms.dart';
-import '../models/ui-schema-v2.dart';
+import '../models/ui_schema.dart' as ui;
 import 'data/list_item.dart';
 import 'form_elements.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,8 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:flutter_json_forms/src/json_validator.dart';
 import '../constants.dart';
-import '../models/json_schema.dart';
+import '../models/jsonSchema.dart';
+import 'package:flutter_js/flutter_js.dart' show getJavascriptRuntime, JavascriptRuntime;
 
 /// A dynamic form which generates form fields based on a JSON schema and a UI schema
 class DynamicJsonForm extends StatefulWidget {
@@ -89,7 +91,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// model classes for the JSON and UI schema
   late final JsonSchemaModel jsonSchemaModel;
-  late final UiSchemaV2Model uiSchemaModel;
+  late final ui.UiSchema uiSchemaModel;
 
   /// The dependencies of the form fields which are dependent on other fields
   Map<String, dynamic> _showOnDependencies = {};
@@ -97,6 +99,10 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   final Map<String, dynamic> _formSubmitValues = {};
 
   late final Map<String, dynamic> formData;
+
+  late final JavascriptRuntime jsRuntime = getJavascriptRuntime();
+  dynamic jsRuleSet;
+  Map<String, dynamic> ritaRules = {};
 
   /// return true if the widget is in the loading state (the validation is not finished yet
   /// (async part comes form reading the files. The validation is done synchronously))
@@ -129,6 +135,17 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     } else {
       _initializeForm();
     }
+    _initializeJsEngineAndRuleSet();
+  }
+
+  Future<void> _initializeJsEngineAndRuleSet() async {
+    // Load JS bundle from assets
+    // final jsCode = await rootBundle.loadString('assets/js/rita-core.js');
+    // jsRuntime.evaluate(jsCode);
+
+    // // Parse ruleset once (assuming widget.jsonSchema is your rules)
+    // final ruleSetJson = jsonEncode(widget.jsonSchema);
+    // jsRuleSet = jsRuntime.evaluate('Parser.parseRuleSet($ruleSetJson)');
   }
 
   /// get the json and ui meta schema
@@ -159,11 +176,31 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       if (widget.validate && !_validateUiSchema(uiSchemaMap)) {
         return;
       }
-      uiSchemaModel = UiSchemaV2Model.fromJson(uiSchemaMap);
+      uiSchemaModel = ui.UiSchema.fromJson(uiSchemaMap);
     }
 
     _showOnDependencies = initShowOnDependencies(_properties, formData);
     // _formKey.currentState!.patchValue(removeEmptyKeys(_showOnDependencies));
+
+    // Collect all rita rules
+    ritaRules = {};
+    void collectRitaRules(dynamic element) {
+      if (element is Map && element['showOn'] != null && element['showOn']['rule'] != null && element['showOn']['id'] != null) {
+        ritaRules[element['showOn']['id']] = element['showOn']['rule'];
+      }
+      if (element is Map && element['elements'] != null) {
+        for (var child in element['elements']) {
+          collectRitaRules(child);
+        }
+      }
+      if (element is Map && element['buttons'] != null) {
+        for (var child in element['buttons']) {
+          collectRitaRules(child);
+        }
+      }
+    }
+
+    collectRitaRules(widget.uiSchema);
   }
 
   /// Save form values and validate all fields of form
@@ -336,38 +373,38 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   Widget _generateForm() {
     const nestingLevel = 0;
     Widget child;
-    Layout layout = uiSchemaModel.layout;
+    ui.Layout layout = uiSchemaModel.layout;
     switch (layout.type) {
-      case LayoutType.VERTICAL_LAYOUT:
+      case ui.LayoutType.VERTICAL_LAYOUT:
         child = _generateVerticalLayout(layout.elements, nestingLevel);
-      case LayoutType.HORIZONTAL_LAYOUT:
+      case ui.LayoutType.HORIZONTAL_LAYOUT:
         child = _generateHorizontalLayout(layout.elements, nestingLevel);
-      case LayoutType.GROUP:
+      case ui.LayoutType.GROUP:
         child = _generateGroupFromLayout(layout, nestingLevel);
     }
     return _applyCss(child, cssClass: layout.options?.cssClass);
     // return _generateLayout(uiSchemaModel.layout);
   }
 
-  Widget _generateGroupFromLayoutElement(LayoutElement item, int nestingLevel) {
-    if (item.elements == null) {
-      return _getErrorTextWidget("Group element must have elements");
-    }
-    List<LayoutElement> elements = item.elements!;
+  Widget _generateGroupFromLayoutElement(ui.Layout item, int nestingLevel) {
+    // if (item.elements == null) {
+    //   return _getErrorTextWidget("Group element must have elements");
+    // }
+    List<ui.LayoutElement> elements = item.elements;
     String? label = item.options?.label;
-    ShowOnProperty? showOn = item.showOn;
+    ui.ShowOnProperty? showOn = item.showOn;
     return _generateGroup(elements, label, showOn, nestingLevel);
   }
 
-  Widget _generateGroupFromLayout(Layout item, int nestingLevel) {
-    List<LayoutElement> elements = item.elements;
+  Widget _generateGroupFromLayout(ui.Layout item, int nestingLevel) {
+    List<ui.LayoutElement> elements = item.elements;
     String? label = item.options?.label;
-    ShowOnProperty? showOn = item.showOn;
+    ui.ShowOnProperty? showOn = item.showOn;
     return _generateGroup(elements, label, showOn, nestingLevel);
   }
 
   /// generates a group of elements with an optional label at the top
-  Widget _generateGroup(List<LayoutElement> elements, String? label, ShowOnProperty? showOn, int nestingLevel) {
+  Widget _generateGroup(List<ui.LayoutElement> elements, String? label, ui.ShowOnProperty? showOn, int nestingLevel) {
     // List<LayoutElement> elements = item.elements!;
     // String? label = item.label;
 
@@ -425,24 +462,25 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       // );
     }
 
-    return Card( //.filled(
+    return Card(
+        //.filled(
         // color: getAlternatingColor(context, nestingLevel),
         child: Padding(
-          padding: const EdgeInsets.all(UIConstants.groupPadding),
-          child: label != null
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: UIConstants.groupTitleSpacing),
-                    generateGroupElements(),
-                  ],
-                )
-              : generateGroupElements(),
-        ));
+      padding: const EdgeInsets.all(UIConstants.groupPadding),
+      child: label != null
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: UIConstants.groupTitleSpacing),
+                generateGroupElements(),
+              ],
+            )
+          : generateGroupElements(),
+    ));
 
     // if (label != null) {
     //   return Column(
@@ -463,7 +501,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// generates a horizontal layout with the elements in a row. A Wrap is used to warp the elements around
   /// if they need more horizontal space than available
-  LayoutBuilder _generateHorizontalLayout(List<LayoutElement> elements, int nestingLevel) {
+  LayoutBuilder _generateHorizontalLayout(List<ui.LayoutElement> elements, int nestingLevel) {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       return Wrap(
           // make elements align left and right (space between)
@@ -477,7 +515,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 
   /// generates a vertical layout with the elements in a column
-  Column _generateVerticalLayout(List<LayoutElement> elements, int nestingLevel) {
+  Column _generateVerticalLayout(List<ui.LayoutElement> elements, int nestingLevel) {
     // return Column(
     //   children: elements
     //       .map((item) => Padding(
@@ -525,38 +563,80 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 
   /// generates an Layoutelement based on the type of the element
-  Widget _generateItem(LayoutElement item, int nestingLevel, {bool? isShownFromParent}) {
+  Widget _generateItem(ui.LayoutElement item, int nestingLevel, {bool? isShownFromParent}) {
     Widget child;
+
     switch (item.type) {
-      case LayoutElementType.BUTTON:
-        return _generateButtonControl(item as Button);
-      case LayoutElementType.BUTTONGROUP:
-        return _generateButtonGroupControl(item);
-      case LayoutElementType.CONTROL:
-        child = _generateControl(item, nestingLevel, isShownFromParent: isShownFromParent);
-      case LayoutElementType.DIVIDER:
-        child = _generateDivider(item);
-      case LayoutElementType.GROUP:
-        child = _generateGroupFromLayoutElement(item, nestingLevel + 1);
-      case LayoutElementType.HORIZONTAL_LAYOUT:
-        child = _generateHorizontalLayout(item.elements!, nestingLevel + 1);
-      case LayoutElementType.HTML:
-        child = _generateHtml(item);
-      case LayoutElementType.VERTICAL_LAYOUT:
-        child = _generateVerticalLayout(item.elements!, nestingLevel + 1);
+      case ui.LayoutElementType.BUTTON:
+        return _generateButtonControl(ui.Button.fromJson(item.toJson()));
+      case ui.LayoutElementType.BUTTONGROUP:
+        return _generateButtonGroupControl(ui.Buttongroup.fromJson(item.toJson()));
+      case ui.LayoutElementType.CONTROL:
+        child = _generateControl(ui.Control.fromJson(item.toJson()), nestingLevel, isShownFromParent: isShownFromParent);
+      case ui.LayoutElementType.DIVIDER:
+        child = _generateDivider(ui.Divider.fromJson(item.toJson()));
+      case ui.LayoutElementType.GROUP:
+        child = _generateGroupFromLayoutElement(ui.Layout.fromJson(item.toJson()), nestingLevel + 1);
+      case ui.LayoutElementType.HORIZONTAL_LAYOUT:
+        child = _generateHorizontalLayout(ui.Layout.fromJson(item.toJson()).elements, nestingLevel + 1);
+      case ui.LayoutElementType.HTML:
+        child = _generateHtml(ui.HtmlRenderer.fromJson(item.toJson()));
+      case ui.LayoutElementType.VERTICAL_LAYOUT:
+        child = _generateVerticalLayout(ui.Layout.fromJson(item.toJson()).elements, nestingLevel + 1);
       case null:
-        child = getNotImplementedWidget("Null type");
+        child = getNotImplementedWidget("No type defined for LayoutElementType $item");
     }
-    // return child;
-    return _applyCss(_handleShowOn(item.showOn, Padding(padding: const EdgeInsets.symmetric(vertical: 5), child: child)),
-        cssClass: item.options?.cssClass);
+
+    // if (item is ui.Button) {
+    //   return _generateButtonControl(ui.Button.fromJson(item.toJson()));
+    // } else if (item is ui.Buttongroup) {
+    //   return _generateButtonGroupControl(ui.Buttongroup.fromJson(item.toJson()));
+    // } else if (item is ui.Control) {
+    //   child = _generateControl(ui.Control.fromJson(item.toJson()), nestingLevel, isShownFromParent: isShownFromParent);
+    // } else if (item is ui.Divider) {
+    //   child = _generateDivider(ui.Divider.fromJson(item.toJson()));
+    // } else if (item is ui.Layout && item.type == ui.LayoutElementType.GROUP) {
+    //   child = _generateGroupFromLayoutElement(ui.Layout.fromJson(item.toJson()), nestingLevel + 1);
+    // } else if (item is ui.Layout && item.type == ui.LayoutElementType.HORIZONTAL_LAYOUT) {
+    //   child = _generateHorizontalLayout(ui.Layout.fromJson(item.toJson()).elements, nestingLevel + 1);
+    // } else if (item is ui.HtmlRenderer) {
+    //   child = _generateHtml(ui.HtmlRenderer.fromJson(item.toJson()));
+    // } else if (item is ui.Layout && item.type == ui.LayoutElementType.VERTICAL_LAYOUT) {
+    //   child = _generateVerticalLayout(ui.Layout.fromJson(item.toJson()).elements, nestingLevel + 1);
+    // } else {
+    //   child = getNotImplementedWidget("Unknown or null type");
+    // }
+
+    return _applyCss(
+      _handleShowOn(
+        item.showOn,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: child,
+        ),
+      ),
+      cssClass: item.options?.cssClass,
+    );
   }
 
   /// handles the visibility of an element based on the showOn property.
   /// Uses the _evaluateCondition function to evaluate the condition
-  Widget _handleShowOn(ShowOnProperty? showOn, Widget child) {
+  Widget _handleShowOn(ui.ShowOnProperty? showOn, Widget child) {
     if (showOn == null) {
       return child;
+    } else if (showOn.rule != null && showOn.id != null) {
+      // Rita rule: evaluate with JS
+      final ruleJson = jsonEncode(showOn.rule);
+      final dataJson = jsonEncode(toEncodable(_showOnDependencies));
+      final result = jsRuntime.evaluate('Parser.parseRule($ruleJson).evaluate($dataJson)');
+      final isVisible = result.rawResult == true || result.stringResult == 'true';
+      return AnimatedCrossFade(
+        duration: const Duration(milliseconds: 500),
+        sizeCurve: Curves.easeInOut,
+        firstChild: child,
+        secondChild: Container(),
+        crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      );
     } else {
       bool isVisible = _evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
       return AnimatedCrossFade(
@@ -582,16 +662,16 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 
   /// generates a button group control based on the type of the button group
-  Widget _generateButtonGroupControl(LayoutElement element) {
+  Widget _generateButtonGroupControl(ui.Buttongroup element) {
     if (element.options?.vertical != null && element.options!.vertical!) {
       return Column(
-        children: element.buttons!.map((item) {
+        children: element.buttons.map((item) {
           return _generateButtonControl(item);
         }).toList(),
       );
     } else {
       return Wrap(
-        children: element.buttons!.map((item) {
+        children: element.buttons.map((item) {
           return _generateButtonControl(item);
         }).toList(),
       );
@@ -599,15 +679,15 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 
   /// generates a button control based on the type of the button
-  Widget _generateButtonControl(Button button) {
+  Widget _generateButtonControl(ui.Button button) {
     // TODO: I dont get variant here, this most likely is an error with the generated type. Adjust the parsing process
     // if(button.options.nativeSubmitOptions.
     return FilledButton(
       onPressed: () {
         switch (button.buttonType) {
-          case TheButtonsType.RESET:
+          case ui.TheButtonsType.RESET:
             _formKey.currentState?.reset();
-          case TheButtonsType.SUBMIT:
+          case ui.TheButtonsType.SUBMIT:
             _formKey.currentState?.saveAndValidate();
         }
         _formKey.currentState?.reset();
@@ -617,15 +697,15 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 
   /// renders a simple Divider Widget
-  Divider _generateDivider(LayoutElement item) {
+  Divider _generateDivider(ui.Divider item) {
     return const Divider();
   }
 
   /// renders the HTML data in the UI schema
-  HtmlWidget _generateHtml(LayoutElement item) {
+  HtmlWidget _generateHtml(ui.HtmlRenderer item) {
     return HtmlWidget(
       enableCaching: true,
-      item.htmlData!,
+      item.htmlData,
       onTapUrl: (url) async {
         final Uri uri = Uri.parse(url);
         if (!await launchUrl(uri)) {
@@ -638,21 +718,21 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 
   /// evaluates the condition based on the operator and the operands
-  bool _evaluateCondition(ShowOnFunctionType? operator, dynamic operand1, dynamic operand2) {
+  bool _evaluateCondition(ui.ShowOnFunctionType? operator, dynamic operand1, dynamic operand2) {
     // TODO as the types are dynamic, type error could occur here. Use stronger typing if possible!
     // maybe try to do the check and if an exception occurs, render an error in the ui
     switch (operator) {
-      case ShowOnFunctionType.EQUALS:
+      case ui.ShowOnFunctionType.EQUALS:
         return operand1 == operand2;
-      case ShowOnFunctionType.GREATER:
+      case ui.ShowOnFunctionType.GREATER:
         return operand1 > operand2;
-      case ShowOnFunctionType.SMALLER:
+      case ui.ShowOnFunctionType.SMALLER:
         return operand1 < operand2;
-      case ShowOnFunctionType.GREATER_OR_EQUAL:
+      case ui.ShowOnFunctionType.GREATER_OR_EQUAL:
         return operand1 >= operand2;
-      case ShowOnFunctionType.SMALLER_OR_EQUAL:
+      case ui.ShowOnFunctionType.SMALLER_OR_EQUAL:
         return operand1 <= operand2;
-      case ShowOnFunctionType.NOT_EQUALS:
+      case ui.ShowOnFunctionType.NOT_EQUALS:
         return operand1 != operand2;
       case null:
         return false;
@@ -661,21 +741,21 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// generates a control element based on the type of the property
   /// TODO use typing here for the referenced elements in schema.json
-  Widget _generateControl(LayoutElement item, int nestingLevel, {bool? isShownFromParent}) {
-    if (item.scope == null) {
-      return _getErrorTextWidget("Control element must have a scope");
-    }
-    String scope = item.scope!;
+  Widget _generateControl(ui.Control item, int nestingLevel, {bool? isShownFromParent}) {
+    // if (item.scope == null) {
+    //   return _getErrorTextWidget("Control element must have a scope");
+    // }
+    String scope = item.scope;
     if (scope.startsWith("#")) {
       scope = scope.substring(1);
     }
-    final Options? options = item.options;
+    final ui.ControlOptions? options = item.options;
     final Map<String, dynamic>? property = _getObjectFromJsonSchema(scope);
     if (property == null) {
       return _getErrorTextWidget("Control element must have a valid scope. Scope $scope not found in json schema.");
     }
 
-    final format = item.options?.format;
+    final format = item.options?.fieldSpecificOptions?.format;
     // dynamic formDataForScope = _getObjectFromJsonFormData;
     // if isShownFromParent == false then the field is not shown
     // if isShownFromParent == true or not set, check if showOn condition exists. If so, evaluate it
@@ -693,6 +773,11 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       onChanged: (value) {
         setState(() {
           setValueForShowOn(scope, value);
+
+          // Evaluate rule with new data
+          final dataJson = jsonEncode(toEncodable(_showOnDependencies)); // or your data map
+          final result = jsRuntime.evaluate('jsRuleSet[0].evaluate($dataJson)');
+          // Use result as needed (e.g. update UI, validation, etc.)
         });
       },
       property: property,
@@ -719,12 +804,12 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     );
   }
 
-  dynamic _getObjectFromJsonFormData(String path) {
-    if (formData.isEmpty) {
-      return null;
-    }
-    return getObjectFromJson(formData, path);
-  }
+  // dynamic _getObjectFromJsonFormData(String path) {
+  //   if (formData.isEmpty) {
+  //     return null;
+  //   }
+  //   return getObjectFromJson(formData, path);
+  // }
 
   /// gets an object from the jsonSchema
   /// [path] the path of the object in the json schema
@@ -791,12 +876,23 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 }
 
+dynamic toEncodable(dynamic value) {
+  if (value is DateTime) {
+    return value.toIso8601String();
+  } else if (value is Map) {
+    return value.map((k, v) => MapEntry(k, toEncodable(v)));
+  } else if (value is List) {
+    return value.map(toEncodable).toList();
+  }
+  return value;
+}
+
 /// takes a [path] and transforms it to one which has properties at the beginning and between each part
 String getPathWithProperties(String path) {
   if (path.startsWith("#")) {
     path = path.substring(1);
   }
-  if (path=="" || path.startsWith("/properties")) {
+  if (path == "" || path.startsWith("/properties")) {
     return path;
   }
   List<String> pathParts = path.split('/');
@@ -811,9 +907,9 @@ String getPathWithProperties(String path) {
 /// [path] the path of the object in the json
 /// [json] the json object
 dynamic getObjectFromJson(
-    Map<String, dynamic> json,
-    String path,
-    ) {
+  Map<String, dynamic> json,
+  String path,
+) {
   List<String> pathParts = getPathWithoutPrefix(path).split('/');
   dynamic object = json;
   try {
@@ -840,10 +936,9 @@ String getPathWithoutPrefix(String path) {
 /// initialize _showDependencies with the default values
 /// this function gets called recursively for objects in the jsonSchema which are nested into each other
 Map<String, dynamic> initShowOnDependencies(Map<String, dynamic>? properties, Map<String, dynamic>? formData) {
-
   dynamic formatDateTime(dynamic input, String? format) {
     if (format == "date-time" || format == "") {
-      if(input == "\$now"){
+      if (input == "\$now") {
         return DateTime.now();
       }
       // TODO: could throw exception if invalid format. If so, print error in UI
@@ -861,8 +956,8 @@ Map<String, dynamic> initShowOnDependencies(Map<String, dynamic>? properties, Ma
       final recursiveFormData = formData == null
           ? null
           : formData.containsKey(key)
-          ? formData[key]
-          : null;
+              ? formData[key]
+              : null;
       final nestedDependencies = initShowOnDependencies(element['properties'], recursiveFormData);
       nestedDependencies.forEach((nestedKey, nestedValue) {
         dependencies["/properties/$key$nestedKey"] = nestedValue;
@@ -916,24 +1011,22 @@ void resetShowOnDependencies(Map<String, dynamic> dependencies) {
 /// element in the UI schema. If a field is of type `object`, it is represented as a
 /// group containing its nested properties.
 ///
-/// The return value is a [UiSchemaV2Model] object that represents the generated default UI schema.
-UiSchemaV2Model generateDefaultUISchema(Map<String, dynamic> jsonSchema) {
+/// The return value is a [ui.UiSchema ] object that represents the generated default UI schema.
+ui.UiSchema generateDefaultUISchema(Map<String, dynamic> jsonSchema) {
   // generates the default UI schema elements based on the properties of the JSON schema
-  List<LayoutElement> generateDefaultUISchemaElements(Map<String, dynamic> properties, {String path = ""}) {
-    List<LayoutElement> elements = [];
+  List<ui.LayoutElement> generateDefaultUISchemaElements(Map<String, dynamic> properties, {String path = ""}) {
+    List<ui.LayoutElement> elements = [];
     for (String key in properties.keys) {
       final element = properties[key];
       if (element["type"] == "object") {
-        elements.add(LayoutElement(
-          type: LayoutElementType.GROUP,
+        elements.add(ui.LayoutElement(
+          type: ui.LayoutElementType.GROUP,
           elements: generateDefaultUISchemaElements(element['properties'], path: "$path/$key/properties"),
-          options: Options(
-              label: key
-          ),
+          options: ui.LayoutElementOptions(label: key),
         ));
       } else {
-        elements.add(LayoutElement(
-          type: LayoutElementType.CONTROL,
+        elements.add(ui.LayoutElement(
+          type: ui.LayoutElementType.CONTROL,
           scope: "$path/$key",
         ));
       }
@@ -942,7 +1035,7 @@ UiSchemaV2Model generateDefaultUISchema(Map<String, dynamic> jsonSchema) {
   }
 
   // traverse the json schema and generate a default ui schema. This schema has a control element for every element in the json schema
-  return UiSchemaV2Model(
+  return ui.UiSchema(
       version: "2.0",
-      layout: Layout(elements: generateDefaultUISchemaElements(jsonSchema, path: "/properties"), type: LayoutType.VERTICAL_LAYOUT));
+      layout: ui.Layout(elements: generateDefaultUISchemaElements(jsonSchema, path: "/properties"), type: ui.LayoutType.VERTICAL_LAYOUT));
 }

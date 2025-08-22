@@ -1,0 +1,101 @@
+{
+    "type": "object",
+    "properties": {
+        "fg_art_der_fahrt": {
+            "type": "array",
+            "title": "FG Art der Fahrt",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "fg_art_der_fahrt_fs_art_der_fahrt": {
+                        "title": "Art der Fahrt",
+                        "type": "string",
+                        "enum": [
+                            "Fahrten zum Arzt/ zur Ärztin oder zum Therapeuten/ zur Therapeutin",
+                            "Fahrten zum Arbeitgebenden während der stufenweisen Wiedereingliederung",
+                            "Fahrten zu einer ärztlichen Begutachtung/ Zusatzbegutachtung"
+                        ]
+                    },
+                    "fg_art_der_fahrt_fg_arr_datumsangaben": {
+                        "type": "array",
+                        "title": "Datumsangaben der Fahrten",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum": {
+                                    "title": "Datum der Fahrt",
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "required": [],
+                            "dependentRequired": {},
+                            "allOf": []
+                        }
+                    },
+                    "fg_art_der_fahrt_fs_ziel": {
+                        "title": "Ziel der Fahrt?",
+                        "type": "string"
+                    },
+                    "fg_art_der_fahrt_fs_verkehrsmittel": {
+                        "title": "Verkehrsmittel",
+                        "type": "string",
+                        "enum": [
+                            "ÖPNV",
+                            "Kraftfahrzeug",
+                            "Taxi (ärztliche Bescheinigung über die Notwendigkeit erforderlich)"
+                        ]
+                    },
+                    "fg_art_der_fahrt_fs_kosten_fahrkarte": {
+                        "title": "Kosten der Fahrkarten (Hin- und Rückweg)?",
+                        "type": "number"
+                    },
+                    "fg_art_der_fahrt_fs_strecke": {
+                        "title": "Erforderliche Strecke (Hin- und Rückfahrt)?",
+                        "type": "number"
+                    },
+                    "fg_art_der_fahrt_fs_taxikosten": {
+                        "title": "Höhe der Taxikosten (Belege erforderlich)?",
+                        "type": "number"
+                    },
+                    "fg_art_der_fahrt_fs_begleitung": {
+                        "title": "Eine Begleitperson war erforderlich (ärztliche Bescheinigung über die Notwendigkeit, Dauer und den Grund erforderlich)",
+                        "type": "boolean"
+                    },
+                    "fg_art_der_fahrt_fg_begleit_verdienstausf_fs_verdienstausfall": {
+                        "title": "Mir ist ein Verdienstausfall wegen einer ärztlichen Begutachtung entstanden",
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "fg_art_der_fahrt_fg_arr_datumsangaben",
+                    "fg_art_der_fahrt_fs_ziel",
+                    "fg_art_der_fahrt_fs_kosten_fahrkarte",
+                    "fg_art_der_fahrt_fs_strecke",
+                    "fg_art_der_fahrt_fs_taxikosten"
+                ],
+                "dependentRequired": {},
+                "allOf": []
+            }
+        },
+        "fs_sonstige_kosten": {
+            "title": "Sonstige Kosten?",
+            "type": "string"
+        },
+        "fg_bankverbindung_fs_kontoauswahl": {
+            "title": "Auf welches Konto wollen Sie die Leistung überwiesen haben?",
+            "type": "string",
+            "enum": [
+                "Auf das Ihnen bereits bekannte Konto",
+                "Auf das Konto einer anderen Person (schriftliche Kontoerklärung folgt)",
+                "Auf das nachstehende Konto"
+            ]
+        }
+    },
+    "required": [
+        "fg_bankverbindung_fs_kontoauswahl"
+    ],
+    "dependentRequired": {},
+    "allOf": []
+}

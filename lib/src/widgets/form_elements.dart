@@ -6,13 +6,13 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
 
 import '../constants.dart';
-import '../models/ui-schema-v2.dart';
+import '../models/ui_schema.dart' as ui;
 import 'custom_form_fields/form_builder_segmented_button.dart';
 import 'data/list_item.dart';
 
 class FormElementFormControl extends StatefulWidget {
-  final Options? options;
-  final Format? format;
+  final ui.ControlOptions? options;
+  final ui.Format? format;
   final String scope;
   final Map<String, dynamic> property;
   final bool required;
@@ -50,8 +50,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   late final String title;
   late final String? description;
   late final String? type;
-  late final Options? options;
-  late final Format? format;
+  late final ui.ControlOptions? options;
+  late final ui.Format? format;
   late final String scope;
   late final Map<String, dynamic> property;
   late final bool required;
@@ -75,10 +75,10 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     onChanged = widget.onChanged;
     isShownCallback = widget.isShownCallback;
     title = property['title'] ?? _getNameFromPath(scope);
-    label = options?.label ?? true;
+    label = options?.formattingOptions?.label ?? true;
     description = property['description'];
     type = property["type"];
-    placeholder = options?.placeholder;
+    placeholder = options?.formattingOptions?.placeholder;
     enabled = true; // options?.disabled != true;
     initialValue = widget.initialValue ?? property['default'];
     // on saved should only be called when the element is shown
@@ -127,7 +127,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       default: // TODO: number and null missing
         child = _getNotImplementedWidget();
     }
-    if (options?.hidden == true) {
+    if (options?.formattingOptions?.hidden == true) {
       // TODO: this results in a small additional gap in the ui
       return Visibility(
         maintainState: true,
@@ -164,27 +164,29 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           }
         }
       }
-      switch (options?.displayAs) {
-        case  DisplayAs.RADIOBUTTONS:
+      switch (options?.fieldSpecificOptions?.displayAs) {
+        case ui.DisplayAs.RADIOBUTTONS:
           return generateRadioGroup(values);
-        case DisplayAs.SWITCHES:
+        case ui.DisplayAs.SWITCHES:
           return generateSegmentedControl(values);
-        case DisplayAs.SELECT:
+        case ui.DisplayAs.SELECT:
           return generateDropdown(values);
-          case null:
-        return generateDropdown(values);
+        case ui.DisplayAs.BUTTONS:
+          return generateSegmentedControl(values);
+        case null:
+          return generateDropdown(values);
       }
-    } else if (property['format'] == 'date-time' || format == Format.DATETIME_LOCAL) {
+    } else if (property['format'] == 'date-time' || format == ui.Format.DATETIME_LOCAL) {
       return generateDateTimePicker(InputType.both);
-    } else if (property['format'] == 'date' || format == Format.DATE) {
+    } else if (property['format'] == 'date' || format == ui.Format.DATE) {
       return generateDateTimePicker(InputType.date); // TODO adjust timepicker
-    } else if (property['format'] == 'time' || format == Format.TIME) {
+    } else if (property['format'] == 'time' || format == ui.Format.TIME) {
       return generateDateTimePicker(InputType.time); // TODO adjust timepicker
     } else if (property['format'] == 'uri') {
       return generateFilePicker();
     } else {
       // type is string
-      if (property['format'] == 'color' || format == Format.COLOR) {
+      if (property['format'] == 'color' || format == ui.Format.COLOR) {
         return generateColorPicker();
       }
       return generateTextField();
@@ -193,7 +195,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   /// handles the generation of integer elements in the jsonSchema
   Widget _generateIntegerControl() {
-    if(options?.range == true){
+    if (options?.fieldSpecificOptions?.range == true) {
       return generateSlider();
     }
     // if(options?.displayAs == DisplayAs.RATING) return generateRating();
@@ -227,7 +229,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       }
       return generateCheckboxGroup(values);
     }
-    if (options?.tags?.enabled == true) {
+    if (options?.fieldSpecificOptions?.tags?.enabled == true) {
       // TODO implement variants and proper tags support
       return generateTextField();
     }
@@ -285,6 +287,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     }
 
     int? maxItems = safeParseInt(property['maxItems']);
+    int minItems = safeParseInt(property['minItems']) ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,10 +299,10 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
               _getLabel(),
               style: Theme.of(context).textTheme.titleLarge,
             ),
-              FilledButton.tonal(
-                onPressed: maxItems != null && items.length < maxItems ? () => addItem() : null,
-                child: Icon(Icons.add),
-              ),
+            FilledButton.tonal(
+              onPressed: maxItems == null || items.length < maxItems ? () => addItem() : null,
+              child: Icon(Icons.add),
+            ),
           ],
         ),
         ReorderableListView.builder(
@@ -308,11 +311,18 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           physics: const ClampingScrollPhysics(),
           itemCount: items.length,
           itemBuilder: (context, index) {
-            return Padding(
+            return Container(
               key: Key('${items[index].id}'),
-              padding: const EdgeInsets.only(right: 40, top: 5, bottom: 5),
+              // padding: const EdgeInsets.only(right: 40, top: 5, bottom: 5),
               child: Row(
                 children: [
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: GestureDetector(
+                      onTapDown: (_) => FocusScope.of(context).unfocus(),
+                      child: const Icon(Icons.drag_handle),
+                    ),
+                  ),
                   Expanded(
                     child: FormElementFormControl(
                       scope: '$scope/${items[index].id}',
@@ -338,8 +348,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                       showLabel: false,
                     ),
                   ),
-                  if (items.length > 1) SizedBox(width: 10),
-                  if (items.length > 1)
+                  if (items.length > minItems) SizedBox(width: 10),
+                  if (items.length > minItems)
                     IconButton(
                       icon: Icon(Icons.close),
                       onPressed: () => removeItem(index),
@@ -417,7 +427,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     }
 
     Container generateGroupElements() {
-      return getLineContainer( //.filled(
+      return getLineContainer(
+        //.filled(
         // color: getAlternatingColor(context, widget.nestingLevel),
         child: ListView.separated(
           shrinkWrap: true,
@@ -431,7 +442,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
             return const SizedBox(height: UIConstants.verticalLayoutItemPadding);
           },
         ),
-
       );
     }
 
@@ -473,11 +483,11 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   /// Make the field required if it is in the required fields
   Widget generateTextField() {
     int getLines() {
-      if (options?.multi != null) {
-        dynamic multi = options!.multi;
-        if (options!.multi is bool) {
+      if (options?.fieldSpecificOptions?.multi != null) {
+        dynamic multi = options!.fieldSpecificOptions!.multi;
+        if (options!.fieldSpecificOptions!.multi is bool) {
           bool multiBool = multi;
-          return multiBool ? 5 : 1;
+          return multiBool ? 2 : 1;
         } else if (multi is int) {
           return multi;
         }
@@ -490,15 +500,15 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     TextInputType getKeyboardType() {
       if (maxLines > 1) return TextInputType.multiline;
       switch (format) {
-        case Format.EMAIL:
+        case ui.Format.EMAIL:
           return TextInputType.emailAddress;
-        case Format.PASSWORD:
+        case ui.Format.PASSWORD:
           return TextInputType.visiblePassword;
-        case Format.SEARCH:
+        case ui.Format.SEARCH:
           return TextInputType.text;
-        case Format.URL:
+        case ui.Format.URL:
           return TextInputType.url;
-        case Format.TEL:
+        case ui.Format.TEL:
           return TextInputType.phone;
         default:
           if (type == "integer" || type == "number") {
@@ -509,121 +519,121 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     }
 
     Iterable<String>? getAutocompleteValues() {
-      if (options?.autocomplete != null) {
-        switch (options!.autocomplete!) {
-          case AutocompleteValues.OFF:
+      if (options?.fieldSpecificOptions?.autocomplete != null) {
+        switch (options!.fieldSpecificOptions!.autocomplete!) {
+          case ui.Autocomplete.OFF:
             return null; // don't autofill
-          case AutocompleteValues.ON:
+          case ui.Autocomplete.ON:
             return null; // finding a best match is not implemented
-          case AutocompleteValues.NAME:
+          case ui.Autocomplete.NAME:
             return [AutofillHints.name];
-          case AutocompleteValues.HONORIFIC_PREFIX:
+          case ui.Autocomplete.HONORIFIC_PREFIX:
             return [AutofillHints.namePrefix];
-          case AutocompleteValues.GIVEN_NAME:
+          case ui.Autocomplete.GIVEN_NAME:
             return null; // not found
-          case AutocompleteValues.ADDITIONAL_NAME:
+          case ui.Autocomplete.ADDITIONAL_NAME:
             return [AutofillHints.givenName];
-          case AutocompleteValues.FAMILY_NAME:
+          case ui.Autocomplete.FAMILY_NAME:
             return [AutofillHints.familyName];
-          case AutocompleteValues.HONORIFIC_SUFFIX:
+          case ui.Autocomplete.HONORIFIC_SUFFIX:
             return [AutofillHints.nameSuffix];
-          case AutocompleteValues.NICKNAME:
+          case ui.Autocomplete.NICKNAME:
             return [AutofillHints.nickname];
-          case AutocompleteValues.EMAIL:
+          case ui.Autocomplete.EMAIL:
             return [AutofillHints.email];
-          case AutocompleteValues.USERNAME:
+          case ui.Autocomplete.USERNAME:
             return [AutofillHints.username];
-          case AutocompleteValues.NEW_PASSWORD:
+          case ui.Autocomplete.NEW_PASSWORD:
             return [AutofillHints.newPassword];
-          case AutocompleteValues.CURRENT_PASSWORD:
+          case ui.Autocomplete.CURRENT_PASSWORD:
             return [AutofillHints.password];
-          case AutocompleteValues.ONE_TIME_CODE:
+          case ui.Autocomplete.ONE_TIME_CODE:
             return [AutofillHints.oneTimeCode];
-          case AutocompleteValues.ORGANIZATION_TITLE:
+          case ui.Autocomplete.ORGANIZATION_TITLE:
             return [AutofillHints.organizationName];
-          case AutocompleteValues.ORGANIZATION:
+          case ui.Autocomplete.ORGANIZATION:
             return [AutofillHints.organizationName]; // best fit
-          case AutocompleteValues.STREET_ADDRESS:
+          case ui.Autocomplete.STREET_ADDRESS:
             return null; // not found
-          case AutocompleteValues.SHIPPING:
+          case ui.Autocomplete.SHIPPING:
             return null; // not found
-          case AutocompleteValues.BILLING:
+          case ui.Autocomplete.BILLING:
             return null; // not found
-          case AutocompleteValues.ADDRESS_LINE1:
+          case ui.Autocomplete.ADDRESS_LINE1:
             return [AutofillHints.streetAddressLine1];
-          case AutocompleteValues.ADDRESS_LINE2:
+          case ui.Autocomplete.ADDRESS_LINE2:
             return [AutofillHints.streetAddressLine2];
-          case AutocompleteValues.ADDRESS_LINE3:
+          case ui.Autocomplete.ADDRESS_LINE3:
             return [AutofillHints.streetAddressLine3];
-          case AutocompleteValues.ADDRESS_LEVEL1:
+          case ui.Autocomplete.ADDRESS_LEVEL1:
             return [AutofillHints.streetAddressLevel1];
-          case AutocompleteValues.ADDRESS_LEVEL2:
+          case ui.Autocomplete.ADDRESS_LEVEL2:
             return [AutofillHints.streetAddressLevel2];
-          case AutocompleteValues.ADDRESS_LEVEL3:
+          case ui.Autocomplete.ADDRESS_LEVEL3:
             return [AutofillHints.streetAddressLevel3];
-          case AutocompleteValues.ADDRESS_LEVEL4:
+          case ui.Autocomplete.ADDRESS_LEVEL4:
             return [AutofillHints.streetAddressLevel4];
-          case AutocompleteValues.COUNTRY:
+          case ui.Autocomplete.COUNTRY:
             return [AutofillHints.countryCode];
-          case AutocompleteValues.COUNTRY_NAME:
+          case ui.Autocomplete.COUNTRY_NAME:
             return [AutofillHints.countryName];
-          case AutocompleteValues.POSTAL_CODE:
+          case ui.Autocomplete.POSTAL_CODE:
             return [AutofillHints.postalCode];
-          case AutocompleteValues.CC_NAME:
+          case ui.Autocomplete.CC_NAME:
             return [AutofillHints.creditCardName];
-          case AutocompleteValues.CC_GIVEN_NAME:
+          case ui.Autocomplete.CC_GIVEN_NAME:
             return [AutofillHints.creditCardGivenName];
-          case AutocompleteValues.CC_ADDITIONAL_NAME:
+          case ui.Autocomplete.CC_ADDITIONAL_NAME:
             return null; // not found
-          case AutocompleteValues.CC_FAMILY_NAME:
+          case ui.Autocomplete.CC_FAMILY_NAME:
             return [AutofillHints.creditCardFamilyName];
-          case AutocompleteValues.CC_NUMBER:
+          case ui.Autocomplete.CC_NUMBER:
             return [AutofillHints.creditCardNumber];
-          case AutocompleteValues.CC_EXP:
+          case ui.Autocomplete.CC_EXP:
             return [AutofillHints.creditCardExpirationDate];
-          case AutocompleteValues.CC_EXP_MONTH:
+          case ui.Autocomplete.CC_EXP_MONTH:
             return [AutofillHints.creditCardExpirationMonth];
-          case AutocompleteValues.CC_EXP_YEAR:
+          case ui.Autocomplete.CC_EXP_YEAR:
             return [AutofillHints.creditCardExpirationYear];
-          case AutocompleteValues.CC_CSC:
+          case ui.Autocomplete.CC_CSC:
             return [AutofillHints.creditCardSecurityCode];
-          case AutocompleteValues.CC_TYPE:
+          case ui.Autocomplete.CC_TYPE:
             return [AutofillHints.creditCardType];
-          case AutocompleteValues.TRANSACTION_CURRENCY:
+          case ui.Autocomplete.TRANSACTION_CURRENCY:
             return [AutofillHints.transactionCurrency];
-          case AutocompleteValues.TRANSACTION_AMOUNT:
+          case ui.Autocomplete.TRANSACTION_AMOUNT:
             return [AutofillHints.transactionAmount];
-          case AutocompleteValues.LANGUAGE:
+          case ui.Autocomplete.LANGUAGE:
             return [AutofillHints.language];
-          case AutocompleteValues.BDAY:
+          case ui.Autocomplete.BDAY:
             return [AutofillHints.birthday];
-          case AutocompleteValues.BDAY_DAY:
+          case ui.Autocomplete.BDAY_DAY:
             return [AutofillHints.birthdayDay];
-          case AutocompleteValues.BDAY_MONTH:
+          case ui.Autocomplete.BDAY_MONTH:
             return [AutofillHints.birthdayMonth];
-          case AutocompleteValues.BDAY_YEAR:
+          case ui.Autocomplete.BDAY_YEAR:
             return [AutofillHints.birthdayYear];
-          case AutocompleteValues.SEX:
+          case ui.Autocomplete.SEX:
             return [AutofillHints.gender];
-          case AutocompleteValues.TEL:
+          case ui.Autocomplete.TEL:
             return [AutofillHints.telephoneNumber];
-          case AutocompleteValues.TEL_COUNTRY_CODE:
+          case ui.Autocomplete.TEL_COUNTRY_CODE:
             return [AutofillHints.telephoneNumberCountryCode];
-          case AutocompleteValues.TEL_NATIONAL:
+          case ui.Autocomplete.TEL_NATIONAL:
             return [AutofillHints.telephoneNumberNational];
-          case AutocompleteValues.TEL_AREA_CODE:
+          case ui.Autocomplete.TEL_AREA_CODE:
             return [AutofillHints.telephoneNumberAreaCode];
-          case AutocompleteValues.TEL_LOCAL:
+          case ui.Autocomplete.TEL_LOCAL:
             return [AutofillHints.telephoneNumberLocal];
-          case AutocompleteValues.TEL_EXTENSION:
+          case ui.Autocomplete.TEL_EXTENSION:
             return [AutofillHints.telephoneNumberExtension];
-          case AutocompleteValues.IMPP:
+          case ui.Autocomplete.IMPP:
             return [AutofillHints.impp];
-          case AutocompleteValues.URL:
+          case ui.Autocomplete.URL:
             return [AutofillHints.url];
-          case AutocompleteValues.PHOTO:
+          case ui.Autocomplete.PHOTO:
             return [AutofillHints.photo];
-          case AutocompleteValues.WEBAUTHN:
+          case ui.Autocomplete.WEBAUTHN:
             return null; // not found
         }
       }
@@ -655,8 +665,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       keyboardType: getKeyboardType(),
       autofillHints: getAutocompleteValues(),
       // onTapOutside: (PointerDownEvent event) {
-        // print("onTapOutside");
-        // FocusScope.of(context).unfocus();
+      // print("onTapOutside");
+      // FocusScope.of(context).unfocus();
       // },
     ));
   }
@@ -674,6 +684,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       ),
     );
   }
+
   Widget generateSlider() {
     return _wrapFieldTitle(
       child: FormBuilderSlider(
@@ -712,8 +723,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   /// generate File Picker using [FormBuilderFilePicker]
   Widget generateFilePicker() {
     List<String>? getFileExtensions() {
-      if (options?.acceptedFileType != null) {
-        String acceptedFileType = options!.acceptedFileType!;
+      if (options?.fieldSpecificOptions?.acceptedFileType != null) {
+        String acceptedFileType = options!.fieldSpecificOptions!.acceptedFileType!;
         List<String> fileTypes = acceptedFileType.split(', ');
         // if all file types are allowed, no restriction is needed
         if (fileTypes.contains("*")) {
@@ -734,7 +745,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         validator: _composeBaseValidator(),
         decoration: _getInputDecoration(),
         //  filled: true
-        maxFiles: options?.allowMultipleFiles == true ? null : 1,
+        maxFiles: options?.fieldSpecificOptions?.allowMultipleFiles == true ? null : 1,
         allowedExtensions: getFileExtensions(),
         // TODO correctly parse file types, see documentation
       ),
@@ -942,8 +953,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       // filled: border,
       // fillColor: getAlternatingColor(context, widget.nestingLevel),
       // border: InputBorder.none,
-      border:
-          !border ? InputBorder.none: Theme.of(context).inputDecorationTheme.border,
+      border: !border ? InputBorder.none : Theme.of(context).inputDecorationTheme.border,
       helperText: description,
       helperMaxLines: 10,
       prefix: prefixHardcoded,

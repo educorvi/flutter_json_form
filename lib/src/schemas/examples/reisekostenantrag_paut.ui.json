@@ -1,0 +1,327 @@
+{
+    "version": "2.0",
+    "layout": {
+        "type": "VerticalLayout",
+        "elements": [
+            {
+                "type": "HTML",
+                "htmlData": "<p>Um prüfen zu können, in welchem Umfang Reisekosten zu erstatten sind, bitten wir Sie, den beigefügten Fahrtennachweis auszufüllen und Belege und Bestätigungen hochzuladen. Das Ausfüllen des Online-Antrags wird ca. xx Minuten in Anspruch nehmen.</p>"
+            },
+            {
+                "type": "HTML",
+                "htmlData": "<h3>Allgemeine Informationen zur Reisekostenerstattung</h3>\n<p>Entstehen Ihnen Kosten durch Reisen, die Sie</p>\n<ul>\n<li>auf Anforderung des Unfallversicherungsträgers</li>\n<li>zur Heilbehandlung wegen Unfallfolgen oder wegen einer Berufskrankheit</li>\n<li>wegen Maßnahmen der medizinischen Rehabilitation oder zur Teilhabe am Arbeitsleben</li>\n<li>zur ärztlichen Begutachtung</li>\n</ul>\n<p>unternehmen, erstatten wir Ihnen die Reisekosten im notwendigen und angemessenen Umfang nach Maßgabe der gesetzlichen Bestimmungen.</p>\n<p>Detaillierte Information zur Reisekostenerstattung können Sie unserem Merkblatt über Reisekosten entnehmen.</p>"
+            },
+            {
+                "type": "HTML",
+                "htmlData": "<h3>Hinweis zu erforderlichen Belegen und Bestätigungen</h3>\n<p>Zur Bearbeitung Ihres Reiskostenantrags benötigen wir in folgenden Fällen neben Ihren Angaben zu den Fahrten eine Bestätigung</p>\n<ul>\n<li>Ihres Arztes / Therapeuten (Behandlungstermine, Notwendigkeit einer Begleitperson, Notwendigkeit einer Taxibenutzung)</li>\n<li>Ihres Arbeitgebers (Verdienstausfall aufgrund einer Begutachtung, Arbeitstage während einer stufenweisen Wiedereingliederung)</li>\n</ul>\n<p>Damit wir Ihren Antrag zeitnah bearbeiten können, geben wir Ihnen am Ende die Gelegenheit Ihre Dokumente und Belege hochzuladen.</p>"
+            },
+            {
+                "type": "HTML",
+                "htmlData": "<h3>Musterformulare zur Vorlage beim Behandelnden/ Therapierenden  bzw. Arbeitgebenden</h3>\n<p>Musterformulare zur Vorlage beim Arzt bzw. Arbeitgeber können Sie über die nachfolgenden Links herunterladen:</p>\n<p><a href=\"http://www.bghw.de\" rel=\"noopener\" target=\"_blank\" title=\"Fahrtennachweis behandelnde Person\">Fahrtennachweis zur ärztlichen/ therapeutischen Behandlung einschl. bei Bedarf Notwendigkeit einer Taxinutzung/ Begleitperson</a><br><br><a href=\"http://www.bghw.de\" rel=\"noopener\" target=\"_blank\" title=\"Fahrtennachweis stufenweise Wiedereingliederung\">Fahrtennachweis zur stufenweisen Wiedereingliederung</a><br><br><a href=\"http://www.bghw.de\" rel=\"noopener\" target=\"_blank\" title=\"Fahrtennachweis ärztliche Begutachtung\">Fahrtennachweis zu einer ärztlichen Begutachtung einschl. bei Bedarf Notwendigkeit einer Taxinutzung/ Begleitperson und Verdienstausfall</a></p>"
+            },
+            {
+                "type": "HTML",
+                "htmlData": "<p>Die mit * (Stern) gekennzeichneten Felder sind Pflichtfelder.</p>"
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/fg_art_der_fahrt",
+                "options": {
+                    "descendantControlOverrides": {
+                        "/properties/fg_art_der_fahrt/items/properties/fg_art_der_fahrt_fs_art_der_fahrt": {
+                            "options": {
+                                "displayAs": "radiobuttons",
+                                "stacked": true
+                            }
+                        },
+                        "/properties/fg_art_der_fahrt/items/properties/fg_art_der_fahrt_fg_arr_datumsangaben/items/properties/fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum": {
+                            "options": {
+                                "format": "date"
+                            }
+                        },
+                        "/properties/fg_art_der_fahrt/items/properties/fg_art_der_fahrt_fs_ziel": {
+                            "options": {
+                                "placeholder": "Name und Anschrift der behandelnden Person"
+                            }
+                        },
+                        "/properties/fg_art_der_fahrt/items/properties/fg_art_der_fahrt_fs_verkehrsmittel": {
+                            "options": {
+                                "displayAs": "radiobuttons",
+                                "stacked": true
+                            }
+                        },
+                        "/properties/fg_art_der_fahrt/items/properties/fg_art_der_fahrt_fs_kosten_fahrkarte": {
+                            "options": {
+                                "append": "EUR"
+                            },
+                            "showOn": {
+                                "id": "ritaRule-fg_art_der_fahrt_fs_kosten_fahrkarte",
+                                "rule": {
+                                    "type": "exists",
+                                    "array": {
+                                        "type": "atom",
+                                        "path": "fg_art_der_fahrt",
+                                        "default": []
+                                    },
+                                    "placeholder": "$array_item1",
+                                    "indexPlaceholder": "$index1",
+                                    "rule": {
+                                        "type": "and",
+                                        "arguments": [
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$index1",
+                                                        "default": -1
+                                                    },
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$selfIndices./properties/fg_art_der_fahrt",
+                                                        "default": -1
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$array_item1.fg_art_der_fahrt_fs_verkehrsmittel",
+                                                        "default": ""
+                                                    },
+                                                    "ÖPNV"
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "/properties/fg_art_der_fahrt/items/properties/fg_art_der_fahrt_fs_strecke": {
+                            "options": {
+                                "append": "km"
+                            },
+                            "showOn": {
+                                "id": "ritaRule-fg_art_der_fahrt_fs_strecke",
+                                "rule": {
+                                    "type": "exists",
+                                    "array": {
+                                        "type": "atom",
+                                        "path": "fg_art_der_fahrt",
+                                        "default": []
+                                    },
+                                    "placeholder": "$array_item1",
+                                    "indexPlaceholder": "$index1",
+                                    "rule": {
+                                        "type": "and",
+                                        "arguments": [
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$index1",
+                                                        "default": -1
+                                                    },
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$selfIndices./properties/fg_art_der_fahrt",
+                                                        "default": -1
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$array_item1.fg_art_der_fahrt_fs_verkehrsmittel",
+                                                        "default": ""
+                                                    },
+                                                    "Kraftfahrzeug"
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "/properties/fg_art_der_fahrt/items/properties/fg_art_der_fahrt_fs_taxikosten": {
+                            "options": {
+                                "append": "EUR"
+                            },
+                            "showOn": {
+                                "id": "ritaRule-fg_art_der_fahrt_fs_taxikosten",
+                                "rule": {
+                                    "type": "exists",
+                                    "array": {
+                                        "type": "atom",
+                                        "path": "fg_art_der_fahrt",
+                                        "default": []
+                                    },
+                                    "placeholder": "$array_item1",
+                                    "indexPlaceholder": "$index1",
+                                    "rule": {
+                                        "type": "and",
+                                        "arguments": [
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$index1",
+                                                        "default": -1
+                                                    },
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$selfIndices./properties/fg_art_der_fahrt",
+                                                        "default": -1
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$array_item1.fg_art_der_fahrt_fs_verkehrsmittel",
+                                                        "default": ""
+                                                    },
+                                                    "Taxi (ärztliche Bescheinigung über die Notwendigkeit erforderlich)"
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "/properties/fg_art_der_fahrt/items/properties/fg_art_der_fahrt_fs_begleitung": {
+                            "showOn": {
+                                "id": "ritaRule-fg_art_der_fahrt_fs_begleitung",
+                                "rule": {
+                                    "type": "or",
+                                    "arguments": [
+                                        {
+                                            "type": "exists",
+                                            "array": {
+                                                "type": "atom",
+                                                "path": "fg_art_der_fahrt",
+                                                "default": []
+                                            },
+                                            "placeholder": "$array_item1",
+                                            "indexPlaceholder": "$index1",
+                                            "rule": {
+                                                "type": "and",
+                                                "arguments": [
+                                                    {
+                                                        "type": "comparison",
+                                                        "operation": "equal",
+                                                        "arguments": [
+                                                            {
+                                                                "type": "atom",
+                                                                "path": "$index1",
+                                                                "default": -1
+                                                            },
+                                                            {
+                                                                "type": "atom",
+                                                                "path": "$selfIndices./properties/fg_art_der_fahrt",
+                                                                "default": -1
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "comparison",
+                                                        "operation": "equal",
+                                                        "arguments": [
+                                                            {
+                                                                "type": "atom",
+                                                                "path": "$array_item1.fg_art_der_fahrt_fs_art_der_fahrt",
+                                                                "default": ""
+                                                            },
+                                                            "Fahrten zum Arzt/ zur Ärztin oder zum Therapeuten/ zur Therapeutin"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "type": "exists",
+                                            "array": {
+                                                "type": "atom",
+                                                "path": "fg_art_der_fahrt",
+                                                "default": []
+                                            },
+                                            "placeholder": "$array_item1",
+                                            "indexPlaceholder": "$index1",
+                                            "rule": {
+                                                "type": "and",
+                                                "arguments": [
+                                                    {
+                                                        "type": "comparison",
+                                                        "operation": "equal",
+                                                        "arguments": [
+                                                            {
+                                                                "type": "atom",
+                                                                "path": "$index1",
+                                                                "default": -1
+                                                            },
+                                                            {
+                                                                "type": "atom",
+                                                                "path": "$selfIndices./properties/fg_art_der_fahrt",
+                                                                "default": -1
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "comparison",
+                                                        "operation": "equal",
+                                                        "arguments": [
+                                                            {
+                                                                "type": "atom",
+                                                                "path": "$array_item1.fg_art_der_fahrt_fs_art_der_fahrt",
+                                                                "default": ""
+                                                            },
+                                                            "Fahrten zu einer ärztlichen Begutachtung/ Zusatzbegutachtung"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/fs_sonstige_kosten",
+                "options": {
+                    "multi": true,
+                    "placeholder": "Bitte Art der Kosten und Beträge eingeben."
+                }
+            },
+            {
+                "type": "HTML",
+                "htmlData": "<h3>Bankverbindung</h3>\n<p>Hinweis: Aus rechtlichen Gründen ist aufgrund dieses Antrags nur eine Überweisung auf das eigene Konto bzw. auf ein Gemeinschaftskonto, das auch auf den Namen des Zahlungsempfangenden lautet, möglich.</p>\n<p>Soll eine Überweisung auf das Konto einer anderen Person erfolgen, ist wegen der erforderlichen Erklärungen und Bestätigungen (Schriftformerfordernis), die Rücksendung des vollständig ausgefüllten Formulars erforderlich. Sie können das Formular unter dem folgendem Link herunterladen:</p>\n<p><a href=\"https://www.bghw.de\" rel=\"noopener\" target=\"_blank\" title=\"Kontoerklärung\">Kontoerklärung</a></p>"
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/fg_bankverbindung_fs_kontoauswahl",
+                "options": {
+                    "displayAs": "radiobuttons",
+                    "stacked": true
+                }
+            }
+        ]
+    }
+}
