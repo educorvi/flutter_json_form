@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:flutter_json_forms/src/ritaRuleEvaluator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../flutter_json_forms.dart';
@@ -13,7 +13,7 @@ import 'package:json_schema/json_schema.dart';
 import 'package:flutter_json_forms/src/json_validator.dart';
 import '../constants.dart';
 import '../models/jsonSchema.dart';
-import 'package:flutter_js/flutter_js.dart' show getJavascriptRuntime, JavascriptRuntime;
+// import 'package:flutter_js/flutter_js.dart' show getJavascriptRuntime, JavascriptRuntime;
 
 /// A dynamic form which generates form fields based on a JSON schema and a UI schema
 class DynamicJsonForm extends StatefulWidget {
@@ -100,9 +100,11 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   late final Map<String, dynamic> formData;
 
-  late final JavascriptRuntime jsRuntime = getJavascriptRuntime();
-  dynamic jsRuleSet;
-  Map<String, dynamic> ritaRules = {};
+  // late final JavascriptRuntime jsRuntime = getJavascriptRuntime();
+  late final RitaRuleEvaluator ritaRuleEvaluator;
+  Map<String, bool> _ritaDependencies = {};
+  // dynamic jsRuleSet;
+  // Map<String, dynamic> ritaRules = {};
 
   /// return true if the widget is in the loading state (the validation is not finished yet
   /// (async part comes form reading the files. The validation is done synchronously))
@@ -127,7 +129,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   @override
   void initState() {
-    super.initState();
+    _initializeJsEngineAndRuleSet();
     if (widget.validate) {
       _initializeSchemas().then((_) {
         _initializeForm();
@@ -135,12 +137,14 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     } else {
       _initializeForm();
     }
-    _initializeJsEngineAndRuleSet();
+    super.initState();
   }
 
-  Future<void> _initializeJsEngineAndRuleSet() async {
+  void _initializeJsEngineAndRuleSet() {
+    ritaRuleEvaluator = RitaRuleEvaluator.create();
+
     // Load JS bundle from assets
-    // final jsCode = await rootBundle.loadString('assets/js/rita-core.js');
+    // final jsCode = await rootBundle.loadString('packages/flutter_json_forms/assets/js/rita-core.js');
     // jsRuntime.evaluate(jsCode);
 
     // // Parse ruleset once (assuming widget.jsonSchema is your rules)
@@ -183,24 +187,47 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     // _formKey.currentState!.patchValue(removeEmptyKeys(_showOnDependencies));
 
     // Collect all rita rules
-    ritaRules = {};
-    void collectRitaRules(dynamic element) {
-      if (element is Map && element['showOn'] != null && element['showOn']['rule'] != null && element['showOn']['id'] != null) {
-        ritaRules[element['showOn']['id']] = element['showOn']['rule'];
-      }
-      if (element is Map && element['elements'] != null) {
-        for (var child in element['elements']) {
-          collectRitaRules(child);
+    // ritaRules = {};
+    void collectDescendantRitaRules(Map<String, ui.DescendantControlOverrides> overrides) {
+      for (var entry in overrides.entries) {
+        if (entry.value.showOn?.id != null) {
+          ritaRuleEvaluator.addRule(entry.value.showOn!);
         }
-      }
-      if (element is Map && element['buttons'] != null) {
-        for (var child in element['buttons']) {
-          collectRitaRules(child);
+        // Recursively check for nested descendantControlOverrides
+        final nested = entry.value.options?.formattingOptions?.descendantControlOverrides;
+        if (nested != null) {
+          collectDescendantRitaRules(nested);
         }
       }
     }
 
-    collectRitaRules(widget.uiSchema);
+    void collectRitaRules(List<ui.LayoutElement> layoutElements) {
+      for (var element in layoutElements) {
+        if (element.elements != null) {
+          collectRitaRules(element.elements!);
+        }
+        if (element.showOn?.id != null) {
+          ritaRuleEvaluator.addRule(element.showOn!);
+        }
+        final overrides = element.options?.formattingOptions?.descendantControlOverrides;
+        if (overrides != null) {
+          collectDescendantRitaRules(overrides);
+        }
+      }
+    }
+
+    for (var element in uiSchemaModel.layout.elements) {
+      if (element.elements != null) {
+        collectRitaRules(element.elements!);
+      }
+      if (element.showOn?.id != null) {
+        ritaRuleEvaluator.addRule(element.showOn!);
+      }
+      final overrides = element.options?.formattingOptions?.descendantControlOverrides;
+      if (overrides != null) {
+        collectDescendantRitaRules(overrides);
+      }
+    }
   }
 
   /// Save form values and validate all fields of form
@@ -626,10 +653,31 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       return child;
     } else if (showOn.rule != null && showOn.id != null) {
       // Rita rule: evaluate with JS
-      final ruleJson = jsonEncode(showOn.rule);
-      final dataJson = jsonEncode(toEncodable(_showOnDependencies));
-      final result = jsRuntime.evaluate('Parser.parseRule($ruleJson).evaluate($dataJson)');
-      final isVisible = result.rawResult == true || result.stringResult == 'true';
+      // final ruleJson = jsonEncode(showOn);
+      // final dataJson = jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies)));
+      // jsRuntime.evaluate('var rule = $ruleJson;');
+      // jsRuntime.evaluate('var data = $dataJsoin;');
+      // jsRuntime.evaluate('var rule = $rule;');
+      // jsRuntime.evaluate('var data = $data;');
+      // // Evaluate the rule using rita
+      // String jsEval = '''
+      //   (async function() {
+      //     var ruleObj = JSON.parse(rule);
+      //     var dataObj = JSON.parse(data);
+      //     var parser = new rita.Parser();
+      //     var ruleSet = parser.parseRuleSet(ruleObj);
+      //     var result = await ruleSet[0].evaluate(dataObj);
+      //     return result;
+      //   })()
+      //   ''';
+
+      // final evalResult = await jsRuntime.evaluateAsync(jsEval);
+      // print('Result: ${evalResult.stringResult}');
+      // final result = jsRuntime.evaluate('rita.Parser().parseRuleSet($data).evaluate($rule)');
+      // ritaRuleEvaluator.
+      // ritaRuleEvaluator.evaluate(showOn.id!, dataJson);
+      final isVisible = _ritaDependencies[showOn.id!] == true;
+      // final isVisible = result.rawResult == true || result.stringResult == 'true';
       return AnimatedCrossFade(
         duration: const Duration(milliseconds: 500),
         sizeCurve: Curves.easeInOut,
@@ -770,13 +818,32 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       required: _isRequired(scope),
       // && isShown
       // only evaluate the second expression if the field is required and the field has a showOn condition
-      onChanged: (value) {
+      onChanged: (value) async {
+        bool? ritaValue;
+
+        setValueForShowOn(scope, value);
+
+        // if (item.showOn?.id != null) {
+        //   // If the current item has a rita rule, ensure it's added to the evaluator
+        //   // TODO now the new value is not included in _showOnDependencies
+        //   ritaValue = await ritaRuleEvaluator.evaluate(item.showOn!.id!, jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies))));
+        // }
+
+        // ritaValue = await ritaRuleEvaluator.evaluate(item.showOn!.id!, jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies))));
+        final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies))));
+
         setState(() {
+          // if (ritaValue != null) {
+          // _ritaDependencies[item.showOn!.id!] = ritaValue;
+          // }
+          _ritaDependencies = ritaDependencies;
+
           setValueForShowOn(scope, value);
 
           // Evaluate rule with new data
-          final dataJson = jsonEncode(toEncodable(_showOnDependencies)); // or your data map
-          final result = jsRuntime.evaluate('jsRuleSet[0].evaluate($dataJson)');
+          // final dataJson = jsonEncode(toEncodable(_showOnDependencies)); // or your data map
+          // jsRuleEvaluator.evaluate([], "");
+          // final result = jsRuntime.evaluate('jsRuleSet[0].evaluate($dataJson)');
           // Use result as needed (e.g. update UI, validation, etc.)
         });
       },

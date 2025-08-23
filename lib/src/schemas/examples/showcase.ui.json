@@ -91,7 +91,7 @@
           },
           {
             "type": "HTML",
-            "htmlData": "<h3 style=\"background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);   -webkit-background-clip: text;color: transparent;\">You are a very fancy unicorn my friend...</h3>",
+            "htmlData": "<h3>You are a very fancy unicorn my friend...</h3>",
             "showOn": {
               "id": "ritaRule1",
               "rule": {
@@ -103,7 +103,7 @@
                     "arguments": [
                       {
                         "type": "atom",
-                        "path": "fancyness",
+                        "path": "fanciness",
                         "default": ""
                       },
                       "unicorn"
