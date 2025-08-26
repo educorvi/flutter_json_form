@@ -20,3 +20,10 @@
 - [ ] allow to provide an onError widget to be shown when an error occurs (instead of the default error which shows which fields are invalid in the json)
 - [ ] when loading things are done by the flutter app which use the library, it would be nice if the form would already show its loading widget. This should be configurable by some way. There should also be a way to configure the loading widget
 - 
+
+
+# TODOS 2.0:
+- default values empty array: `[]` throws error (general: handle default array values)
+- everywhere where _evaluateCondition is called, rita has to be called as well. Check this and maybe create shared function
+- Object generation in FormElements and FormElements Creation DynamicFormBuilder is similar in many parts. Most likely the whole thing cant be at the same place but maybe use same/similar functions (e.g. for the is visible part where parent check has the be done, on create and so on)
+

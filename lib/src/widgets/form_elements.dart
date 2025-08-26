@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/animated_tooltip.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/html_widget.dart';
 import 'package:flutter_json_forms/src/widgets/shared_widgets.dart';
+import 'package:flutter_json_forms/src/widgets/utils.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
@@ -14,12 +17,17 @@ class FormElementFormControl extends StatefulWidget {
   final ui.ControlOptions? options;
   final ui.Format? format;
   final String scope;
+  final String id;
   final Map<String, dynamic> property;
   final bool required;
   final void Function(dynamic)? onChanged;
   final bool Function() isShownCallback;
   final dynamic initialValue;
   final int nestingLevel;
+  final bool? parentIsShown;
+  final Map<String, bool>? ritaDependencies;
+  final dynamic Function(String path) checkValueForShowOn;
+  final ui.ShowOnProperty? showOn;
 
   // final bool isShown;
 
@@ -40,7 +48,12 @@ class FormElementFormControl extends StatefulWidget {
       this.showLabel = true,
       required this.isShownCallback,
       this.format,
-      required this.nestingLevel});
+      required this.nestingLevel,
+      required this.id,
+      this.parentIsShown,
+      this.ritaDependencies,
+      required this.checkValueForShowOn,
+      this.showOn});
 
   @override
   State<FormElementFormControl> createState() => _FormElementFormControlState();
@@ -292,26 +305,27 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
+        SizedBox(
+            width: double.infinity,
+            child: Text(
               _getLabel(),
               style: Theme.of(context).textTheme.titleLarge,
-            ),
-            FilledButton.tonal(
-              onPressed: maxItems == null || items.length < maxItems ? () => addItem() : null,
-              child: Icon(Icons.add),
-            ),
-          ],
-        ),
+            )),
         ReorderableListView.builder(
           shrinkWrap: true,
           // buildDefaultDragHandles: true,
           physics: const ClampingScrollPhysics(),
           itemCount: items.length,
           itemBuilder: (context, index) {
+            // Compute isShown for this array item (if you want to support showOn/rita per item in the future)
+            bool itemIsShown() => isElementShown(
+                  parentIsShown: widget.parentIsShown ?? true,
+                  showOn: widget.showOn,
+                  ritaDependencies: widget.ritaDependencies,
+                  checkValueForShowOn: widget.checkValueForShowOn,
+                );
             return Container(
+              padding: EdgeInsets.symmetric(vertical: 5),
               key: Key('${items[index].id}'),
               // padding: const EdgeInsets.only(right: 40, top: 5, bottom: 5),
               child: Row(
@@ -325,7 +339,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                   ),
                   Expanded(
                     child: FormElementFormControl(
-                      scope: '$scope/${items[index].id}',
+                      scope: '$scope/items', // ${items[index].id} TODO maybe revert or have a look if this breaks things
+                      id: '${widget.id}/items/${items[index].id}',
+                      options: options,
                       property: property['items'] ?? {},
                       nestingLevel: widget.nestingLevel,
                       required: required,
@@ -346,14 +362,20 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                         }
                       },
                       showLabel: false,
+                      parentIsShown: itemIsShown(),
+                      ritaDependencies: widget.ritaDependencies,
+                      checkValueForShowOn: widget.checkValueForShowOn,
+                      // showOn: widget.options?.formattingOptions?.descendantControlOverrides?,
                     ),
                   ),
-                  if (items.length > minItems) SizedBox(width: 10),
-                  if (items.length > minItems)
-                    IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () => removeItem(index),
-                    ),
+                  // SizedBox(width: 10),
+                  IconButton(
+                    color: Theme.of(context).colorScheme.error,
+                    disabledColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
+                    icon: Icon(Icons.close),
+                    onPressed: items.length > minItems ? () => removeItem(index) : null,
+                    // padding: EdgeInsets.zero,
+                  ),
                 ],
               ),
             );
@@ -377,6 +399,13 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.tonal(
+            onPressed: maxItems == null || items.length < maxItems ? () => addItem() : null,
+            child: Icon(Icons.add),
+          ),
+        ),
       ],
     );
   }
@@ -388,40 +417,53 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       for (var key in property['properties'].keys) {
         // TODO: add default values recursively here
         bool childRequired = property['required'] != null ? property['required'].contains(key) : false;
-        onSavedCallback(value) {
-          if (value != null && value != "" && isShownCallback()) {
-            formSubmitValues[key] = value;
-          } else {
-            formSubmitValues.remove(key);
-          }
-          // if last element is saved, submit the form
-          if (widget.onSavedCallback != null && key == property['properties'].keys.last) {
-            // dont submit an empty object
-            if (formSubmitValues.isNotEmpty) {
-              widget.onSavedCallback!(formSubmitValues);
-            }
-          }
-        }
+        String childScope = "$scope/properties/$key";
+        ui.DescendantControlOverrides? descendantControlOverrides = options?.formattingOptions?.descendantControlOverrides?[childScope];
 
-        onChangedCallback(value) {
-          _showOnDependencies[key] = value;
-          if (widget.onChanged != null) {
-            widget.onChanged!(_showOnDependencies);
-          }
-        }
+        // Use descendant overrides if present, otherwise fall back to parent's options/showOn
+        final childOptions = descendantControlOverrides?.options ?? options;
+        final childShowOn = descendantControlOverrides?.showOn ?? widget.showOn;
 
-        // formSubmitValues[key] = property['properties'][key]['default'];
+        // Helper for child visibility
+        bool childIsShown() => isElementShown(
+              parentIsShown: widget.isShownCallback(),
+              showOn: childShowOn,
+              ritaDependencies: widget.ritaDependencies,
+              checkValueForShowOn: widget.checkValueForShowOn,
+            );
         elements.add(FormElementFormControl(
-          scope: "$scope/properties/$key",
+          scope: childScope,
+          id: '${widget.id}/properties/$key',
+          options: childOptions,
+          showOn: childShowOn,
           nestingLevel: widget.nestingLevel + 1,
           property: property['properties'][key],
           required: childRequired,
           initialValue: initialValue is Map<String, dynamic> ? initialValue["/properties/$key"] : null,
           // TODO: error handling, most likely at another place in the code. If no object is provided here, an error should be rendered in the ui before
           // isShown: widget.isShown,
-          isShownCallback: isShownCallback,
-          onSavedCallback: onSavedCallback,
-          onChanged: onChangedCallback,
+          isShownCallback: childIsShown,
+          onSavedCallback: (value) {
+            if (value != null && value != "" && childIsShown()) {
+              formSubmitValues[key] = value;
+            } else {
+              formSubmitValues.remove(key);
+            }
+            if (widget.onSavedCallback != null && key == property['properties'].keys.last) {
+              if (formSubmitValues.isNotEmpty) {
+                widget.onSavedCallback!(formSubmitValues);
+              }
+            }
+          },
+          onChanged: (value) {
+            _showOnDependencies[key] = value;
+            if (widget.onChanged != null) {
+              widget.onChanged!(_showOnDependencies);
+            }
+          },
+          parentIsShown: isShownCallback(),
+          ritaDependencies: widget.ritaDependencies,
+          checkValueForShowOn: widget.checkValueForShowOn,
         ));
       }
     }
@@ -466,7 +508,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   Widget generateSwitch() {
     return FormBuilderSwitch(
       initialValue: initialValue,
-      name: scope,
+      name: widget.id,
       onChanged: onChanged,
       enabled: enabled,
       onSaved: widget.onSavedCallback,
@@ -647,15 +689,15 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       initialValueString = "";
     }
 
-    return _wrapFieldTitle(
+    return _wrapField(
         child: FormBuilderTextField(
-      name: scope,
+      name: widget.id,
       onSubmitted: onChanged,
       enabled: enabled,
       onSaved: widget.onSavedCallback,
       validator: FormBuilderValidators.compose([
         _composeBaseValidator(),
-        if (type == 'number' || type == 'integer') FormBuilderValidators.numeric(),
+        if (type == 'number' || type == 'integer') FormBuilderValidators.numeric(checkNullOrEmpty: false),
       ]),
       // _composeBaseValidator(additionalValidators: (type == 'number' || type == 'integer') ? [FormBuilderValidators.numeric()] : null)
       decoration: _getInputDecoration(),
@@ -673,9 +715,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   /// generate Color Picker using [FormBuilderColorPickerField]
   Widget generateColorPicker() {
-    return _wrapFieldTitle(
+    return _wrapField(
       child: FormBuilderColorPickerField(
-        name: scope,
+        name: widget.id,
         onChanged: onChanged,
         onSaved: widget.onSavedCallback,
         enabled: enabled,
@@ -686,9 +728,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   }
 
   Widget generateSlider() {
-    return _wrapFieldTitle(
+    return _wrapField(
       child: FormBuilderSlider(
-        name: scope,
+        name: widget.id,
         onChanged: onChanged,
         onSaved: widget.onSavedCallback,
         enabled: enabled,
@@ -736,9 +778,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       return null;
     }
 
-    return _wrapFieldTitle(
+    return _wrapField(
       child: FormBuilderFilePicker(
-        name: scope,
+        name: widget.id,
         onChanged: onChanged,
         onSaved: widget.onSavedCallback,
         enabled: enabled,
@@ -754,9 +796,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   /// generates a FormBuilderRadioGroup to select a value from a list of Radio Widgets using [FormBuilderRadioGroup]
   Widget generateRadioGroup(List<String> values) {
-    return _wrapFieldTitle(
+    return _wrapField(
       child: FormBuilderRadioGroup(
-        name: scope,
+        name: widget.id,
         onChanged: onChanged,
         onSaved: widget.onSavedCallback,
         enabled: enabled,
@@ -771,11 +813,11 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   /// generates a FormBuilderCheckboxGroup to select multiple values from a list of Checkbox Widgets
   Widget generateCheckboxGroup(List<String> values) {
-    return _wrapFieldTitle(
+    return _wrapField(
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 400),
         child: FormBuilderCheckboxGroup(
-          name: scope,
+          name: widget.id,
           onChanged: onChanged,
           onSaved: widget.onSavedCallback,
           enabled: enabled,
@@ -790,9 +832,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   /// generates a FormBuilderDropdown to select a value from a list of Dropdown Widgets
   Widget generateDropdown(List<String> values) {
-    return _wrapFieldTitle(
+    return _wrapField(
       child: FormBuilderDropdown(
-        name: scope,
+        name: widget.id,
         onChanged: onChanged,
         onSaved: widget.onSavedCallback,
         enabled: enabled,
@@ -819,15 +861,15 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       }
     }
 
-    return _wrapFieldTitle(
+    return _wrapField(
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 100),
         child: FormBuilderDateTimePicker(
-            name: scope,
+            name: widget.id,
             onChanged: onChanged,
             enabled: enabled,
             validator: _composeBaseValidator(),
-            decoration: _getInputDecoration(suffixHardcoded: const Icon(Icons.date_range)),
+            decoration: _getInputDecoration(suffix: const Icon(Icons.date_range)),
             initialValue: getDefaultDatetime(),
             inputType: inputType,
             onSaved: (DateTime? dateTime) => {widget.onSavedCallback?.call((dateTime?.toIso8601String()))}
@@ -841,11 +883,11 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   /// generate rating
   Widget generateRating() {
-    return _wrapFieldTitle(
+    return _wrapField(
       child: Container(
         constraints: const BoxConstraints(minWidth: 100),
         child: FormBuilderRatingBar(
-          name: scope,
+          name: widget.id,
           onChanged: onChanged,
           enabled: enabled,
           validator: _composeBaseValidator(),
@@ -866,9 +908,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     //       .map((value) => FormBuilderFieldOption(value: value))
     //       .toList(growable: false),
     // );
-    return _wrapFieldTitle(
+    return _wrapField(
       child: FormBuilderSegmentedButton<String>(
-        name: scope,
+        name: widget.id,
         onChanged: onChanged,
         onSaved: widget.onSavedCallback,
         initialValue: initialValue,
@@ -892,9 +934,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       if (!isShownCallback()) {
         return null;
       }
-      // if(!widget.isShown){
-      //   return null;
-      // }
 
       if (required) {
         final validatorResult = FormBuilderValidators.required().call(valueCandidate);
@@ -931,22 +970,53 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     );
   }
 
-  Widget _wrapFieldTitle({required Widget child}) {
-    return labelSeparateText && widget.showLabel
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
+  Widget _wrapField({required Widget child}) {
+    final preHtml = options?.formattingOptions?.preHtml;
+    final postHtml = options?.formattingOptions?.postHtml;
+
+    List<Widget> columnChildren = [];
+
+    if (preHtml != null && preHtml.isNotEmpty) {
+      columnChildren.add(CustomHtmlWidget(htmlData: preHtml));
+    }
+
+    if (labelSeparateText && widget.showLabel) {
+      columnChildren.add(
+        Row(
+          children: [
+            Expanded(
+              child: Text(
                 _getLabel(),
               ),
-              // const SizedBox(height: UIConstants.groupTitleSpacing),
-              child,
-            ],
-          )
-        : child;
+            ),
+            if (options?.formattingOptions?.help != null)
+              AnimatedTooltip(
+                content: options!.formattingOptions!.help!.text,
+                label: options!.formattingOptions!.help!.label ?? "?",
+              ),
+          ],
+        ),
+      );
+    }
+
+    columnChildren.add(child);
+
+    if (postHtml != null && postHtml.isNotEmpty) {
+      columnChildren.add(CustomHtmlWidget(htmlData: postHtml));
+    }
+
+    // Always wrap in a Column to ensure preHtml/postHtml are rendered
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: columnChildren,
+    );
   }
 
-  InputDecoration _getInputDecoration({bool border = true, Widget? prefixHardcoded, Widget? suffixHardcoded}) {
+  /// Creates the input decoration for the form field
+  /// [prefix] and [suffix] widgets can be set to customize the appearance
+  /// If the uiSchema defines formatting options, they take precedence and will be used instead
+  InputDecoration _getInputDecoration({bool border = true, Widget? prefix, Widget? suffix}) {
+    // TODO: Range selector
     return InputDecoration(
       labelText: labelSeparateText ? null : _getLabel(),
       hintText: placeholder,
@@ -956,8 +1026,11 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       border: !border ? InputBorder.none : Theme.of(context).inputDecorationTheme.border,
       helperText: description,
       helperMaxLines: 10,
-      prefix: prefixHardcoded,
-      suffix: suffixHardcoded,
+      prefix: options?.formattingOptions?.prepend != null ? prefix : null,
+      prefixText: options?.formattingOptions?.prepend,
+      suffix: options?.formattingOptions?.append != null ? suffix : null,
+      suffixText: options?.formattingOptions?.append,
+      floatingLabelBehavior: FloatingLabelBehavior.always,
       // TODO: has to be added back
       // prefixText: prefixHardcoded != null
       //     ? null

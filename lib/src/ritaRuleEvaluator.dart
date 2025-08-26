@@ -125,7 +125,12 @@ class RitaRuleEvaluator {
     // return result;
 
     _ritaCompleter = Completer<dynamic>();
-    jsRuntime.evaluate('ritaEvalById("$ruleId", $dataJson);');
+    try {
+      jsRuntime.evaluate('ritaEvalById("$ruleId", $dataJson);');
+    } catch (e) {
+      print("JS Exception during evaluate: $e");
+      return false;
+    }
     final result = await _ritaCompleter!.future;
     // Handle result as before
     return result == true || result.toString().trim() == 'true' || result.toString().trim() == '1';

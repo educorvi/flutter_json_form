@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter_json_forms/src/ritaRuleEvaluator.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/html_widget.dart';
+import 'package:flutter_json_forms/src/widgets/utils.dart';
+import 'package:http/http.dart' as http; // Add this import at the top
 
 import '../../flutter_json_forms.dart';
 import '../models/ui_schema.dart' as ui;
@@ -8,7 +10,6 @@ import 'data/list_item.dart';
 import 'form_elements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:flutter_json_forms/src/json_validator.dart';
 import '../constants.dart';
@@ -261,31 +262,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     });
   }
 
-  // /// converts the form values to the format of the JSON schema
-  // /// handles array elements by getting each element and generating the form builder elements with their ids and contained values
-  // Map<String, dynamic> convertShowOnDependenciesToFormBuilderValues(Map<String, dynamic> dependencies) {
-  //   Map<String, dynamic> formBuilderValues = {};
-  //   dependencies.forEach((key, value) {
-  //     if (value is List) {
-  //       for (int i = 0; i < value.length; i++) {
-  //         final item = value[i];
-  //         if (item is ListItem) {
-  //           final value = item.value;
-  //           final path = "$key/$i";
-  //           if (value is Map<String, dynamic>) {
-  //             formBuilderValues.addAll(convertShowOnDependenciesToFormBuilderValues(value));
-  //           } else {
-  //             formBuilderValues[path] = value;
-  //           }
-  //         }
-  //       }
-  //     } else {
-  //       formBuilderValues[key] = value;
-  //     }
-  //   });
-  //   return formBuilderValues;
-  // }
-
   /// Returns the saved value only
   Map<String, dynamic> get value {
     // TODO here, preprocessing can be done in order to e.g. sort array correctly, return a nested object instead of a flat one, etc.
@@ -410,13 +386,9 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         child = _generateGroupFromLayout(layout, nestingLevel);
     }
     return _applyCss(child, cssClass: layout.options?.cssClass);
-    // return _generateLayout(uiSchemaModel.layout);
   }
 
   Widget _generateGroupFromLayoutElement(ui.Layout item, int nestingLevel) {
-    // if (item.elements == null) {
-    //   return _getErrorTextWidget("Group element must have elements");
-    // }
     List<ui.LayoutElement> elements = item.elements;
     String? label = item.options?.label;
     ui.ShowOnProperty? showOn = item.showOn;
@@ -432,40 +404,12 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// generates a group of elements with an optional label at the top
   Widget _generateGroup(List<ui.LayoutElement> elements, String? label, ui.ShowOnProperty? showOn, int nestingLevel) {
-    // List<LayoutElement> elements = item.elements!;
-    // String? label = item.label;
+    bool? isShown = showOn == null
+        ? null
+        : isElementShown(parentIsShown: true, showOn: showOn, ritaDependencies: _ritaDependencies, checkValueForShowOn: checkValueForShowOn);
 
-    bool? isShown = showOn == null ? null : _evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
-
-    // final List<LayoutElement> visibleElements = [];
-    // for (int i = 0; i < elements.length; i++) {
-    //   if (elements[i].showOn != null) {
-    //     bool isVisible = _evaluateCondition(elements[i].showOn!.type, checkValueForShowOn(elements[i].showOn!.scope), elements[i].showOn!.referenceValue);
-    //     if (isVisible) {
-    //       visibleElements.add(elements[i]);
-    //     } else {
-    //       // _formKey.currentState!.fields.remove(elements[i].scope);
-    //     }
-    //   } else {
-    //     visibleElements.add(elements[i]);
-    //   }
-    // }
-
+    // _evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
     Column generateGroupElements() {
-      // return Padding(
-      //   padding: const EdgeInsets.symmetric(horizontal: UIConstants.groupPadding),
-      //   child: Column(
-      //     children: elements
-      //         .map((item) => Padding(
-      //               padding: EdgeInsets.only(
-      //                   top: item == elements.first ? 0 : UIConstants.groupItemPadding,
-      //                   bottom: item == elements.last ? 0 : UIConstants.groupItemPadding),
-      //               child: _generateItem(item),
-      //             ))
-      //         .toList(),
-      //   ),
-      // );
-
       return Column(
         //shrinkWrap: true,
         //physics: const ClampingScrollPhysics(),
@@ -473,20 +417,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
           return _generateItem(item, nestingLevel, isShownFromParent: isShown);
         }).toList(),
       );
-
-      // return ListView.separated(
-      //   shrinkWrap: true,
-      //   physics: const ClampingScrollPhysics(),
-      //   // padding: const EdgeInsets.symmetric(horizontal: UIConstants.groupPadding),
-      //   itemCount: elements.length,
-      //   itemBuilder: (BuildContext context, int index) {
-      //     return _generateItem(elements[index], isShownFromParent: isShown);
-      //   },
-      //   separatorBuilder: (BuildContext context, int index) {
-      //     return _handleShowOn(elements[index].showOn, const SizedBox(height: UIConstants.verticalLayoutItemPadding));
-      //     // return const SizedBox(height: UIConstants.verticalLayoutItemPadding);
-      //   },
-      // );
     }
 
     return Card(
@@ -508,64 +438,23 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
             )
           : generateGroupElements(),
     ));
-
-    // if (label != null) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       Text(
-    //         label,
-    //         style: Theme.of(context).textTheme.titleLarge,
-    //       ),
-    //       const SizedBox(height: UIConstants.groupTitleSpacing),
-    //       generateGroupElements(),
-    //     ],
-    //   );
-    // } else {
-    //   return generateGroupElements();
-    // }
   }
 
   /// generates a horizontal layout with the elements in a row. A Wrap is used to warp the elements around
   /// if they need more horizontal space than available
   LayoutBuilder _generateHorizontalLayout(List<ui.LayoutElement> elements, int nestingLevel) {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      return Wrap(
+      return Row(
           // make elements align left and right (space between)
-          alignment: WrapAlignment.spaceBetween,
-          spacing: UIConstants.horizontalLayoutItemPadding,
-          runSpacing: UIConstants.verticalLayoutItemPadding,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: elements.map((item) {
-            return _generateItem(item, nestingLevel);
+            return Expanded(child: _generateItem(item, nestingLevel));
           }).toList());
     });
   }
 
   /// generates a vertical layout with the elements in a column
   Column _generateVerticalLayout(List<ui.LayoutElement> elements, int nestingLevel) {
-    // return Column(
-    //   children: elements
-    //       .map((item) => Padding(
-    //               padding: EdgeInsets.only(top: item == elements.first ? 0 : UIConstants.verticalLayoutItemPadding, bottom: item == elements.last ? 0 : UIConstants.verticalLayoutItemPadding),
-    //               child: _generateItem(item),
-    //             ))
-    //       .toList(),
-    // );
-
-    // final List<LayoutElement> visibleElements = [];
-    // for (int i = 0; i < elements.length; i++) {
-    //   if (elements[i].showOn != null) {
-    //     bool isVisible = _evaluateCondition(elements[i].showOn!.type, checkValueForShowOn(elements[i].showOn!.scope), elements[i].showOn!.referenceValue);
-    //     if (isVisible) {
-    //       visibleElements.add(elements[i]);
-    //     } else {
-    //       // _formKey.currentState!.fields.remove(elements[i].scope);
-    //     }
-    //   } else {
-    //     visibleElements.add(elements[i]);
-    //   }
-    // }
-
     return Column(
       // shrinkWrap: true,
       // physics: const ClampingScrollPhysics(),
@@ -573,20 +462,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         return _generateItem(item, nestingLevel);
       }).toList(),
     );
-
-    // return ListView.separated(
-    //   shrinkWrap: true,
-    //   physics: const ClampingScrollPhysics(),
-    //   itemCount: elements.length,
-    //   itemBuilder: (BuildContext context, int index) {
-    //     return _generateItem(elements[index]);
-    //   },
-    //   separatorBuilder: (BuildContext context, int index) {
-    //     // return Container();
-    //     return _handleShowOn(elements[index].showOn, const SizedBox(height: UIConstants.verticalLayoutItemPadding));
-    //     // return const SizedBox(height: UIConstants.verticalLayoutItemPadding);
-    //   },
-    // );
   }
 
   /// generates an Layoutelement based on the type of the element
@@ -614,26 +489,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         child = getNotImplementedWidget("No type defined for LayoutElementType $item");
     }
 
-    // if (item is ui.Button) {
-    //   return _generateButtonControl(ui.Button.fromJson(item.toJson()));
-    // } else if (item is ui.Buttongroup) {
-    //   return _generateButtonGroupControl(ui.Buttongroup.fromJson(item.toJson()));
-    // } else if (item is ui.Control) {
-    //   child = _generateControl(ui.Control.fromJson(item.toJson()), nestingLevel, isShownFromParent: isShownFromParent);
-    // } else if (item is ui.Divider) {
-    //   child = _generateDivider(ui.Divider.fromJson(item.toJson()));
-    // } else if (item is ui.Layout && item.type == ui.LayoutElementType.GROUP) {
-    //   child = _generateGroupFromLayoutElement(ui.Layout.fromJson(item.toJson()), nestingLevel + 1);
-    // } else if (item is ui.Layout && item.type == ui.LayoutElementType.HORIZONTAL_LAYOUT) {
-    //   child = _generateHorizontalLayout(ui.Layout.fromJson(item.toJson()).elements, nestingLevel + 1);
-    // } else if (item is ui.HtmlRenderer) {
-    //   child = _generateHtml(ui.HtmlRenderer.fromJson(item.toJson()));
-    // } else if (item is ui.Layout && item.type == ui.LayoutElementType.VERTICAL_LAYOUT) {
-    //   child = _generateVerticalLayout(ui.Layout.fromJson(item.toJson()).elements, nestingLevel + 1);
-    // } else {
-    //   child = getNotImplementedWidget("Unknown or null type");
-    // }
-
     return _applyCss(
       _handleShowOn(
         item.showOn,
@@ -652,32 +507,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     if (showOn == null) {
       return child;
     } else if (showOn.rule != null && showOn.id != null) {
-      // Rita rule: evaluate with JS
-      // final ruleJson = jsonEncode(showOn);
-      // final dataJson = jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies)));
-      // jsRuntime.evaluate('var rule = $ruleJson;');
-      // jsRuntime.evaluate('var data = $dataJsoin;');
-      // jsRuntime.evaluate('var rule = $rule;');
-      // jsRuntime.evaluate('var data = $data;');
-      // // Evaluate the rule using rita
-      // String jsEval = '''
-      //   (async function() {
-      //     var ruleObj = JSON.parse(rule);
-      //     var dataObj = JSON.parse(data);
-      //     var parser = new rita.Parser();
-      //     var ruleSet = parser.parseRuleSet(ruleObj);
-      //     var result = await ruleSet[0].evaluate(dataObj);
-      //     return result;
-      //   })()
-      //   ''';
-
-      // final evalResult = await jsRuntime.evaluateAsync(jsEval);
-      // print('Result: ${evalResult.stringResult}');
-      // final result = jsRuntime.evaluate('rita.Parser().parseRuleSet($data).evaluate($rule)');
-      // ritaRuleEvaluator.
-      // ritaRuleEvaluator.evaluate(showOn.id!, dataJson);
       final isVisible = _ritaDependencies[showOn.id!] == true;
-      // final isVisible = result.rawResult == true || result.stringResult == 'true';
       return AnimatedCrossFade(
         duration: const Duration(milliseconds: 500),
         sizeCurve: Curves.easeInOut,
@@ -686,7 +516,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       );
     } else {
-      bool isVisible = _evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
+      bool isVisible = evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
       return AnimatedCrossFade(
         duration: const Duration(milliseconds: 500),
         sizeCurve: Curves.easeInOut,
@@ -695,17 +525,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         // Invisible child
         crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       );
-      // return Visibility(
-      //   visible: isVisible,
-      //   maintainAnimation: true,
-      //   maintainState: true,
-      //   child: AnimatedOpacity(
-      //       opacity: isVisible ? 1.0 : 0.0,
-      //       // maintainState: true,
-      //       duration: const Duration(milliseconds: 500),
-      //       curve: Curves.easeInOut,
-      //       child: child),
-      // );
     }
   }
 
@@ -726,23 +545,238 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     }
   }
 
-  /// generates a button control based on the type of the button
+  Widget renderStyledButton({
+    required BuildContext context,
+    required ui.ColorVariant? variant,
+    required VoidCallback? onPressed,
+    required Widget child,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+
+    // Map enum to color and style
+    late final Color color;
+    late final bool isOutline;
+    late final bool isLight;
+
+    switch (variant) {
+      case ui.ColorVariant.PRIMARY:
+        color = scheme.primary;
+        isOutline = false;
+        isLight = false;
+        break;
+      case ui.ColorVariant.SECONDARY:
+        color = scheme.secondary;
+        isOutline = false;
+        isLight = false;
+        break;
+      case ui.ColorVariant.SUCCESS:
+        color = Colors.green;
+        isOutline = false;
+        isLight = false;
+        break;
+      case ui.ColorVariant.WARNING:
+        color = Colors.orange;
+        isOutline = false;
+        isLight = false;
+        break;
+      case ui.ColorVariant.DANGER:
+        color = scheme.error;
+        isOutline = false;
+        isLight = false;
+        break;
+      case ui.ColorVariant.INFO:
+        color = Colors.blue;
+        isOutline = false;
+        isLight = false;
+        break;
+      case ui.ColorVariant.LIGHT:
+        color = scheme.surfaceContainerHighest;
+        isOutline = false;
+        isLight = true;
+        break;
+      case ui.ColorVariant.DARK:
+        color = Colors.black87;
+        isOutline = false;
+        isLight = false;
+        break;
+      case ui.ColorVariant.OUTLINE_PRIMARY:
+        color = scheme.primary;
+        isOutline = true;
+        isLight = false;
+        break;
+      case ui.ColorVariant.OUTLINE_SECONDARY:
+        color = scheme.secondary;
+        isOutline = true;
+        isLight = false;
+        break;
+      case ui.ColorVariant.OUTLINE_SUCCESS:
+        color = Colors.green;
+        isOutline = true;
+        isLight = false;
+        break;
+      case ui.ColorVariant.OUTLINE_WARNING:
+        color = Colors.orange;
+        isOutline = true;
+        isLight = false;
+        break;
+      case ui.ColorVariant.OUTLINE_DANGER:
+        color = scheme.error;
+        isOutline = true;
+        isLight = false;
+        break;
+      case ui.ColorVariant.OUTLINE_INFO:
+        color = Colors.blue;
+        isOutline = true;
+        isLight = false;
+        break;
+      case ui.ColorVariant.OUTLINE_LIGHT:
+        color = scheme.surfaceContainerHighest;
+        isOutline = true;
+        isLight = true;
+        break;
+      case ui.ColorVariant.OUTLINE_DARK:
+        color = Colors.black87;
+        isOutline = true;
+        isLight = false;
+        break;
+      case null:
+        color = scheme.primary;
+        isOutline = false;
+        isLight = false;
+        break;
+    }
+
+    if (isOutline) {
+      return OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: color,
+          side: BorderSide(color: color),
+        ),
+        onPressed: onPressed,
+        child: child,
+      );
+    } else {
+      return FilledButton(
+        style: FilledButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: isLight ? Colors.black : Colors.white,
+        ),
+        onPressed: onPressed,
+        child: child,
+      );
+    }
+  }
+
   Widget _generateButtonControl(ui.Button button) {
-    // TODO: I dont get variant here, this most likely is an error with the generated type. Adjust the parsing process
-    // if(button.options.nativeSubmitOptions.
-    return FilledButton(
-      onPressed: () {
-        switch (button.buttonType) {
-          case ui.TheButtonsType.RESET:
-            _formKey.currentState?.reset();
-          case ui.TheButtonsType.SUBMIT:
-            _formKey.currentState?.saveAndValidate();
-        }
-        _formKey.currentState?.reset();
-      },
+    final formNoValidate = button.options?.formnovalidate ?? false;
+    final submitOptions = button.options?.submitOptions;
+
+    String getMethod(ui.Method? method) {
+      switch (method) {
+        case ui.Method.GET:
+          return 'GET';
+        case ui.Method.POST:
+          return 'POST';
+        case ui.Method.PUT:
+          return 'PUT';
+        case ui.Method.DELETE:
+          return 'DELETE';
+        case null:
+          return 'POST';
+      }
+    }
+
+    Future<void> handleSubmit() async {
+      // If formnovalidate is true, skip validation
+      bool valid = formNoValidate ? true : saveAndValidate();
+
+      if (!valid) return;
+
+      final action = submitOptions?.action ?? 'submit';
+
+      switch (action) {
+        case 'request':
+          final request = submitOptions?.request;
+          if (request != null) {
+            final url = Uri.parse(request.url);
+
+            final method = getMethod(request.method);
+            final headers = request.headers;
+            final body = jsonEncode(value);
+
+            http.Response response;
+            switch (method) {
+              case 'GET':
+                response = await http.get(url, headers: headers);
+                break;
+              case 'POST':
+                response = await http.post(url, headers: headers, body: body);
+                break;
+              case 'PUT':
+                response = await http.put(url, headers: headers, body: body);
+                break;
+              case 'DELETE':
+                response = await http.delete(url, headers: headers, body: body);
+                break;
+              default:
+                throw Exception('Unsupported HTTP method: $method');
+            }
+            // You can handle the response here, e.g., show a snackbar or call a callback
+            debugPrint('Request response: ${response.statusCode} ${response.body}');
+          }
+          break;
+        case 'save':
+          // Implement your save logic here
+          debugPrint('Save action: ${jsonEncode(value)}');
+          break;
+        case 'print':
+          // Implement your print logic here
+          debugPrint('Print action: ${jsonEncode(value)}');
+          break;
+        default:
+          // Default submit: just validate and do nothing else
+          debugPrint('Default submit: ${jsonEncode(value)}');
+      }
+    }
+
+    VoidCallback? onPressed;
+    switch (button.buttonType) {
+      case ui.TheButtonsType.RESET:
+        onPressed = reset;
+        break;
+      case ui.TheButtonsType.SUBMIT:
+        onPressed = handleSubmit;
+        break;
+    }
+
+    return renderStyledButton(
+      context: context,
+      variant: button.options?.variant,
+      onPressed: onPressed,
       child: Text(button.text),
     );
   }
+
+  // /// generates a button control based on the type of the button
+  // Widget _generateButtonControl(ui.Button button) {
+  //   // TODO: I dont get variant here, this most likely is an error with the generated type. Adjust the parsing process
+  //   // if(button.options.nativeSubmitOptions.
+  //   return renderStyledButton(
+  //     context: context,
+  //     variant: button.options?.variant,
+  //     onPressed: () {
+  //       switch (button.buttonType) {
+  //         case ui.TheButtonsType.RESET:
+  //           _formKey.currentState?.reset();
+  //           break;
+  //         case ui.TheButtonsType.SUBMIT:
+  //           _formKey.currentState?.saveAndValidate();
+  //           break;
+  //       }
+  //     },
+  //     child: Text(button.text),
+  //   );
+  // }
 
   /// renders a simple Divider Widget
   Divider _generateDivider(ui.Divider item) {
@@ -750,53 +784,16 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   }
 
   /// renders the HTML data in the UI schema
-  HtmlWidget _generateHtml(ui.HtmlRenderer item) {
-    return HtmlWidget(
-      enableCaching: true,
-      item.htmlData,
-      onTapUrl: (url) async {
-        final Uri uri = Uri.parse(url);
-        if (!await launchUrl(uri)) {
-          print('Could not launch $url');
-        }
-        return true;
-      },
-      renderMode: const ListViewMode(shrinkWrap: true, physics: ClampingScrollPhysics()),
+  CustomHtmlWidget _generateHtml(ui.HtmlRenderer item) {
+    return CustomHtmlWidget(
+      htmlData: item.htmlData,
     );
-  }
-
-  /// evaluates the condition based on the operator and the operands
-  bool _evaluateCondition(ui.ShowOnFunctionType? operator, dynamic operand1, dynamic operand2) {
-    // TODO as the types are dynamic, type error could occur here. Use stronger typing if possible!
-    // maybe try to do the check and if an exception occurs, render an error in the ui
-    switch (operator) {
-      case ui.ShowOnFunctionType.EQUALS:
-        return operand1 == operand2;
-      case ui.ShowOnFunctionType.GREATER:
-        return operand1 > operand2;
-      case ui.ShowOnFunctionType.SMALLER:
-        return operand1 < operand2;
-      case ui.ShowOnFunctionType.GREATER_OR_EQUAL:
-        return operand1 >= operand2;
-      case ui.ShowOnFunctionType.SMALLER_OR_EQUAL:
-        return operand1 <= operand2;
-      case ui.ShowOnFunctionType.NOT_EQUALS:
-        return operand1 != operand2;
-      case null:
-        return false;
-    }
   }
 
   /// generates a control element based on the type of the property
   /// TODO use typing here for the referenced elements in schema.json
   Widget _generateControl(ui.Control item, int nestingLevel, {bool? isShownFromParent}) {
-    // if (item.scope == null) {
-    //   return _getErrorTextWidget("Control element must have a scope");
-    // }
-    String scope = item.scope;
-    if (scope.startsWith("#")) {
-      scope = scope.substring(1);
-    }
+    String scope = item.scope.startsWith("#") ? item.scope.substring(1) : item.scope;
     final ui.ControlOptions? options = item.options;
     final Map<String, dynamic>? property = _getObjectFromJsonSchema(scope);
     if (property == null) {
@@ -809,65 +806,46 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     // if isShownFromParent == true or not set, check if showOn condition exists. If so, evaluate it
     // bool isShown = isShownFromParent == false ? false : item.showOn == null ? true : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.scope), item.showOn!.referenceValue);
 
+    final bool parentIsShown = isShownFromParent ?? true;
+
+    // Helper for this control's visibility
+    bool isShown() => isElementShown(
+          parentIsShown: parentIsShown,
+          showOn: item.showOn,
+          ritaDependencies: _ritaDependencies,
+          checkValueForShowOn: checkValueForShowOn,
+        );
+
     return FormElementFormControl(
       options: options,
       format: format,
       scope: scope,
+      id: scope,
       nestingLevel: nestingLevel + 1,
-      // isShown: isShown,
       required: _isRequired(scope),
-      // && isShown
-      // only evaluate the second expression if the field is required and the field has a showOn condition
-      onChanged: (value) async {
-        bool? ritaValue;
-
-        setValueForShowOn(scope, value);
-
-        // if (item.showOn?.id != null) {
-        //   // If the current item has a rita rule, ensure it's added to the evaluator
-        //   // TODO now the new value is not included in _showOnDependencies
-        //   ritaValue = await ritaRuleEvaluator.evaluate(item.showOn!.id!, jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies))));
-        // }
-
-        // ritaValue = await ritaRuleEvaluator.evaluate(item.showOn!.id!, jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies))));
-        final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies))));
-
-        setState(() {
-          // if (ritaValue != null) {
-          // _ritaDependencies[item.showOn!.id!] = ritaValue;
-          // }
-          _ritaDependencies = ritaDependencies;
-
-          setValueForShowOn(scope, value);
-
-          // Evaluate rule with new data
-          // final dataJson = jsonEncode(toEncodable(_showOnDependencies)); // or your data map
-          // jsRuleEvaluator.evaluate([], "");
-          // final result = jsRuntime.evaluate('jsRuleSet[0].evaluate($dataJson)');
-          // Use result as needed (e.g. update UI, validation, etc.)
-        });
-      },
       property: property,
       initialValue: checkValueForShowOn(scope),
-      isShownCallback: () {
-        return isShownFromParent == false
-            ? false
-            : item.showOn == null
-                ? true
-                : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.path ?? ""), item.showOn!.referenceValue);
+      isShownCallback: isShown,
+      onChanged: (value) async {
+        setValueForShowOn(scope, value);
+        final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies))));
+        setState(() {
+          _ritaDependencies = ritaDependencies;
+          setValueForShowOn(scope, value);
+        });
       },
-      // formDataForScope,
+      // formDataForScope, // TODO: rita rule evaluation
       onSavedCallback: (value) {
-        if (value != null && value != "" && isShownFromParent == false
-            ? false
-            : item.showOn == null
-                ? true
-                : _evaluateCondition(item.showOn!.type, checkValueForShowOn(item.showOn!.path ?? ""), item.showOn!.referenceValue)) {
+        if (value != null && value != "" && isShown()) {
           _formSubmitValues[scope] = value;
         } else {
           _formSubmitValues.remove(scope);
         }
       },
+      parentIsShown: parentIsShown,
+      ritaDependencies: _ritaDependencies,
+      checkValueForShowOn: checkValueForShowOn,
+      showOn: item.showOn,
     );
   }
 
