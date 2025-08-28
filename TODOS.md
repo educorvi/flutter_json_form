@@ -26,4 +26,4 @@
 - default values empty array: `[]` throws error (general: handle default array values)
 - everywhere where _evaluateCondition is called, rita has to be called as well. Check this and maybe create shared function
 - Object generation in FormElements and FormElements Creation DynamicFormBuilder is similar in many parts. Most likely the whole thing cant be at the same place but maybe use same/similar functions (e.g. for the is visible part where parent check has the be done, on create and so on)
-
+- values in dependent fields which are not shown should be ignored. This leads to a chain of dependencies which have to be analyzed for it to work

@@ -6,18 +6,23 @@ Color getAlternatingColor(BuildContext context, int nestingLevel) {
 }
 
 bool isElementShown({
-  required bool parentIsShown,
+  bool? parentIsShown,
   ui.ShowOnProperty? showOn,
   Map<String, bool>? ritaDependencies,
   required dynamic Function(String path) checkValueForShowOn,
 }) {
-  if (!parentIsShown) return false;
+  if (parentIsShown == false) return false;
   if (showOn == null) return true;
   if (showOn.rule != null && showOn.id != null && ritaDependencies != null) {
     // Rita rule: use precomputed dependency
     return ritaDependencies[showOn.id!] == true;
   }
   // Fallback: classic showOn
+  final value = checkValueForShowOn(showOn.path ?? "");
+  if (value == null && showOn.referenceValue != null) {
+    return false;
+  }
+
   return evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
 }
 
@@ -41,4 +46,24 @@ bool evaluateCondition(ui.ShowOnFunctionType? operator, dynamic operand1, dynami
     case null:
       return false;
   }
+}
+
+/// handles the visibility of an element based on the showOn property.
+/// Uses the _evaluateCondition function to evaluate the condition
+Widget handleShowOn(
+    {ui.ShowOnProperty? showOn,
+    required Widget child,
+    Map<String, bool>? ritaDependencies,
+    required dynamic Function(String) checkValueForShowOn,
+    bool? parentIsShown}) {
+  bool isVisible =
+      isElementShown(parentIsShown: parentIsShown, showOn: showOn, ritaDependencies: ritaDependencies, checkValueForShowOn: checkValueForShowOn);
+  return AnimatedCrossFade(
+    duration: const Duration(milliseconds: 450),
+    sizeCurve: Curves.easeInOut,
+    firstChild: child,
+    secondChild: Container(),
+    // Invisible child
+    crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+  );
 }

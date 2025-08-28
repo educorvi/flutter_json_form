@@ -104,13 +104,14 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   // late final JavascriptRuntime jsRuntime = getJavascriptRuntime();
   late final RitaRuleEvaluator ritaRuleEvaluator;
   Map<String, bool> _ritaDependencies = {};
+  bool _ritaInitialized = false;
   // dynamic jsRuleSet;
   // Map<String, dynamic> ritaRules = {};
 
   /// return true if the widget is in the loading state (the validation is not finished yet
   /// (async part comes form reading the files. The validation is done synchronously))
   get isLoading {
-    return _jsonSchemaValidationErrors == null || _uiSchemaValidationErrors == null;
+    return (_jsonSchemaValidationErrors == null || _uiSchemaValidationErrors == null) && !_ritaInitialized;
   }
 
   /// return true if the JSON schema is valid
@@ -229,6 +230,17 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         collectDescendantRitaRules(overrides);
       }
     }
+    _ritaInitialized = false;
+    ritaRuleEvaluator.initializeWithBundle().then(
+      (_) {
+        ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies)))).then((value) {
+          _ritaDependencies = value;
+          setState(() {
+            _ritaInitialized = true;
+          });
+        });
+      },
+    );
   }
 
   /// Save form values and validate all fields of form
@@ -388,6 +400,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     return _applyCss(child, cssClass: layout.options?.cssClass);
   }
 
+  /// Generates a group of elements from a layout element
   Widget _generateGroupFromLayoutElement(ui.Layout item, int nestingLevel) {
     List<ui.LayoutElement> elements = item.elements;
     String? label = item.options?.label;
@@ -395,6 +408,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     return _generateGroup(elements, label, showOn, nestingLevel);
   }
 
+  /// Generates a group of elements from a layout
   Widget _generateGroupFromLayout(ui.Layout item, int nestingLevel) {
     List<ui.LayoutElement> elements = item.elements;
     String? label = item.options?.label;
@@ -404,9 +418,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
   /// generates a group of elements with an optional label at the top
   Widget _generateGroup(List<ui.LayoutElement> elements, String? label, ui.ShowOnProperty? showOn, int nestingLevel) {
-    bool? isShown = showOn == null
-        ? null
-        : isElementShown(parentIsShown: true, showOn: showOn, ritaDependencies: _ritaDependencies, checkValueForShowOn: checkValueForShowOn);
+    bool? isShown = isElementShown(showOn: showOn, ritaDependencies: _ritaDependencies, checkValueForShowOn: checkValueForShowOn);
 
     // _evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
     Column generateGroupElements() {
@@ -490,42 +502,17 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     }
 
     return _applyCss(
-      _handleShowOn(
-        item.showOn,
-        Padding(
+      handleShowOn(
+        showOn: item.showOn,
+        child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: child,
         ),
+        ritaDependencies: _ritaDependencies,
+        checkValueForShowOn: checkValueForShowOn,
       ),
       cssClass: item.options?.cssClass,
     );
-  }
-
-  /// handles the visibility of an element based on the showOn property.
-  /// Uses the _evaluateCondition function to evaluate the condition
-  Widget _handleShowOn(ui.ShowOnProperty? showOn, Widget child) {
-    if (showOn == null) {
-      return child;
-    } else if (showOn.rule != null && showOn.id != null) {
-      final isVisible = _ritaDependencies[showOn.id!] == true;
-      return AnimatedCrossFade(
-        duration: const Duration(milliseconds: 500),
-        sizeCurve: Curves.easeInOut,
-        firstChild: child,
-        secondChild: Container(),
-        crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-      );
-    } else {
-      bool isVisible = evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
-      return AnimatedCrossFade(
-        duration: const Duration(milliseconds: 500),
-        sizeCurve: Curves.easeInOut,
-        firstChild: child,
-        secondChild: Container(),
-        // Invisible child
-        crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-      );
-    }
   }
 
   /// generates a button group control based on the type of the button group
@@ -545,6 +532,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     }
   }
 
+  /// Renders a styled button based on the provided variant
   Widget renderStyledButton({
     required BuildContext context,
     required ui.ColorVariant? variant,
@@ -667,6 +655,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     }
   }
 
+  /// Generates a button control based on the provided button configuration
   Widget _generateButtonControl(ui.Button button) {
     final formNoValidate = button.options?.formnovalidate ?? false;
     final submitOptions = button.options?.submitOptions;
@@ -757,27 +746,6 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     );
   }
 
-  // /// generates a button control based on the type of the button
-  // Widget _generateButtonControl(ui.Button button) {
-  //   // TODO: I dont get variant here, this most likely is an error with the generated type. Adjust the parsing process
-  //   // if(button.options.nativeSubmitOptions.
-  //   return renderStyledButton(
-  //     context: context,
-  //     variant: button.options?.variant,
-  //     onPressed: () {
-  //       switch (button.buttonType) {
-  //         case ui.TheButtonsType.RESET:
-  //           _formKey.currentState?.reset();
-  //           break;
-  //         case ui.TheButtonsType.SUBMIT:
-  //           _formKey.currentState?.saveAndValidate();
-  //           break;
-  //       }
-  //     },
-  //     child: Text(button.text),
-  //   );
-  // }
-
   /// renders a simple Divider Widget
   Divider _generateDivider(ui.Divider item) {
     return const Divider();
@@ -846,15 +814,12 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       ritaDependencies: _ritaDependencies,
       checkValueForShowOn: checkValueForShowOn,
       showOn: item.showOn,
+      // Rita/selfIndices support
+      ritaEvaluator: ritaRuleEvaluator,
+      getFullFormData: () => processFormValuesEllaV2(_showOnDependencies),
+      selfIndices: const {},
     );
   }
-
-  // dynamic _getObjectFromJsonFormData(String path) {
-  //   if (formData.isEmpty) {
-  //     return null;
-  //   }
-  //   return getObjectFromJson(formData, path);
-  // }
 
   /// gets an object from the jsonSchema
   /// [path] the path of the object in the json schema
@@ -1010,16 +975,27 @@ Map<String, dynamic> initShowOnDependencies(Map<String, dynamic>? properties, Ma
     } else if (formData != null && formData.containsKey(key)) {
       final formDataKey = formData[key];
       if (formDataKey is List) {
-        // int id = 0;
-        dependencies["/properties/$key"] = formDataKey.map((item) => item.toString()).toList(); // ListItem(id: id++, value: item)
+        dependencies["/properties/$key"] = formDataKey.map((item) => item.toString()).toList();
       } else {
         dependencies["/properties/$key"] = formatDateTime(formData[key], element["format"]);
       }
-      // dependencies["/properties/$key"] = formData[key];
     } else if (element.containsKey('default')) {
-      // check if the jsonSchema defines a default value for the field
       dependencies["/properties/$key"] = formatDateTime(element["default"], element["format"]);
     } else {
+      // Set default based on type if not set
+      // if (element["type"] == "string") {
+      //   dependencies["/properties/$key"] = "";
+      // } else if (element["type"] == "integer" || element["type"] == "number") {
+      //   // TODO use minValue if available. But it would be better to just evaluate all conditions to false if no value is set and let the ui component handle the default value (same behaviour as vue json forms)
+      //   dependencies["/properties/$key"] = 0;
+      //   if (element.containsKey('minimum')) {
+      //     dependencies["/properties/$key"] = element['minimum'];
+      //   } else {
+      //     dependencies["/properties/$key"] = 0;
+      //   }
+      // } else {
+      //   dependencies["/properties/$key"] = null;
+      // }
       dependencies["/properties/$key"] = null;
     }
   }

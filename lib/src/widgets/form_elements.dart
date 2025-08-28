@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_json_forms/src/ritaRuleEvaluator.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/animated_tooltip.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/html_widget.dart';
 import 'package:flutter_json_forms/src/widgets/shared_widgets.dart';
@@ -28,6 +29,9 @@ class FormElementFormControl extends StatefulWidget {
   final Map<String, bool>? ritaDependencies;
   final dynamic Function(String path) checkValueForShowOn;
   final ui.ShowOnProperty? showOn;
+  final Map<String, int>? selfIndices;
+  final RitaRuleEvaluator? ritaEvaluator;
+  final Map<String, dynamic> Function()? getFullFormData;
 
   // final bool isShown;
 
@@ -53,7 +57,10 @@ class FormElementFormControl extends StatefulWidget {
       this.parentIsShown,
       this.ritaDependencies,
       required this.checkValueForShowOn,
-      this.showOn});
+      this.showOn,
+      this.selfIndices,
+      this.ritaEvaluator,
+      this.getFullFormData});
 
   @override
   State<FormElementFormControl> createState() => _FormElementFormControlState();
@@ -71,7 +78,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   late final bool label;
   late final String? placeholder;
   late final bool enabled;
-  late final dynamic initialValue;
+  late dynamic initialValue;
   late final void Function(dynamic)? onChanged;
   late final bool Function() isShownCallback;
   late final void Function(dynamic)? onSavedCallback;
@@ -151,15 +158,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     } else {
       return child;
     }
-  }
-
-  /// temporary: get title from path
-  String _getNameFromPath(String path) {
-    final name = path.split('/').last;
-    if (name.isNotEmpty) {
-      return name[0].toUpperCase() + name.substring(1);
-    }
-    return name;
   }
 
   /// handles the generation of string elements in the jsonSchema
@@ -250,13 +248,18 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     if (!itemsInitialized) {
       itemsInitialized = true;
       // initialize items with default value
-      if (initialValue != null && initialValue is List<ListItem>) {
-        for (ListItem item in initialValue) {
-          items.add(ListItem<dynamic>(id: item.id, value: item.value));
+      if (initialValue != null) {
+        if (initialValue is! List) {
+          // print("initialValue is not a List, but should be for an array");
+          // return _getNotImplementedWidget();
+          initialValue = [];
+        }
+        for (dynamic item in initialValue) {
+          items.add(ListItem<dynamic>(id: _idCounter, value: item));
           _idCounter++;
         }
       } else {
-        int min_items = safeParseInt(property['minItems']) ?? 1;
+        int min_items = safeParseInt(property['minItems']) ?? 0;
         for (int i = 0; i < min_items; i++) {
           items.add(ListItem<dynamic>(id: _idCounter++, value: null));
         }
@@ -299,10 +302,20 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       });
     }
 
+    // Compute array container shown-state once, and propagate to children
+    // bool arrayIsShown() => isElementShown(
+    //       parentIsShown: widget.isShownCallback(),
+    //       showOn: widget.showOn,
+    //       ritaDependencies: widget.ritaDependencies,
+    //       checkValueForShowOn: widget.checkValueForShowOn,
+    //     );
+    // Use the already computed shown-state for this container
+    bool arrayIsShown() => widget.isShownCallback();
+
     int? maxItems = safeParseInt(property['maxItems']);
     int minItems = safeParseInt(property['minItems']) ?? 0;
 
-    return Column(
+    Widget arrayWidget = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
@@ -317,13 +330,19 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           physics: const ClampingScrollPhysics(),
           itemCount: items.length,
           itemBuilder: (context, index) {
-            // Compute isShown for this array item (if you want to support showOn/rita per item in the future)
-            bool itemIsShown() => isElementShown(
-                  parentIsShown: widget.parentIsShown ?? true,
-                  showOn: widget.showOn,
+            // Per-item child overrides and its shown-state chained to the array container
+            // final String childScope = '$scope/items';
+            final ui.DescendantControlOverrides? overrides = options?.formattingOptions?.descendantControlOverrides?[scope];
+            final ui.ControlOptions? childOptions = overrides?.options ?? options;
+            final ui.ShowOnProperty? childShowOn = overrides?.showOn;
+
+            bool childIsShown() => isElementShown(
+                  parentIsShown: arrayIsShown(),
+                  showOn: childShowOn,
                   ritaDependencies: widget.ritaDependencies,
                   checkValueForShowOn: widget.checkValueForShowOn,
                 );
+
             return Container(
               padding: EdgeInsets.symmetric(vertical: 5),
               key: Key('${items[index].id}'),
@@ -341,12 +360,25 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                     child: FormElementFormControl(
                       scope: '$scope/items', // ${items[index].id} TODO maybe revert or have a look if this breaks things
                       id: '${widget.id}/items/${items[index].id}',
-                      options: options,
+                      options: childOptions,
+                      showOn: childShowOn,
                       property: property['items'] ?? {},
                       nestingLevel: widget.nestingLevel,
                       required: required,
                       // isShown: widget.isShown,
                       initialValue: items[index].value,
+                      // Add/propagate selfIndices (mark current array scope with current index)
+                      selfIndices: () {
+                        final map = <String, int>{};
+                        if (widget.selfIndices != null) {
+                          map.addAll(widget.selfIndices!);
+                        }
+                        // For the current array, the key is the array's scope (not '/items')
+                        map[scope] = index;
+                        return map;
+                      }(),
+                      ritaEvaluator: widget.ritaEvaluator,
+                      getFullFormData: widget.getFullFormData,
                       onSavedCallback: (value) {
                         items[index].value = value;
                         // call widget.onSavedCallback with the new value when last element is saved
@@ -354,7 +386,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                           widget.onSavedCallback!(items.map((e) => e.value).toList());
                         }
                       },
-                      isShownCallback: isShownCallback,
+                      isShownCallback: childIsShown,
                       onChanged: (value) {
                         items[index].value = value;
                         if (widget.onChanged != null) {
@@ -362,7 +394,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                         }
                       },
                       showLabel: false,
-                      parentIsShown: itemIsShown(),
+                      parentIsShown: arrayIsShown(),
                       ritaDependencies: widget.ritaDependencies,
                       checkValueForShowOn: widget.checkValueForShowOn,
                       // showOn: widget.options?.formattingOptions?.descendantControlOverrides?,
@@ -408,10 +440,29 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         ),
       ],
     );
+
+    return handleShowOn(
+      child: arrayWidget,
+      parentIsShown: widget.parentIsShown,
+      showOn: widget.showOn,
+      ritaDependencies: widget.ritaDependencies,
+      checkValueForShowOn: widget.checkValueForShowOn,
+      selfIndices: widget.selfIndices,
+      ritaEvaluator: widget.ritaEvaluator,
+      getFullFormData: widget.getFullFormData,
+    );
   }
 
   Widget _generateObject() {
-    // TODO use version from dynamic_form_builder.dart
+    // Compute object container shown-state once, and propagate to children
+    // bool objectIsShown() => isElementShown(
+    //       parentIsShown: widget.isShownCallback(),
+    //       showOn: widget.showOn,
+    //       ritaDependencies: widget.ritaDependencies,
+    //       checkValueForShowOn: widget.checkValueForShowOn,
+    //     );
+    // Use current element's shown-state
+    bool objectIsShown() => widget.isShownCallback();
     List<Widget> elements = [];
     if (property['properties'] != null) {
       for (var key in property['properties'].keys) {
@@ -426,7 +477,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
         // Helper for child visibility
         bool childIsShown() => isElementShown(
-              parentIsShown: widget.isShownCallback(),
+              parentIsShown: objectIsShown(),
               showOn: childShowOn,
               ritaDependencies: widget.ritaDependencies,
               checkValueForShowOn: widget.checkValueForShowOn,
@@ -440,8 +491,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           property: property['properties'][key],
           required: childRequired,
           initialValue: initialValue is Map<String, dynamic> ? initialValue["/properties/$key"] : null,
-          // TODO: error handling, most likely at another place in the code. If no object is provided here, an error should be rendered in the ui before
-          // isShown: widget.isShown,
           isShownCallback: childIsShown,
           onSavedCallback: (value) {
             if (value != null && value != "" && childIsShown()) {
@@ -461,7 +510,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
               widget.onChanged!(_showOnDependencies);
             }
           },
-          parentIsShown: isShownCallback(),
+          parentIsShown: objectIsShown(),
           ritaDependencies: widget.ritaDependencies,
           checkValueForShowOn: widget.checkValueForShowOn,
         ));
@@ -487,8 +536,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       );
     }
 
+    Widget objectWidget;
     if (property['title'] != null) {
-      return Column(
+      objectWidget = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -500,8 +550,19 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         ],
       );
     } else {
-      return generateGroupElements();
+      objectWidget = generateGroupElements();
     }
+
+    return handleShowOn(
+      child: objectWidget,
+      checkValueForShowOn: widget.checkValueForShowOn,
+      parentIsShown: widget.parentIsShown,
+      showOn: widget.showOn,
+      ritaDependencies: widget.ritaDependencies,
+      selfIndices: widget.selfIndices,
+      ritaEvaluator: widget.ritaEvaluator,
+      getFullFormData: widget.getFullFormData,
+    );
   }
 
   /// Material Switch
@@ -689,8 +750,18 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       initialValueString = "";
     }
 
+    TextAlign textAlign = switch (options?.fieldSpecificOptions?.textAlign) {
+      ui.TextAlign.START => TextAlign.start,
+      ui.TextAlign.END => TextAlign.end,
+      ui.TextAlign.CENTER => TextAlign.center,
+      ui.TextAlign.LEFT => TextAlign.left,
+      ui.TextAlign.RIGHT => TextAlign.right,
+      null => TextAlign.start,
+    };
+
     return _wrapField(
         child: FormBuilderTextField(
+      textAlign: textAlign,
       name: widget.id,
       onSubmitted: onChanged,
       enabled: enabled,
@@ -744,24 +815,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     );
   }
 
-  double safeParseDouble(dynamic value) {
-    if (value is num) {
-      return value.toDouble();
-    } else if (value is String) {
-      return double.tryParse(value) ?? 0.0;
-    }
-    return 0.0;
-  }
-
-  int? safeParseInt(dynamic value) {
-    if (value is int) {
-      return value;
-    } else if (value is String) {
-      return int.tryParse(value);
-    }
-    return null;
-  }
-
   /// generate File Picker using [FormBuilderFilePicker]
   Widget generateFilePicker() {
     List<String>? getFileExtensions() {
@@ -806,7 +859,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         decoration: _getInputDecoration(border: false),
         // const OutlineInputBorder()
         options: values.map((value) => FormBuilderFieldOption(value: value)).toList(growable: false),
-        orientation: OptionsOrientation.vertical,
+        orientation: getOptionsOrientation(options?.fieldSpecificOptions?.stacked),
       ),
     );
   }
@@ -823,6 +876,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           enabled: enabled,
           validator: _composeBaseValidator(),
           decoration: _getInputDecoration(border: false),
+          orientation: getOptionsOrientation(options?.fieldSpecificOptions?.stacked),
           // border: const OutlineInputBorder()
           options: values.map((value) => FormBuilderFieldOption(value: value)).toList(growable: false),
         ),
@@ -953,13 +1007,40 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     };
   }
 
+  double safeParseDouble(dynamic value) {
+    if (value is num) {
+      return value.toDouble();
+    } else if (value is String) {
+      return double.tryParse(value) ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  int? safeParseInt(dynamic value) {
+    if (value is int) {
+      return value;
+    } else if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
+  }
+
   /// generates the label text marked as required when the field is required
   String _getLabel() {
     return title + (required ? '*' : '');
   }
 
-  Text? _getLabelText() {
-    return label ? Text(_getLabel()) : null;
+  // Text? _getLabelText() {
+  //   return label ? Text(_getLabel()) : null;
+  // }
+
+  /// temporary: get title from path
+  String _getNameFromPath(String path) {
+    final name = path.split('/').last;
+    if (name.isNotEmpty) {
+      return name[0].toUpperCase() + name.substring(1);
+    }
+    return name;
   }
 
   /// TODO temporary
@@ -1006,10 +1087,25 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     }
 
     // Always wrap in a Column to ensure preHtml/postHtml are rendered
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: columnChildren,
+    return handleShowOn(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: columnChildren,
+      ),
+      parentIsShown: widget.parentIsShown ?? true,
+      showOn: widget.showOn,
+      ritaDependencies: widget.ritaDependencies,
+      checkValueForShowOn: widget.checkValueForShowOn,
+      selfIndices: widget.selfIndices,
+      ritaEvaluator: widget.ritaEvaluator,
+      getFullFormData: widget.getFullFormData,
     );
+  }
+
+  // get the options orientation depending on the stacking
+  // by default, stack is handled as false like defined in the ui Schema so the Orientation is set to wrap
+  OptionsOrientation getOptionsOrientation(bool? stacked) {
+    return stacked == true ? OptionsOrientation.vertical : OptionsOrientation.wrap;
   }
 
   /// Creates the input decoration for the form field
@@ -1026,9 +1122,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       border: !border ? InputBorder.none : Theme.of(context).inputDecorationTheme.border,
       helperText: description,
       helperMaxLines: 10,
-      prefix: options?.formattingOptions?.prepend != null ? prefix : null,
+      prefix: options?.formattingOptions?.prepend == null ? prefix : null,
       prefixText: options?.formattingOptions?.prepend,
-      suffix: options?.formattingOptions?.append != null ? suffix : null,
+      suffix: options?.formattingOptions?.append == null ? suffix : null,
       suffixText: options?.formattingOptions?.append,
       floatingLabelBehavior: FloatingLabelBehavior.always,
       // TODO: has to be added back
