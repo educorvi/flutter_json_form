@@ -1,5 +1,5 @@
 {
-  "$schema": "../../schemas/ui_v2-2/ui.schema.json",
+  "$schema": "../../schemas/ui/ui.schema.json",
   "version": "2.0",
   "layout": {
     "type": "VerticalLayout",
@@ -17,7 +17,11 @@
         "scope": "/properties/name",
         "options": {
           "placeholder": "Full Name",
-          "autocomplete": "name"
+          "autocomplete": "name",
+          "help": {
+            "text": "Please enter your full name",
+            "label": "?"
+          }
         }
       },
       {
@@ -122,7 +126,7 @@
                             "path": "rating",
                             "default": 1
                           },
-                          12
+                          4
                         ]
                       },
                       0

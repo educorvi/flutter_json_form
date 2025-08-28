@@ -513,6 +513,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           parentIsShown: objectIsShown(),
           ritaDependencies: widget.ritaDependencies,
           checkValueForShowOn: widget.checkValueForShowOn,
+          selfIndices: widget.selfIndices,
+          ritaEvaluator: widget.ritaEvaluator,
+          getFullFormData: widget.getFullFormData,
         ));
       }
     }

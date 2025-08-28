@@ -8,7 +8,12 @@
     },
     "title": {
       "type": "string",
-      "enum": ["Mrs.", "Mr.", "Ms.", "Dr."]
+      "enum": [
+        "Mrs.",
+        "Mr.",
+        "Ms.",
+        "Dr."
+      ]
     },
     "description": {
       "type": "string",
@@ -29,7 +34,10 @@
     "group_selector": {
       "title": "Groups or Object?",
       "type": "string",
-      "enum": ["Groups", "Object"],
+      "enum": [
+        "Groups",
+        "Object"
+      ],
       "default": "Groups"
     },
     "due_date": {
@@ -91,11 +99,19 @@
           "type": "boolean"
         }
       },
-      "required": ["petName", "age"]
+      "required": [
+        "petName",
+        "flauschig"
+      ]
     },
     "fanciness": {
       "type": "string",
-      "enum": ["fancy", "fancier", "fanciest", "unicorn"],
+      "enum": [
+        "fancy",
+        "fancier",
+        "fanciest",
+        "unicorn"
+      ],
       "description": "Select how fancy you are"
     },
     "tags": {
@@ -118,7 +134,9 @@
       "default": "$now"
     }
   },
-  "required": ["done", "name",
+  "required": [
+    "done",
+    "name",
     "fanciness"
   ]
 }
