@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
+import 'package:flutter_json_forms_demo/constants/constants.dart';
 import 'package:flutter_json_forms_demo/widgets/form_file/form_file_base.dart';
 import 'package:flutter_json_forms_demo/widgets/form_selector.dart';
 
@@ -16,10 +17,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       localizationsDelegates: const [FormBuilderLocalizations.delegate],
       title: 'Flutter Json Forms Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
-        useMaterial3: true,
-      ),
+      // theme: ThemeData(
+      //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
+      //   useMaterial3: true,
+      // ),
+      theme: appConstants.theme.getThemeData(Brightness.light),
+      darkTheme: appConstants.theme.getThemeData(Brightness.dark),
       home: const FlutterFormDemo(),
     );
   }
@@ -70,13 +73,13 @@ class _FlutterFormDemoState extends State<FlutterFormDemo> {
           // ),
           // FormSelector(),
           FormSelector(
-            // key: formSelectorKey,
-            // onFormSelected: (formFile) {
-            //   setState(() {
-            //     selectedFormFile = formFile;
-            //   });
-            // },
-          ),
+              // key: formSelectorKey,
+              // onFormSelected: (formFile) {
+              //   setState(() {
+              //     selectedFormFile = formFile;
+              //   });
+              // },
+              ),
           // const SizedBox(height: 16),
           // SafeArea(
           //   child: selectedFormFile != null ? selectedFormFile!.getForm() : const SizedBox(),

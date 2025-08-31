@@ -60,6 +60,8 @@ dynamic _extractListItemValue(dynamic value) {
     return value.map(_extractListItemValue).toList();
   } else if (value is Map) {
     return value.map((k, v) => MapEntry(k, _extractListItemValue(v)));
+  } else if (value is DateTime) {
+    return value.toIso8601String();
   }
   return value;
 }

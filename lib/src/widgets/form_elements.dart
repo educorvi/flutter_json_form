@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_json_forms/src/ritaRuleEvaluator.dart';
+import 'package:flutter_json_forms/src/utils/parse.dart';
+import 'package:flutter_json_forms/src/utils/validators/validators.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/animated_tooltip.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/html_widget.dart';
 import 'package:flutter_json_forms/src/widgets/shared_widgets.dart';
-import 'package:flutter_json_forms/src/widgets/utils.dart';
+import 'package:flutter_json_forms/src/utils/utils.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
+import 'package:json_schema/json_schema.dart';
 
 import '../constants.dart';
 import '../models/ui_schema.dart' as ui;
@@ -19,7 +22,7 @@ class FormElementFormControl extends StatefulWidget {
   final ui.Format? format;
   final String scope;
   final String id;
-  final Map<String, dynamic> property;
+  final JsonSchema jsonSchema;
   final bool required;
   final void Function(dynamic)? onChanged;
   final bool Function() isShownCallback;
@@ -45,7 +48,7 @@ class FormElementFormControl extends StatefulWidget {
       required this.scope,
       required this.required,
       this.onChanged,
-      required this.property,
+      required this.jsonSchema,
       this.initialValue,
       // required this.isShown,
       this.onSavedCallback,
@@ -69,11 +72,11 @@ class FormElementFormControl extends StatefulWidget {
 class _FormElementFormControlState extends State<FormElementFormControl> {
   late final String title;
   late final String? description;
-  late final String? type;
+  late final SchemaType? type;
   late final ui.ControlOptions? options;
   late final ui.Format? format;
   late final String scope;
-  late final Map<String, dynamic> property;
+  late final JsonSchema jsonSchema;
   late final bool required;
   late final bool label;
   late final String? placeholder;
@@ -90,17 +93,17 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     options = widget.options;
     format = widget.format;
     scope = widget.scope;
-    property = widget.property;
+    jsonSchema = widget.jsonSchema;
     required = widget.required;
     onChanged = widget.onChanged;
     isShownCallback = widget.isShownCallback;
-    title = property['title'] ?? _getNameFromPath(scope);
+    title = jsonSchema.title ?? _getNameFromPath(scope);
     label = options?.formattingOptions?.label ?? true;
-    description = property['description'];
-    type = property["type"];
+    description = jsonSchema.description;
+    type = jsonSchema.type;
     placeholder = options?.formattingOptions?.placeholder;
     enabled = true; // options?.disabled != true;
-    initialValue = widget.initialValue ?? property['default'];
+    initialValue = widget.initialValue ?? jsonSchema.defaultValue;
     // on saved should only be called when the element is shown
     onSavedCallback = (dynamic value) {
       if (widget.onSavedCallback != null && isShownCallback()) {
@@ -134,15 +137,15 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   Widget build(BuildContext context) {
     final Widget child;
     switch (type) {
-      case 'string':
+      case SchemaType.string:
         child = _generateStringControl();
-      case 'integer' || 'number':
+      case SchemaType.integer || SchemaType.number:
         child = _generateIntegerControl();
-      case 'boolean':
+      case SchemaType.boolean:
         child = _generateBooleanControl();
-      case 'array':
+      case SchemaType.array:
         child = _generateArrayControl();
-      case 'object':
+      case SchemaType.object:
         child = _generateObject();
       default: // TODO: number and null missing
         child = _getNotImplementedWidget();
@@ -154,7 +157,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         visible: false,
         child: child,
       );
-      return child;
     } else {
       return child;
     }
@@ -162,15 +164,16 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   /// handles the generation of string elements in the jsonSchema
   Widget _generateStringControl() {
-    if (property['enum'] != null) {
+    if (jsonSchema.enumValues?.isNotEmpty ?? false) {
       List<String> values = [];
-      for (var item in property['enum']) {
+      for (var item in jsonSchema.enumValues!) {
         if (item is String) {
           values.add(item);
         } else {
           try {
             values.add(item.toString());
           } catch (e) {
+            // TODO: Handle error
             print(e);
           }
         }
@@ -187,17 +190,17 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         case null:
           return generateDropdown(values);
       }
-    } else if (property['format'] == 'date-time' || format == ui.Format.DATETIME_LOCAL) {
+    } else if (jsonSchema.format == 'date-time' || format == ui.Format.DATETIME_LOCAL) {
       return generateDateTimePicker(InputType.both);
-    } else if (property['format'] == 'date' || format == ui.Format.DATE) {
+    } else if (jsonSchema.format == 'date' || format == ui.Format.DATE) {
       return generateDateTimePicker(InputType.date); // TODO adjust timepicker
-    } else if (property['format'] == 'time' || format == ui.Format.TIME) {
+    } else if (jsonSchema.format == 'time' || format == ui.Format.TIME) {
       return generateDateTimePicker(InputType.time); // TODO adjust timepicker
-    } else if (property['format'] == 'uri') {
+    } else if (jsonSchema.format == 'uri') {
       return generateFilePicker();
     } else {
       // type is string
-      if (property['format'] == 'color' || format == ui.Format.COLOR) {
+      if (jsonSchema.format == 'color' || format == ui.Format.COLOR) {
         return generateColorPicker();
       }
       return generateTextField();
@@ -222,24 +225,26 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   /// handles the generation of array elements in the jsonSchema
   Widget _generateArrayControl() {
-    var type = null;
-    if (property['items'] != null) {
-      type = property['items']['type'];
-      if (property['items']['enum'] != null) {
+    if (jsonSchema.items != null) {
+      final type = jsonSchema.items!.type;
+      if (type != SchemaType.object && type != SchemaType.array && jsonSchema.items!.enumValues?.isNotEmpty == true) {
         List<String> values = [];
-        for (var item in property['items']['enum']) {
+        for (var item in jsonSchema.items!.enumValues!) {
           values.add(item);
         }
         return generateCheckboxGroup(values);
       }
     }
-    if (property['enum'] != null) {
-      List<String> values = [];
-      for (var item in property['enum']) {
-        values.add(item);
-      }
-      return generateCheckboxGroup(values);
-    }
+    // if (jsonSchema.items != null) {
+    //   final type = jsonSchema.items!.type;
+    //   if (type != SchemaType.object && type != SchemaType.array && jsonSchema.items!.enumValues != null) {
+    //     List<String> values = [];
+    //     for (var item in jsonSchema.items!.enumValues!) {
+    //       values.add(item);
+    //     }
+    //     return generateCheckboxGroup(values);
+    //   }
+    // }
     if (options?.fieldSpecificOptions?.tags?.enabled == true) {
       // TODO implement variants and proper tags support
       return generateTextField();
@@ -259,8 +264,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
           _idCounter++;
         }
       } else {
-        int min_items = safeParseInt(property['minItems']) ?? 0;
-        for (int i = 0; i < min_items; i++) {
+        int minItems = safeParseInt(jsonSchema.minItems);
+        for (int i = 0; i < minItems; i++) {
           items.add(ListItem<dynamic>(id: _idCounter++, value: null));
         }
       }
@@ -312,8 +317,8 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     // Use the already computed shown-state for this container
     bool arrayIsShown() => widget.isShownCallback();
 
-    int? maxItems = safeParseInt(property['maxItems']);
-    int minItems = safeParseInt(property['minItems']) ?? 0;
+    int? maxItems = trySafeParseInt(jsonSchema.maxItems);
+    int minItems = safeParseInt(jsonSchema.minItems);
 
     Widget arrayWidget = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,10 +349,17 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                 );
 
             return Container(
-              padding: EdgeInsets.symmetric(vertical: 5),
+              // padding: EdgeInsets.symmetric(vertical: 0),
+              // decoration: BoxDecoration(
+              //   borderRadius: BorderRadius.circular(12),
+              //   border: Border.all(
+              //     color: Colors.grey,
+              //   ),
+              // ),
               key: Key('${items[index].id}'),
               // padding: const EdgeInsets.only(right: 40, top: 5, bottom: 5),
               child: Row(
+                // crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ReorderableDragStartListener(
                     index: index,
@@ -362,7 +374,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                       id: '${widget.id}/items/${items[index].id}',
                       options: childOptions,
                       showOn: childShowOn,
-                      property: property['items'] ?? {},
+                      jsonSchema: jsonSchema.items!, // TODO not type safe!
                       nestingLevel: widget.nestingLevel,
                       required: required,
                       // isShown: widget.isShown,
@@ -402,9 +414,20 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
                   ),
                   // SizedBox(width: 10),
                   IconButton(
-                    color: Theme.of(context).colorScheme.error,
+                    // FilledButton.tonal
+                    // style: ButtonStyle(
+                    //   // backgroundColor: WidgetStateProperty.all(
+                    //   //   Theme.of(context).colorScheme.error,
+                    //   // ),
+                    //   iconColor: WidgetStateProperty.all(
+                    //     Theme.of(context).colorScheme.error,
+                    //     // Theme.of(context).colorScheme.onError,
+                    //   ),
+                    // ),
                     disabledColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
                     icon: Icon(Icons.close),
+                    color: Theme.of(context).colorScheme.error,
+                    // child: Icon(Icons.close),
                     onPressed: items.length > minItems ? () => removeItem(index) : null,
                     // padding: EdgeInsets.zero,
                   ),
@@ -425,7 +448,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         // description
         if (description != null)
           Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(top: 10.0),
             child: Text(
               description!,
               style: Theme.of(context).textTheme.bodyMedium,
@@ -464,97 +487,94 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     // Use current element's shown-state
     bool objectIsShown() => widget.isShownCallback();
     List<Widget> elements = [];
-    if (property['properties'] != null) {
-      for (var key in property['properties'].keys) {
-        // TODO: add default values recursively here
-        bool childRequired = property['required'] != null ? property['required'].contains(key) : false;
-        String childScope = "$scope/properties/$key";
-        ui.DescendantControlOverrides? descendantControlOverrides = options?.formattingOptions?.descendantControlOverrides?[childScope];
+    for (var key in jsonSchema.properties.keys) {
+      // TODO: add default values recursively here
+      bool childRequired = jsonSchema.propertyRequired(key);
+      String childScope = "$scope/properties/$key";
+      ui.DescendantControlOverrides? descendantControlOverrides = options?.formattingOptions?.descendantControlOverrides?[childScope];
 
-        // Use descendant overrides if present, otherwise fall back to parent's options/showOn
-        final childOptions = descendantControlOverrides?.options ?? options;
-        final childShowOn = descendantControlOverrides?.showOn ?? widget.showOn;
+      // Use descendant overrides if present, otherwise fall back to parent's options/showOn
+      final childOptions = descendantControlOverrides?.options ?? options;
+      final childShowOn = descendantControlOverrides?.showOn ?? widget.showOn;
 
-        // Helper for child visibility
-        bool childIsShown() => isElementShown(
-              parentIsShown: objectIsShown(),
-              showOn: childShowOn,
-              ritaDependencies: widget.ritaDependencies,
-              checkValueForShowOn: widget.checkValueForShowOn,
-            );
-        elements.add(FormElementFormControl(
-          scope: childScope,
-          id: '${widget.id}/properties/$key',
-          options: childOptions,
-          showOn: childShowOn,
-          nestingLevel: widget.nestingLevel + 1,
-          property: property['properties'][key],
-          required: childRequired,
-          initialValue: initialValue is Map<String, dynamic> ? initialValue["/properties/$key"] : null,
-          isShownCallback: childIsShown,
-          onSavedCallback: (value) {
-            if (value != null && value != "" && childIsShown()) {
-              formSubmitValues[key] = value;
-            } else {
-              formSubmitValues.remove(key);
+      // Helper for child visibility
+      bool childIsShown() => isElementShown(
+            parentIsShown: objectIsShown(),
+            showOn: childShowOn,
+            ritaDependencies: widget.ritaDependencies,
+            checkValueForShowOn: widget.checkValueForShowOn,
+          );
+      elements.add(FormElementFormControl(
+        scope: childScope,
+        id: '${widget.id}/properties/$key',
+        options: childOptions,
+        showOn: childShowOn,
+        nestingLevel: widget.nestingLevel + 1,
+        jsonSchema: jsonSchema.properties[key]!, // TODO: unsafe
+        required: childRequired,
+        initialValue: initialValue is Map<String, dynamic> ? initialValue["/properties/$key"] : null,
+        isShownCallback: childIsShown,
+        onSavedCallback: (value) {
+          if (value != null && value != "" && childIsShown()) {
+            formSubmitValues[key] = value;
+          } else {
+            formSubmitValues.remove(key);
+          }
+          if (widget.onSavedCallback != null && key == jsonSchema.properties.keys.last) {
+            if (formSubmitValues.isNotEmpty) {
+              widget.onSavedCallback!(formSubmitValues);
             }
-            if (widget.onSavedCallback != null && key == property['properties'].keys.last) {
-              if (formSubmitValues.isNotEmpty) {
-                widget.onSavedCallback!(formSubmitValues);
-              }
-            }
-          },
-          onChanged: (value) {
-            _showOnDependencies[key] = value;
-            if (widget.onChanged != null) {
-              widget.onChanged!(_showOnDependencies);
-            }
-          },
-          parentIsShown: objectIsShown(),
-          ritaDependencies: widget.ritaDependencies,
-          checkValueForShowOn: widget.checkValueForShowOn,
-          selfIndices: widget.selfIndices,
-          ritaEvaluator: widget.ritaEvaluator,
-          getFullFormData: widget.getFullFormData,
-        ));
-      }
+          }
+        },
+        onChanged: (value) {
+          _showOnDependencies[key] = value;
+          if (widget.onChanged != null) {
+            widget.onChanged!(_showOnDependencies);
+          }
+        },
+        parentIsShown: objectIsShown(),
+        ritaDependencies: widget.ritaDependencies,
+        checkValueForShowOn: widget.checkValueForShowOn,
+        selfIndices: widget.selfIndices,
+        ritaEvaluator: widget.ritaEvaluator,
+        getFullFormData: widget.getFullFormData,
+      ));
     }
 
-    Container generateGroupElements() {
-      return getLineContainer(
-        //.filled(
-        // color: getAlternatingColor(context, widget.nestingLevel),
-        child: ListView.separated(
-          shrinkWrap: true,
-          physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: UIConstants.groupPadding),
-          itemCount: elements.length,
-          itemBuilder: (BuildContext context, int index) {
-            return elements[index];
-          },
-          separatorBuilder: (BuildContext context, int index) {
-            return const SizedBox(height: UIConstants.verticalLayoutItemPadding);
-          },
+    String label = jsonSchema.title ?? scope.split('/').last;
+
+    Widget objectWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
-      );
-    }
-
-    Widget objectWidget;
-    if (property['title'] != null) {
-      objectWidget = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            property['title'],
-            style: Theme.of(context).textTheme.titleLarge,
+        getLineContainer(
+            //.filled(
+            // color: getAlternatingColor(context, widget.nestingLevel),
+            // child: ListView.builder(
+            //   // .separated
+            //   shrinkWrap: true,
+            //   physics: const ClampingScrollPhysics(),
+            //   padding: const EdgeInsets.symmetric(horizontal: UIConstants.groupPadding),
+            //   itemCount: elements.length,
+            //   itemBuilder: (BuildContext context, int index) {
+            //     return elements[index];
+            //   },
+            //   // separatorBuilder: (BuildContext context, int index) {
+            //   //   return const SizedBox(height: UIConstants.verticalLayoutItemPadding);
+            //   // },
+            // ),
+            child: Padding(
+          padding: EdgeInsets.only(left: UIConstants.groupPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: elements,
           ),
-          const SizedBox(height: UIConstants.groupTitleSpacing),
-          generateGroupElements(),
-        ],
-      );
-    } else {
-      objectWidget = generateGroupElements();
-    }
+        )),
+      ],
+    );
 
     return handleShowOn(
       child: objectWidget,
@@ -748,7 +768,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
     String initialValueString = "";
     try {
-      initialValueString = initialValue as String;
+      initialValueString = initialValue.toString();
     } catch (e) {
       initialValueString = "";
     }
@@ -772,6 +792,21 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       validator: FormBuilderValidators.compose([
         _composeBaseValidator(),
         if (type == 'number' || type == 'integer') FormBuilderValidators.numeric(checkNullOrEmpty: false),
+        if (jsonSchema.minimum != null) FormBuilderValidators.min(safeParseNum(jsonSchema.minimum), checkNullOrEmpty: false),
+        if (jsonSchema.maximum != null) FormBuilderValidators.max(safeParseNum(jsonSchema.maximum), checkNullOrEmpty: false),
+        if (jsonSchema.exclusiveMinimum != null)
+          FormBuilderValidators.min(safeParseNum(jsonSchema.exclusiveMinimum), inclusive: false, checkNullOrEmpty: false),
+        if (jsonSchema.exclusiveMaximum != null)
+          FormBuilderValidators.max(safeParseNum(jsonSchema.exclusiveMaximum), inclusive: false, checkNullOrEmpty: false),
+        if (jsonSchema.multipleOf != null)
+          JsonSchemaValidators.multipleOf<dynamic>(
+            safeParseNum(jsonSchema.multipleOf),
+            // Optional: provide a localized error text
+            // errorTextBuilder: (m) => AppLocalizations.of(context)!.multipleOfErrorText(m),
+          ),
+        if (jsonSchema.minLength != null) FormBuilderValidators.minLength(safeParseInt(jsonSchema.minLength), checkNullOrEmpty: false),
+        if (jsonSchema.maxLength != null) FormBuilderValidators.maxLength(safeParseInt(jsonSchema.maxLength), checkNullOrEmpty: false),
+        if (jsonSchema.pattern != null) FormBuilderValidators.match(jsonSchema.pattern!, checkNullOrEmpty: false),
       ]),
       // _composeBaseValidator(additionalValidators: (type == 'number' || type == 'integer') ? [FormBuilderValidators.numeric()] : null)
       decoration: _getInputDecoration(),
@@ -802,18 +837,45 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   }
 
   Widget generateSlider() {
+    final double min = safeParseDouble(jsonSchema.minimum);
+    final double max = safeParseDouble(jsonSchema.maximum);
+    final double? multiple = jsonSchema.multipleOf != null ? safeParseDouble(jsonSchema.multipleOf) : null;
+
+    int? divisions;
+    if (max > min) {
+      if (multiple != null && multiple > 0) {
+        final double steps = (max - min) / multiple;
+        // Only set divisions if steps is (almost) an integer
+        if (steps.isFinite && steps > 0 && (steps - steps.roundToDouble()).abs() < 1e-6) {
+          // TODO. set threshold in constants file
+          divisions = steps.round();
+        } else {
+          divisions = null; // slider moves freely; validation enforces multipleOf
+        }
+      } else {
+        divisions = (max - min).toInt();
+      }
+    }
+
     return _wrapField(
       child: FormBuilderSlider(
         name: widget.id,
         onChanged: onChanged,
         onSaved: widget.onSavedCallback,
         enabled: enabled,
-        validator: _composeBaseValidator(),
+        validator: _composeBaseValidator(additionalValidators: [
+          if (multiple != null && multiple > 0)
+            JsonSchemaValidators.multipleOf<dynamic>(
+              multiple,
+              // Optional translation hook:
+              // errorTextBuilder: (m) => AppLocalizations.of(context)!.multipleOfErrorText(m),
+            ),
+        ]),
         decoration: _getInputDecoration(),
-        min: safeParseDouble(property['minimum']),
-        max: safeParseDouble(property['maximum']),
-        divisions: safeParseDouble(property['maximum']).toInt() - safeParseDouble(property['minimum']).toInt(),
-        initialValue: initialValue is double ? initialValue : 0.0,
+        min: min,
+        max: max,
+        divisions: divisions,
+        initialValue: initialValue is double ? initialValue : min,
       ),
     );
   }
@@ -922,18 +984,19 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 100),
         child: FormBuilderDateTimePicker(
-            name: widget.id,
-            onChanged: onChanged,
-            enabled: enabled,
-            validator: _composeBaseValidator(),
-            decoration: _getInputDecoration(suffix: const Icon(Icons.date_range)),
-            initialValue: getDefaultDatetime(),
-            inputType: inputType,
-            onSaved: (DateTime? dateTime) => {widget.onSavedCallback?.call((dateTime?.toIso8601String()))}
-            // locale: const Locale('de', 'DE'),
-            // initialValue: DateTime.now(),
-            // border decoration
-            ),
+          name: widget.id,
+          onChanged: onChanged,
+          enabled: enabled,
+          validator: _composeBaseValidator(),
+          decoration: _getInputDecoration(suffix: const Icon(Icons.date_range)),
+          initialValue: getDefaultDatetime(),
+          inputType: inputType,
+          onSaved: (DateTime? dateTime) => {widget.onSavedCallback?.call((dateTime?.toIso8601String()))}, // widget.onSavedCallback,
+          // onFieldSubmitted: (value) => {value?.toIso8601String()},
+          // locale: const Locale('de', 'DE'),
+          // initialValue: DateTime.now(),
+          // border decoration
+        ),
       ),
     );
   }
@@ -1010,24 +1073,6 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     };
   }
 
-  double safeParseDouble(dynamic value) {
-    if (value is num) {
-      return value.toDouble();
-    } else if (value is String) {
-      return double.tryParse(value) ?? 0.0;
-    }
-    return 0.0;
-  }
-
-  int? safeParseInt(dynamic value) {
-    if (value is int) {
-      return value;
-    } else if (value is String) {
-      return int.tryParse(value);
-    }
-    return null;
-  }
-
   /// generates the label text marked as required when the field is required
   String _getLabel() {
     return title + (required ? '*' : '');
@@ -1091,10 +1136,12 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
     // Always wrap in a Column to ensure preHtml/postHtml are rendered
     return handleShowOn(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: columnChildren,
-      ),
+      child: columnChildren.length == 1
+          ? columnChildren.first
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: columnChildren,
+            ),
       parentIsShown: widget.parentIsShown ?? true,
       showOn: widget.showOn,
       ritaDependencies: widget.ritaDependencies,

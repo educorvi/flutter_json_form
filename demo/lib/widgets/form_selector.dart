@@ -26,7 +26,8 @@ class FormSelector extends StatefulWidget {
           ExampleFormFile(name: "Reproduce", filename: "reproduce"),
           ExampleFormFile(
               name: "Reisekostenantrag mit Prozessautomatisierung",
-              filename: "reisekostenantrag_paut")
+              filename: "reisekostenantrag_paut"),
+          ExampleFormFile(name: "Json Schema", filename: "jsonSchema"),
         ],
         uploadFormFile = UploadFormFile(
           name: "Custom Form",
