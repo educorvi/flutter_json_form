@@ -397,9 +397,9 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
     ui.Layout layout = uiSchemaModel.layout;
     switch (layout.type) {
       case ui.LayoutType.VERTICAL_LAYOUT:
-        child = _generateVerticalLayout(layout.elements, nestingLevel);
+        child = _generateVerticalLayout(layout, nestingLevel);
       case ui.LayoutType.HORIZONTAL_LAYOUT:
-        child = _generateHorizontalLayout(layout.elements, nestingLevel);
+        child = _generateHorizontalLayout(layout, nestingLevel);
       case ui.LayoutType.GROUP:
         child = _generateGroupFromLayout(layout, nestingLevel);
     }
@@ -458,29 +458,49 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
         : groupElement;
   }
 
+  /// Helper widget to render an element with an optional label
+  Widget _withLabel(String? label, Widget child) {
+    if (label == null) return child;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        child,
+      ],
+    );
+  }
+
   /// generates a horizontal layout with the elements in a row. A Wrap is used to warp the elements around
   /// if they need more horizontal space than available
-  LayoutBuilder _generateHorizontalLayout(List<ui.LayoutElement> elements, int nestingLevel) {
+  LayoutBuilder _generateHorizontalLayout(ui.Layout item, int nestingLevel) {
+    final elements = item.elements;
+    final label = item.options?.label;
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      return Row(
-          // make elements align left and right (space between)
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: elements.map((item) {
-            return Expanded(child: _generateItem(item, nestingLevel, layoutDirection: LayoutDirection.horizontal));
-          }).toList());
+      final row = Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: elements.map((item) {
+          return Expanded(child: _generateItem(item, nestingLevel, layoutDirection: LayoutDirection.horizontal));
+        }).toList(),
+      );
+      return _withLabel(label, row);
     });
   }
 
   /// generates a vertical layout with the elements in a column
-  Column _generateVerticalLayout(List<ui.LayoutElement> elements, int nestingLevel) {
-    return Column(
+  Column _generateVerticalLayout(ui.Layout item, int nestingLevel) {
+    final elements = item.elements;
+    final label = item.options?.label;
+    final column = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      // shrinkWrap: true,
-      // physics: const ClampingScrollPhysics(),
       children: elements.map((item) {
         return _generateItem(item, nestingLevel, layoutDirection: LayoutDirection.vertical);
       }).toList(),
     );
+    return _withLabel(label, column) as Column;
   }
 
   /// generates an Layoutelement based on the type of the element
@@ -499,11 +519,11 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       case ui.LayoutElementType.GROUP:
         child = _generateGroupFromLayoutElement(ui.Layout.fromJson(item.toJson()), nestingLevel + 1);
       case ui.LayoutElementType.HORIZONTAL_LAYOUT:
-        child = _generateHorizontalLayout(ui.Layout.fromJson(item.toJson()).elements, nestingLevel + 1);
+        child = _generateHorizontalLayout(ui.Layout.fromJson(item.toJson()), nestingLevel + 1);
       case ui.LayoutElementType.HTML:
         child = _generateHtml(ui.HtmlRenderer.fromJson(item.toJson()));
       case ui.LayoutElementType.VERTICAL_LAYOUT:
-        child = _generateVerticalLayout(ui.Layout.fromJson(item.toJson()).elements, nestingLevel + 1);
+        child = _generateVerticalLayout(ui.Layout.fromJson(item.toJson()), nestingLevel + 1);
       case null:
         child = getNotImplementedWidget("No type defined for LayoutElementType $item");
     }

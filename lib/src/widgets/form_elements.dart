@@ -78,7 +78,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   late final String scope;
   late final JsonSchema jsonSchema;
   late final bool required;
-  late final bool label;
+  // late final bool label;
   late final String? placeholder;
   late final bool enabled;
   late dynamic initialValue;
@@ -98,7 +98,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     onChanged = widget.onChanged;
     isShownCallback = widget.isShownCallback;
     title = jsonSchema.title; // ?? _getNameFromPath(scope);
-    label = options?.formattingOptions?.label ?? true;
+    // label = options?.formattingOptions?.label ?? true;
     description = jsonSchema.description;
     try {
       type = jsonSchema.type;
