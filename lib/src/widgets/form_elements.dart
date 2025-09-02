@@ -509,7 +509,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     List<Widget> elements = [];
     for (var key in jsonSchema.properties.keys) {
       // TODO: add default values recursively here
-      bool childRequired = jsonSchema.propertyRequired(key);
+      bool childRequired = jsonSchema.propertyRequired(key) || required;
       String childScope = "$scope/properties/$key";
       ui.DescendantControlOverrides? descendantControlOverrides = options?.formattingOptions?.descendantControlOverrides?[childScope];
 
@@ -1139,7 +1139,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     }
 
     final titleString = title ?? getScope();
-    return required ? ('${titleString}*') : titleString; // TODO: not barrierefrei, should be an icon with text required/notwendig
+    return required && titleString != null
+        ? ('${titleString}*')
+        : titleString; // TODO: not barrierefrei, should be an icon with text required/notwendig
   }
 
   // Text? _getLabelText() {

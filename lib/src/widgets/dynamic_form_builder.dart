@@ -272,7 +272,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
       _showOnDependencies = initShowOnDependencies(jsonSchema.properties, null);
       // _formKey.currentState!.reset();
       _formKey.currentState!.reset();
-      // The problem here is that sometimes integers are integers (e..g as a slider determined by ui schema) and sometimes they are represented as string (like in a Textfield). We cant determine the type here as it is not solely dependent on the json schema but on the combination of ui and json schema. This would mean reimplementing the locig within form_elements which decides which element to render. An easier approach would be to just check which type the element had before and then convert it accoringly
+      // The problem here is that sometimes integers are integers (e..g as a slider determined by ui schema) and sometimes they are represented as string (like in a Textfield). We can't determine the type here as it is not solely dependent on the json schema but on the combination of ui and json schema. This would mean re-implementing the logic within form_elements which decides which element to render. An easier approach would be to just check which type the element had before and then convert it accordingly
       _formKey.currentState!.patchValue(_showOnDependencies); // convertShowOnDependenciesToFormBuilderValues
       // final arrayElementsToDelete = _resetShowOnDependencies(_showOnDependencies);
       // _showOnDependencies = _initShowOnDependencies(_properties, null);
