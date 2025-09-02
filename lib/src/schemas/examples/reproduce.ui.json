@@ -595,13 +595,6 @@
                     },
                     {
                         "type": "Control",
-                        "scope": "/properties/selectionfield-in-formad0995330a9343efbb2e5488ab28e4a8",
-                        "options": {
-                            "stacked": false
-                        }
-                    },
-                    {
-                        "type": "Control",
                         "scope": "/properties/upload-field-in-formcd69370e0708472482997b3da12ad3cc",
                         "showOn": {
                             "id": "ritaRule-upload-field-in-formcd69370e0708472482997b3da12ad3cc",

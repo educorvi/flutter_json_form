@@ -1,0 +1,67 @@
+{
+  "version": "2.0",
+  "layout": {
+    "type": "VerticalLayout",
+    "elements": [
+      {
+        "type": "Control",
+        "scope": "/properties/fg_art_der_fahrt",
+        "options": {
+          "descendantControlOverrides": {
+            "/properties/fg_art_der_fahrt/items/properties/fg_art_der_fahrt_fs_kosten_fahrkarte": {
+              "options": {
+                "append": "EUR"
+              },
+              "showOn": {
+                "id": "ritaRule-fg_art_der_fahrt_fs_kosten_fahrkarte",
+                "rule": {
+                  "type": "exists",
+                  "array": {
+                    "type": "atom",
+                    "path": "fg_art_der_fahrt",
+                    "default": []
+                  },
+                  "placeholder": "$array_item1",
+                  "indexPlaceholder": "$index1",
+                  "rule": {
+                    "type": "and",
+                    "arguments": [
+                      {
+                        "type": "comparison",
+                        "operation": "equal",
+                        "arguments": [
+                          {
+                            "type": "atom",
+                            "path": "$index1",
+                            "default": -1
+                          },
+                          {
+                            "type": "atom",
+                            "path": "$selfIndices./properties/fg_art_der_fahrt",
+                            "default": -1
+                          }
+                        ]
+                      },
+                      {
+                        "type": "comparison",
+                        "operation": "equal",
+                        "arguments": [
+                          {
+                            "type": "atom",
+                            "path": "$array_item1.fg_art_der_fahrt_fs_verkehrsmittel",
+                            "default": ""
+                          },
+                          "ÖPNV"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -30,8 +30,7 @@
                                 }
                             },
                             "required": [],
-                            "dependentRequired": {},
-                            "allOf": []
+                            "dependentRequired": {}
                         }
                     },
                     "fg_art_der_fahrt_fs_ziel": {
@@ -75,8 +74,7 @@
                     "fg_art_der_fahrt_fs_strecke",
                     "fg_art_der_fahrt_fs_taxikosten"
                 ],
-                "dependentRequired": {},
-                "allOf": []
+                "dependentRequired": {}
             }
         },
         "fs_sonstige_kosten": {
@@ -96,6 +94,5 @@
     "required": [
         "fg_bankverbindung_fs_kontoauswahl"
     ],
-    "dependentRequired": {},
-    "allOf": []
+    "dependentRequired": {}
 }
