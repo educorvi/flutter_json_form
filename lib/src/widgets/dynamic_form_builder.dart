@@ -440,7 +440,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
     Widget groupElement = getLineContainer(
         child: Padding(
-      padding: const EdgeInsets.all(UIConstants.groupPadding),
+      padding: const EdgeInsets.only(left: UIConstants.groupPadding),
       child: generateGroupElements(),
     ));
 
@@ -922,7 +922,7 @@ JsonSchema? getObjectFromJson(
   JsonSchema json,
   String path,
 ) {
-  List<String> pathParts = getPathWithoutPrefix(path).split('/');
+  List<String> pathParts = getPropertyKeysFromPath(path);
   JsonSchema? object = json;
   try {
     for (String part in pathParts) {
@@ -932,6 +932,22 @@ JsonSchema? getObjectFromJson(
     return null;
   }
   return object;
+}
+
+/// get List of property keys from json pointer
+List<String> getPropertyKeysFromPath(String path) {
+  List<String> keys = [];
+  path = getPathWithoutPrefix(path);
+  if (path == "") {
+    return keys;
+  }
+  List<String> pathParts = path.split('/');
+
+  /// add every second part as the first one is properties and can be ignored
+  for (int i = 0; i < pathParts.length; i += 2) {
+    keys.add(pathParts[i]);
+  }
+  return keys;
 }
 
 /// get path without prefix /properties or #/properties
@@ -949,12 +965,12 @@ String getPathWithoutPrefix(String path) {
 /// this function gets called recursively for objects in the jsonSchema which are nested into each other
 Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties, Map<String, dynamic>? formData) {
   dynamic formatInput(dynamic value, JsonSchema schema) {
-    if (schema.format == "date-time" || schema.format == "date") {
+    if (schema.format == "date-time" || schema.format == "date" || schema.format == "time") {
       if (value == "\$now") {
         return DateTime.now();
       }
       // TODO: could throw exception if invalid format. If so, print error in UI
-      return DateTime.parse(value);
+      return DateTime.tryParse(value);
     }
     return value;
   }
@@ -964,15 +980,21 @@ Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties,
 
   for (final entry in properties.entries) {
     final String key = entry.key;
-    final JsonSchema schema = entry.value;
+    final JsonSchema jsonSchema = entry.value;
     // set default values for fields. If a form data is provided, use this
-    if (schema.type == SchemaType.object) {
+    bool isObject;
+    try {
+      isObject = jsonSchema.type == SchemaType.object;
+    } catch (e) {
+      isObject = false;
+    }
+    if (isObject) {
       final recursiveFormData = formData == null
           ? null
           : formData.containsKey(key)
               ? formData[key]
               : null;
-      final nestedDependencies = initShowOnDependencies(schema.properties, recursiveFormData);
+      final nestedDependencies = initShowOnDependencies(jsonSchema.properties, recursiveFormData);
       nestedDependencies.forEach((nestedKey, nestedValue) {
         dependencies["/properties/$key$nestedKey"] = nestedValue;
       });
@@ -981,10 +1003,10 @@ Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties,
       if (formDataKey is List) {
         dependencies["/properties/$key"] = formDataKey.map((item) => item.toString()).toList();
       } else {
-        dependencies["/properties/$key"] = formatInput(formData[key], schema);
+        dependencies["/properties/$key"] = formatInput(formData[key], jsonSchema);
       }
-    } else if (schema.defaultValue != null) {
-      dependencies["/properties/$key"] = formatInput(schema.defaultValue, schema);
+    } else if (jsonSchema.defaultValue != null) {
+      dependencies["/properties/$key"] = formatInput(jsonSchema.defaultValue, jsonSchema);
     } else {
       // Set default based on type if not set
       // if (element["type"] == "string") {

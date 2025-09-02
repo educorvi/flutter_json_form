@@ -70,7 +70,7 @@ class FormElementFormControl extends StatefulWidget {
 }
 
 class _FormElementFormControlState extends State<FormElementFormControl> {
-  late final String title;
+  late final String? title;
   late final String? description;
   late final SchemaType? type;
   late final ui.ControlOptions? options;
@@ -97,10 +97,14 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     required = widget.required;
     onChanged = widget.onChanged;
     isShownCallback = widget.isShownCallback;
-    title = jsonSchema.title ?? _getNameFromPath(scope);
+    title = jsonSchema.title; // ?? _getNameFromPath(scope);
     label = options?.formattingOptions?.label ?? true;
     description = jsonSchema.description;
-    type = jsonSchema.type;
+    try {
+      type = jsonSchema.type;
+    } catch (e) {
+      type = null;
+    }
     placeholder = options?.formattingOptions?.placeholder;
     enabled = true; // options?.disabled != true;
     initialValue = widget.initialValue ?? jsonSchema.defaultValue;
@@ -148,7 +152,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       case SchemaType.object:
         child = _generateObject();
       default: // TODO: number and null missing
-        child = _getNotImplementedWidget();
+        child = _getErrorTextWidget("Not implemented");
     }
     if (options?.formattingOptions?.hidden == true) {
       // TODO: this results in a small additional gap in the ui
@@ -226,7 +230,13 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   /// handles the generation of array elements in the jsonSchema
   Widget _generateArrayControl() {
     if (jsonSchema.items != null) {
-      final type = jsonSchema.items!.type;
+      late final type;
+      try {
+        type = jsonSchema.items!.type;
+      } catch (e) {
+        return _getErrorTextWidget(e.toString());
+        // Handle error
+      }
       if (type != SchemaType.object && type != SchemaType.array && jsonSchema.items!.enumValues?.isNotEmpty == true) {
         List<String> values = [];
         for (var item in jsonSchema.items!.enumValues!) {
@@ -234,6 +244,13 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         }
         return generateCheckboxGroup(values);
       }
+    }
+    if (jsonSchema.enumValues?.isNotEmpty ?? false) {
+      List<String> values = [];
+      for (var item in jsonSchema.enumValues!) {
+        values.add(item);
+      }
+      return generateCheckboxGroup(values);
     }
     // if (jsonSchema.items != null) {
     //   final type = jsonSchema.items!.type;
@@ -320,15 +337,18 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     int? maxItems = trySafeParseInt(jsonSchema.maxItems);
     int minItems = safeParseInt(jsonSchema.minItems);
 
+    final labelString = _getLabel();
+
     Widget arrayWidget = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-            width: double.infinity,
-            child: Text(
-              _getLabel(),
-              style: Theme.of(context).textTheme.titleLarge,
-            )),
+        if (labelString != null)
+          SizedBox(
+              width: double.infinity,
+              child: Text(
+                labelString,
+                style: Theme.of(context).textTheme.titleLarge,
+              )),
         ReorderableListView.builder(
           shrinkWrap: true,
           // buildDefaultDragHandles: true,
@@ -541,40 +561,44 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       ));
     }
 
-    String label = jsonSchema.title ?? scope.split('/').last;
+    Widget objectElements = getLineContainer(
+        //.filled(
+        // color: getAlternatingColor(context, widget.nestingLevel),
+        // child: ListView.builder(
+        //   // .separated
+        //   shrinkWrap: true,
+        //   physics: const ClampingScrollPhysics(),
+        //   padding: const EdgeInsets.symmetric(horizontal: UIConstants.groupPadding),
+        //   itemCount: elements.length,
+        //   itemBuilder: (BuildContext context, int index) {
+        //     return elements[index];
+        //   },
+        //   // separatorBuilder: (BuildContext context, int index) {
+        //   //   return const SizedBox(height: UIConstants.verticalLayoutItemPadding);
+        //   // },
+        // ),
+        child: Padding(
+      padding: EdgeInsets.only(left: UIConstants.groupPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: elements,
+      ),
+    ));
 
-    Widget objectWidget = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        getLineContainer(
-            //.filled(
-            // color: getAlternatingColor(context, widget.nestingLevel),
-            // child: ListView.builder(
-            //   // .separated
-            //   shrinkWrap: true,
-            //   physics: const ClampingScrollPhysics(),
-            //   padding: const EdgeInsets.symmetric(horizontal: UIConstants.groupPadding),
-            //   itemCount: elements.length,
-            //   itemBuilder: (BuildContext context, int index) {
-            //     return elements[index];
-            //   },
-            //   // separatorBuilder: (BuildContext context, int index) {
-            //   //   return const SizedBox(height: UIConstants.verticalLayoutItemPadding);
-            //   // },
-            // ),
-            child: Padding(
-          padding: EdgeInsets.only(left: UIConstants.groupPadding),
-          child: Column(
+    String? label = _getLabel(); // ?? scope.split('/').last;
+
+    Widget objectWidget = label != null
+        ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: elements,
-          ),
-        )),
-      ],
-    );
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              objectElements,
+            ],
+          )
+        : objectElements;
 
     return handleShowOn(
       child: objectWidget,
@@ -590,17 +614,20 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
 
   /// Material Switch
   Widget generateSwitch() {
-    return FormBuilderSwitch(
-      initialValue: initialValue,
-      name: widget.id,
-      onChanged: onChanged,
-      enabled: enabled,
-      onSaved: widget.onSavedCallback,
-      validator: _composeBaseValidator(additionalValidators: required ? [FormBuilderValidators.equal(true)] : null),
-      title: Text(_getLabel()),
-      contentPadding: const EdgeInsets.all(0),
-      decoration: _getInputDecoration(border: false),
-      subtitle: description != null ? Text(description!) : null,
+    return _wrapField(
+      showLabel: false,
+      child: FormBuilderSwitch(
+        initialValue: initialValue,
+        name: widget.id,
+        onChanged: onChanged,
+        enabled: enabled,
+        onSaved: widget.onSavedCallback,
+        validator: _composeBaseValidator(additionalValidators: required ? [FormBuilderValidators.equal(true)] : null),
+        title: Text(_getLabel() ?? ""),
+        contentPadding: const EdgeInsets.all(0),
+        decoration: _getInputDecoration(border: false),
+        subtitle: description != null ? Text(description!) : null,
+      ),
     );
   }
 
@@ -622,6 +649,9 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     }
 
     int maxLines = getLines();
+
+    // TODO: create widget so state works
+    bool obscureText = format == ui.Format.PASSWORD;
 
     TextInputType getKeyboardType() {
       if (maxLines > 1) return TextInputType.multiline;
@@ -767,10 +797,13 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     }
 
     String initialValueString = "";
-    try {
-      initialValueString = initialValue.toString();
-    } catch (e) {
-      initialValueString = "";
+    if (initialValue != null) {
+      try {
+        initialValueString = initialValue.toString();
+      } catch (e) {
+        // TODO: logging
+        initialValueString = "";
+      }
     }
 
     TextAlign textAlign = switch (options?.fieldSpecificOptions?.textAlign) {
@@ -789,6 +822,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       onSubmitted: onChanged,
       enabled: enabled,
       onSaved: widget.onSavedCallback,
+      obscureText: obscureText,
       validator: FormBuilderValidators.compose([
         _composeBaseValidator(),
         if (type == 'number' || type == 'integer') FormBuilderValidators.numeric(checkNullOrEmpty: false),
@@ -807,9 +841,26 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         if (jsonSchema.minLength != null) FormBuilderValidators.minLength(safeParseInt(jsonSchema.minLength), checkNullOrEmpty: false),
         if (jsonSchema.maxLength != null) FormBuilderValidators.maxLength(safeParseInt(jsonSchema.maxLength), checkNullOrEmpty: false),
         if (jsonSchema.pattern != null) FormBuilderValidators.match(jsonSchema.pattern!, checkNullOrEmpty: false),
+        if (options?.fieldSpecificOptions?.format == ui.Format.EMAIL) FormBuilderValidators.email(checkNullOrEmpty: false),
+        if (options?.fieldSpecificOptions?.format == ui.Format.PASSWORD)
+          FormBuilderValidators.password(checkNullOrEmpty: false), // Doesn't do anything currently
+        if (options?.fieldSpecificOptions?.format == ui.Format.TEL) FormBuilderValidators.phoneNumber(checkNullOrEmpty: false),
+        if (options?.fieldSpecificOptions?.format == ui.Format.URL) FormBuilderValidators.url(checkNullOrEmpty: false),
       ]),
       // _composeBaseValidator(additionalValidators: (type == 'number' || type == 'integer') ? [FormBuilderValidators.numeric()] : null)
-      decoration: _getInputDecoration(),
+      decoration: _getInputDecoration(
+          suffixIcon: format == ui.Format.PASSWORD
+              ? IconButton(
+                  icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () {
+                    setState(
+                      () {
+                        obscureText = !obscureText;
+                      },
+                    );
+                  },
+                )
+              : null),
       initialValue: initialValueString,
       textInputAction: maxLines > 1 ? TextInputAction.newline : null,
       maxLines: maxLines,
@@ -877,6 +928,13 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         divisions: divisions,
         initialValue: initialValue is double ? initialValue : min,
       ),
+    );
+  }
+
+  Text _getErrorTextWidget(String message) {
+    return Text(
+      "Error: $message",
+      style: const TextStyle(color: Colors.red),
     );
   }
 
@@ -1074,8 +1132,14 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   }
 
   /// generates the label text marked as required when the field is required
-  String _getLabel() {
-    return title + (required ? '*' : '');
+  String? _getLabel() {
+    String? getScope() {
+      final lastScopeElement = scope.split('/').last;
+      return lastScopeElement != "items" ? lastScopeElement : null;
+    }
+
+    final titleString = title ?? getScope();
+    return required ? ('${titleString}*') : titleString; // TODO: not barrierefrei, should be an icon with text required/notwendig
   }
 
   // Text? _getLabelText() {
@@ -1099,7 +1163,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
     );
   }
 
-  Widget _wrapField({required Widget child}) {
+  Widget _wrapField({required Widget child, bool showLabel = true}) {
     final preHtml = options?.formattingOptions?.preHtml;
     final postHtml = options?.formattingOptions?.postHtml;
 
@@ -1109,13 +1173,15 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       columnChildren.add(CustomHtmlWidget(htmlData: preHtml));
     }
 
-    if (labelSeparateText && widget.showLabel) {
+    final labelText = _getLabel();
+
+    if (labelSeparateText && widget.showLabel && showLabel && labelText != null) {
       columnChildren.add(
         Row(
           children: [
             Expanded(
               child: Text(
-                _getLabel(),
+                labelText,
               ),
             ),
             if (options?.formattingOptions?.help != null)
@@ -1161,7 +1227,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   /// Creates the input decoration for the form field
   /// [prefix] and [suffix] widgets can be set to customize the appearance
   /// If the uiSchema defines formatting options, they take precedence and will be used instead
-  InputDecoration _getInputDecoration({bool border = true, Widget? prefix, Widget? suffix}) {
+  InputDecoration _getInputDecoration({bool border = true, Widget? prefix, Widget? suffix, Widget? suffixIcon}) {
     // TODO: Range selector
     return InputDecoration(
       labelText: labelSeparateText ? null : _getLabel(),
@@ -1176,6 +1242,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
       prefixText: options?.formattingOptions?.prepend,
       suffix: options?.formattingOptions?.append == null ? suffix : null,
       suffixText: options?.formattingOptions?.append,
+      suffixIcon: suffixIcon,
       floatingLabelBehavior: FloatingLabelBehavior.always,
       // TODO: has to be added back
       // prefixText: prefixHardcoded != null
