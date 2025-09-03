@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_json_forms/src/ritaRuleEvaluator.dart';
+import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
 import 'package:flutter_json_forms/src/utils/parse.dart';
+import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:flutter_json_forms/src/utils/validators/validators.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/animated_tooltip.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/html_widget.dart';
-import 'package:flutter_json_forms/src/widgets/shared_widgets.dart';
-import 'package:flutter_json_forms/src/utils/utils.dart';
+import 'package:flutter_json_forms/src/widgets/shared/common.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
