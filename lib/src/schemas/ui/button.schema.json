@@ -1,5 +1,5 @@
 {
-    "$id": "https://educorvi.github.io/vue-json-form/schemas/button.schema.json",
+    "$id": "button.schema.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Button",
     "description": "Used to put a button into the form",
@@ -7,13 +7,18 @@
     "properties": {
         "type": {
             "type": "string",
-            "enum": ["Button"]
+            "enum": [
+                "Button"
+            ]
         },
         "buttonType": {
             "title": "The Buttons Type",
             "description": "Submit or Reset",
             "type": "string",
-            "enum": ["submit", "reset"]
+            "enum": [
+                "submit",
+                "reset"
+            ]
         },
         "text": {
             "type": "string",
@@ -66,7 +71,12 @@
                                 },
                                 "method": {
                                     "type": "string",
-                                    "enum": ["GET", "POST", "PUT", "DELETE"],
+                                    "enum": [
+                                        "GET",
+                                        "POST",
+                                        "PUT",
+                                        "DELETE"
+                                    ],
                                     "default": "POST",
                                     "description": "The HTTP method to use for the request"
                                 },
@@ -79,7 +89,9 @@
                                 }
                             },
                             "additionalProperties": false,
-                            "required": ["url"]
+                            "required": [
+                                "url"
+                            ]
                         }
                     }
                 }
@@ -87,5 +99,9 @@
         }
     },
     "additionalProperties": false,
-    "required": ["type", "buttonType", "text"]
+    "required": [
+        "type",
+        "buttonType",
+        "text"
+    ]
 }

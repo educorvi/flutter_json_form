@@ -1,7 +1,7 @@
 {
     "title": "Layout",
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://educorvi.github.io/vue-json-form/schemas/layout.schema.json",
+    "$id": "layout.schema.json",
     "type": "object",
     "description": "The different layouts",
     "properties": {
@@ -15,7 +15,11 @@
         },
         "type": {
             "type": "string",
-            "enum": ["VerticalLayout", "HorizontalLayout", "Group"]
+            "enum": [
+                "VerticalLayout",
+                "HorizontalLayout",
+                "Group"
+            ]
         },
         "elements": {
             "title": "Elements",
@@ -58,7 +62,10 @@
                 "cssClass": {
                     "type": "string",
                     "description": "The layout's CSS classes",
-                    "examples": ["bg-primary", "bg-info headerpart"]
+                    "examples": [
+                        "bg-primary",
+                        "bg-info headerpart"
+                    ]
                 },
                 "label": {
                     "type": "string",
@@ -81,5 +88,8 @@
         }
     ],
     "additionalProperties": false,
-    "required": ["type", "elements"]
+    "required": [
+        "type",
+        "elements"
+    ]
 }

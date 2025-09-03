@@ -1,5 +1,5 @@
 {
-    "$id": "https://educorvi.github.io/vue-json-form/schemas/show_on.schema.json",
+    "$id": "show_on.schema.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "ShowOn property",
     "type": "object",
@@ -45,7 +45,11 @@
                     ]
                 }
             },
-            "required": ["type", "path", "referenceValue"],
+            "required": [
+                "type",
+                "path",
+                "referenceValue"
+            ],
             "additionalProperties": false
         }
     },
@@ -55,7 +59,7 @@
         },
         {
             "description": "Rita Rule\nSee https://educorvi.github.io/rita/rita-core/docs/schema/#/rule",
-            "$ref": "https://raw.githubusercontent.com/educorvi/rita/main/rita-core/src/schema/rule.json"
+            "type": "object"
         }
     ]
 }
