@@ -5,4 +5,5 @@ class UIConstants {
   static const groupItemPadding = 10.0;
   static const verticalLayoutItemPadding = 15.0;
   static const horizontalLayoutItemPadding = 20.0;
+  static const labelSeparateText = true;
 }

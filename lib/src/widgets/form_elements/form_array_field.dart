@@ -3,8 +3,9 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_checkbox_group_field.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
+import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
 import 'package:json_schema/json_schema.dart';
-import '../../models/ui_schema.dart' as ui;
 import '../../utils/show_on.dart';
 import '../../utils/parse.dart';
 import '../data/list_item.dart';
@@ -63,7 +64,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
       try {
         type = widget.formFieldContext.jsonSchema.items!.type;
       } catch (e) {
-        return _getErrorTextWidget(e.toString());
+        return FormError(e.toString());
       }
       // TODO: this should be done in the factory and here should only be complex array elements so this simple ones dont get wrapped unnecessary in the FormArrayField (also this is not the concern of the FormArrayField)
       if (type != SchemaType.object && type != SchemaType.array && widget.formFieldContext.jsonSchema.items!.enumValues?.isNotEmpty == true) {
@@ -92,7 +93,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
     int? maxItems = trySafeParseInt(widget.formFieldContext.jsonSchema.maxItems);
     int minItems = safeParseInt(widget.formFieldContext.jsonSchema.minItems);
 
-    final labelString = _getLabel();
+    final labelString = FormFieldUtils.getLabel(widget.formFieldContext);
 
     Widget arrayWidget = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,22 +262,5 @@ class _FormArrayFieldState extends State<FormArrayField> {
     setState(() {
       items.removeAt(index);
     });
-  }
-
-  String? _getLabel() {
-    String? getScope() {
-      final lastScopeElement = widget.formFieldContext.scope.split('/').last;
-      return lastScopeElement != "items" ? lastScopeElement : null;
-    }
-
-    final titleString = widget.formFieldContext.title ?? getScope();
-    return widget.formFieldContext.required && titleString != null ? ('${titleString}*') : titleString;
-  }
-
-  Text _getErrorTextWidget(String message) {
-    return Text(
-      "Error: $message",
-      style: const TextStyle(color: Colors.red),
-    );
   }
 }

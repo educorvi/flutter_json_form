@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_json_forms/src/widgets/constants.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import '../../form_field_context.dart';
 
@@ -28,7 +29,11 @@ class FormFieldUtils {
   }
 
   /// Creates standardized label text for form fields
-  static String? getLabel(FormFieldContext context) {
+  static String? getLabel(FormFieldContext context, {bool getLabel = !UIConstants.labelSeparateText}) {
+    if (!getLabel) {
+      return null;
+    }
+
     String? getScope() {
       final lastScopeElement = context.scope.split('/').last;
       return lastScopeElement != "items" ? lastScopeElement : null;
@@ -39,9 +44,9 @@ class FormFieldUtils {
   }
 
   /// Creates standardized validator that respects visibility
-  static FormFieldValidator<dynamic> createBaseValidator(
+  static String? Function(dynamic) createBaseValidator(
     FormFieldContext context, {
-    List<FormFieldValidator<dynamic>>? additionalValidators,
+    List<FormFieldValidator>? additionalValidators,
   }) {
     return (valueCandidate) {
       if (!context.isShownCallback()) {

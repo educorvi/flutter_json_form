@@ -3,6 +3,7 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import '../../models/ui_schema.dart' as ui;
 import '../../utils/show_on.dart';
 import '../shared/common.dart';
@@ -89,7 +90,7 @@ class _FormObjectFieldState extends State<FormObjectField> {
       ),
     );
 
-    String? label = _getLabel();
+    String? label = FormFieldUtils.getLabel(widget.formFieldContext);
 
     Widget objectWidget = label != null
         ? Column(
@@ -114,15 +115,5 @@ class _FormObjectFieldState extends State<FormObjectField> {
       ritaEvaluator: widget.formFieldContext.ritaEvaluator,
       getFullFormData: widget.formFieldContext.getFullFormData,
     );
-  }
-
-  String? _getLabel() {
-    String? getScope() {
-      final lastScopeElement = widget.formFieldContext.scope.split('/').last;
-      return lastScopeElement != "items" ? lastScopeElement : null;
-    }
-
-    final titleString = widget.formFieldContext.title ?? getScope();
-    return widget.formFieldContext.required && titleString != null ? ('${titleString}*') : titleString;
   }
 }

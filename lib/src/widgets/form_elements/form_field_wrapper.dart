@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
+import 'package:flutter_json_forms/src/widgets/constants.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import '../../utils/show_on.dart';
 import '../custom_form_fields/html_widget.dart';
 import '../custom_form_fields/animated_tooltip.dart';
@@ -27,7 +29,7 @@ class FormFieldWrapper extends StatelessWidget {
       columnChildren.add(CustomHtmlWidget(htmlData: preHtml));
     }
 
-    final labelText = _getLabel();
+    final labelText = FormFieldUtils.getLabel(context, getLabel: UIConstants.labelSeparateText);
 
     if (context.showLabel && showLabel && labelText != null) {
       columnChildren.add(
@@ -67,15 +69,5 @@ class FormFieldWrapper extends StatelessWidget {
       ritaEvaluator: context.ritaEvaluator,
       getFullFormData: context.getFullFormData,
     );
-  }
-
-  String? _getLabel() {
-    String? getScope() {
-      final lastScopeElement = context.scope.split('/').last;
-      return lastScopeElement != "items" ? lastScopeElement : null;
-    }
-
-    final titleString = context.title ?? getScope();
-    return context.required && titleString != null ? ('${titleString}*') : titleString;
   }
 }
