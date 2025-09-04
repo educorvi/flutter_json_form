@@ -38,9 +38,7 @@ class FormLayout extends StatelessWidget {
         builder: (BuildContext context, BoxConstraints constraints) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: _buildElementsWithSpacing(context, elements, LayoutDirection.horizontal)
-                .map((widget) => Expanded(child: widget))
-                .toList(),
+            children: _buildElementsWithSpacing(context, elements, LayoutDirection.horizontal).map((widget) => Expanded(child: widget)).toList(),
           );
         },
       );
@@ -53,10 +51,10 @@ class FormLayout extends StatelessWidget {
   List<Widget> _buildElementsWithSpacing(BuildContext context, List<ui.LayoutElement> elements, LayoutDirection layoutDirection) {
     final formContext = FormContext.of(context)!;
     final List<Widget> visibleWidgets = [];
-    
+
     for (int i = 0; i < elements.length; i++) {
       final item = elements[i];
-      
+
       // Check if this element should be visible
       final String elementScope = item.scope ?? '';
       final bool isShown = formContext.elementShown(
@@ -64,7 +62,7 @@ class FormLayout extends StatelessWidget {
         showOn: item.showOn,
         parentIsShown: true,
       );
-      
+
       // Only add visible elements and spacing
       if (isShown) {
         final widget = FormLayoutItemGenerator.generateItem(
@@ -72,7 +70,7 @@ class FormLayout extends StatelessWidget {
           nestingLevel,
           layoutDirection: layoutDirection,
         );
-        
+
         // Add spacing before this element if it's not the first visible element
         if (visibleWidgets.isNotEmpty) {
           if (layoutDirection == LayoutDirection.vertical) {
@@ -81,11 +79,11 @@ class FormLayout extends StatelessWidget {
             visibleWidgets.add(const SizedBox(width: 8.0));
           }
         }
-        
+
         visibleWidgets.add(widget);
       }
     }
-    
+
     return visibleWidgets;
   }
 }

@@ -63,15 +63,15 @@ Widget handleShowOn({
   Map<String, dynamic> Function()? getFullFormData,
   LayoutDirection? layoutDirection = LayoutDirection.vertical,
 }) {
-  Widget formattedChild = Padding(
-    padding: layoutDirection == LayoutDirection.horizontal // TODO: pass down if first or last element and whn not to render the padding
-        ? const EdgeInsets.symmetric(horizontal: UIConstants.elementPadding)
-        : const EdgeInsets.symmetric(vertical: UIConstants.elementPadding),
-    child: child,
-  );
+  // Widget formattedChild = Padding(
+  //   padding: layoutDirection == LayoutDirection.horizontal // TODO: pass down if first or last element and whn not to render the padding
+  //       ? const EdgeInsets.symmetric(horizontal: UIConstants.elementPadding)
+  //       : const EdgeInsets.symmetric(vertical: UIConstants.elementPadding),
+  //   child: child,
+  // );
 
   if (showOn == null) {
-    return formattedChild;
+    return child; // formattedChild;
   }
   // If this element has a Rita rule and evaluator/context are provided, evaluate per element with $selfIndices
   if (showOn.rule != null && showOn.id != null && ritaEvaluator != null && getFullFormData != null) {
@@ -107,7 +107,7 @@ Widget handleShowOn({
   return AnimatedCrossFade(
     duration: const Duration(milliseconds: 400),
     sizeCurve: Curves.easeInOut,
-    firstChild: formattedChild,
+    firstChild: child,
     secondChild: Container(),
     crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
   );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
-import 'package:flutter_json_forms/src/widgets/constants.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_checkbox_group_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
@@ -107,121 +106,14 @@ class _FormArrayFieldState extends State<FormArrayField> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
-        ReorderableListView.builder(
-          shrinkWrap: true,
-          physics: const ClampingScrollPhysics(),
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final childContext = widget.formFieldContext.createChildContext(
-              childScope: '${widget.formFieldContext.scope}/items',
-              childId: '${widget.formFieldContext.id}/items/${items[index].id}',
-              childJsonSchema: widget.formFieldContext.jsonSchema.items!,
-              childInitialValue: items[index].value,
-              childRequired: widget.formFieldContext.required,
-              childShowLabel: false,
-              childSelfIndices: () {
-                final map = <String, int>{};
-                if (widget.formFieldContext.selfIndices != null) {
-                  map.addAll(widget.formFieldContext.selfIndices!);
-                }
-                map[widget.formFieldContext.scope] = index;
-                return map;
-              }(),
-              childOnChanged: (value) {
-                items[index].value = value;
-                if (widget.formFieldContext.onChanged != null) {
-                  widget.formFieldContext.onChanged!(items.map((e) => e.value).toList());
-                }
-              },
-              childOnSavedCallback: (value) {
-                items[index].value = value;
-                if (widget.formFieldContext.onSavedCallback != null && index == items.length - 1) {
-                  widget.formFieldContext.onSavedCallback!(items.map((e) => e.value).toList());
-                }
-              },
-            );
-            // final ui.DescendantControlOverrides? overrides =
-            //     widget.formFieldContext.options?.formattingOptions?.descendantControlOverrides?[widget.formFieldContext.scope];
-            // final ui.ControlOptions? childOptions = overrides?.options ?? widget.formFieldContext.options;
-            // final ui.ShowOnProperty? childShowOn = overrides?.showOn;
-
-            // bool childIsShown() => isElementShown(
-            //       parentIsShown: arrayIsShown(),
-            //       showOn: childShowOn,
-            //       ritaDependencies: formContext.ritaDependencies,
-            //       checkValueForShowOn: formContext.checkValueForShowOn,
-            //     );
-
-            return Container(
-              key: Key('${items[index].id}'),
-              child: Row(
-                children: [
-                  ReorderableDragStartListener(
-                    index: index,
-                    child: GestureDetector(
-                      onTapDown: (_) => FocusScope.of(context).unfocus(),
-                      child: const Icon(Icons.drag_handle),
-                    ),
-                  ),
-                  Expanded(child: FormElementFactory.createFormElement(childContext)
-                      // FormElementFormControl(
-                      //   scope: '${widget.formFieldContext.scope}/items',
-                      //   id: '${widget.formFieldContext.id}/items/${items[index].id}',
-                      //   options: childOptions,
-                      //   showOn: childShowOn,
-                      //   jsonSchema: widget.formFieldContext.jsonSchema.items!,
-                      //   nestingLevel: widget.formFieldContext.nestingLevel,
-                      //   required: widget.formFieldContext.required,
-                      //   initialValue: items[index].value,
-                      //   selfIndices: () {
-                      //     final map = <String, int>{};
-                      //     if (widget.formFieldContext.selfIndices != null) {
-                      //       map.addAll(widget.formFieldContext.selfIndices!);
-                      //     }
-                      //     map[widget.formFieldContext.scope] = index;
-                      //     return map;
-                      //   }(),
-                      //   ritaEvaluator: widget.formFieldContext.ritaEvaluator,
-                      //   getFullFormData: widget.formFieldContext.getFullFormData,
-                      //   onSavedCallback: (value) {
-                      //     items[index].value = value;
-                      //     if (widget.formFieldContext.onSavedCallback != null && index == items.length - 1) {
-                      //       widget.formFieldContext.onSavedCallback!(items.map((e) => e.value).toList());
-                      //     }
-                      //   },
-                      //   isShownCallback: childIsShown,
-                      //   onChanged: (value) {
-                      //     items[index].value = value;
-                      //     if (widget.formFieldContext.onChanged != null) {
-                      //       widget.formFieldContext.onChanged!(items);
-                      //     }
-                      //   },
-                      //   showLabel: false,
-                      //   parentIsShown: arrayIsShown(),
-                      //   ritaDependencies: formContext.ritaDependencies,
-                      //   checkValueForShowOn: formContext.checkValueForShowOn,
-                      // ),
-                      ),
-                  IconButton(
-                    disabledColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
-                    icon: const Icon(Icons.close),
-                    color: Theme.of(context).colorScheme.error,
-                    onPressed: items.length > minItems ? () => _removeItem(index) : null,
-                  ),
-                ],
-              ),
-            );
-          },
-          onReorder: (oldIndex, newIndex) {
-            setState(() {
-              if (newIndex > oldIndex) {
-                newIndex -= 1;
-              }
-              final ListItem item = items.removeAt(oldIndex);
-              items.insert(newIndex, item);
-            });
-          },
-        ),
+        if (items.isNotEmpty) ...[
+          ReorderableListView(
+            shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
+            children: _buildArrayItemsWithSpacing(formContext, arrayIsShown, minItems),
+            onReorder: _moveItem,
+          ),
+        ],
         if (widget.formFieldContext.description != null)
           Padding(
             padding: const EdgeInsets.only(top: 10.0),
@@ -263,5 +155,79 @@ class _FormArrayFieldState extends State<FormArrayField> {
     setState(() {
       items.removeAt(index);
     });
+  }
+
+  void _moveItem(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final ListItem item = items.removeAt(oldIndex);
+      items.insert(newIndex, item);
+    });
+  }
+
+  /// Builds a list of array items with proper spacing and reordering capability
+  List<Widget> _buildArrayItemsWithSpacing(FormContext formContext, bool Function() arrayIsShown, int minItems) {
+    final List<Widget> widgets = [];
+
+    for (int index = 0; index < items.length; index++) {
+      final childContext = widget.formFieldContext.createChildContext(
+        childScope: '${widget.formFieldContext.scope}/items',
+        childId: '${widget.formFieldContext.id}/items/${items[index].id}',
+        childJsonSchema: widget.formFieldContext.jsonSchema.items!,
+        childInitialValue: items[index].value,
+        childRequired: widget.formFieldContext.required,
+        childShowLabel: false,
+        childSelfIndices: () {
+          final map = <String, int>{};
+          if (widget.formFieldContext.selfIndices != null) {
+            map.addAll(widget.formFieldContext.selfIndices!);
+          }
+          map[widget.formFieldContext.scope] = index;
+          return map;
+        }(),
+        childOnChanged: (value) {
+          items[index].value = value;
+          if (widget.formFieldContext.onChanged != null) {
+            widget.formFieldContext.onChanged!(items.map((e) => e.value).toList());
+          }
+        },
+        childOnSavedCallback: (value) {
+          items[index].value = value;
+          if (widget.formFieldContext.onSavedCallback != null && index == items.length - 1) {
+            widget.formFieldContext.onSavedCallback!(items.map((e) => e.value).toList());
+          }
+        },
+      );
+
+      // Create the array item widget with proper spacing
+      final itemWidget = Container(
+        key: Key('${items[index].id}'),
+        margin: index > 0 ? const EdgeInsets.only(top: 8.0) : EdgeInsets.zero,
+        child: Row(
+          children: [
+            ReorderableDragStartListener(
+              index: index,
+              child: GestureDetector(
+                onTapDown: (_) => FocusScope.of(context).unfocus(),
+                child: const Icon(Icons.drag_handle),
+              ),
+            ),
+            Expanded(child: FormElementFactory.createFormElement(childContext)),
+            IconButton(
+              disabledColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
+              icon: const Icon(Icons.close),
+              color: Theme.of(context).colorScheme.error,
+              onPressed: items.length > minItems ? () => _removeItem(index) : null,
+            ),
+          ],
+        ),
+      );
+
+      widgets.add(itemWidget);
+    }
+
+    return widgets;
   }
 }
