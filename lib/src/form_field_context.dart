@@ -111,8 +111,13 @@ class FormFieldContext {
         if (onSavedCallback != null) {
           onSavedCallback(value);
         }
-        // Also call the form context's onSaved
-        formContext.onFormValueSaved(scope, value);
+        if (formContext.elementShown(
+          scope: scope,
+          showOn: showOn,
+          parentIsShown: parentIsShown,
+        )) {
+          formContext.onFormValueSaved(scope, value);
+        }
       },
     );
   }

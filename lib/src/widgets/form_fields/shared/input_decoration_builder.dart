@@ -44,6 +44,7 @@ class InputDecorationBuilder {
     }
 
     final titleString = context.title ?? getScope();
-    return context.required && titleString != null ? ('${titleString}*') : titleString;
+    return context.required && titleString != null ? ('$titleString*') : titleString;
+    // TODO: not barrierefrei, should be an icon with text required/notwendig
   }
 }

@@ -30,38 +30,53 @@ class FormGroup extends StatelessWidget {
       checkValueForShowOn: formContext.checkValueForShowOn,
     );
 
-    Column generateGroupElements() {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: elements.map((item) {
-          return FormLayoutItemGenerator.generateItem(
-            item,
-            nestingLevel,
-            isShownFromParent: isShown,
-            layoutDirection: LayoutDirection.vertical,
-          );
-        }).toList(),
-      );
-    }
-
     Widget groupElement = getLineContainer(
       child: Padding(
         padding: const EdgeInsets.only(left: UIConstants.groupPadding),
-        child: generateGroupElements(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: _buildElementsWithSpacing(context, elements, isShown),
+        ),
       ),
     );
 
-    return label != null
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              groupElement,
-            ],
-          )
-        : groupElement;
+    return withLabel(context, label, groupElement);
+  }
+
+  /// Builds a list of widgets with proper spacing, filtering out hidden elements
+  List<Widget> _buildElementsWithSpacing(BuildContext context, List<ui.LayoutElement> elements, bool? parentIsShown) {
+    final formContext = FormContext.of(context)!;
+    final List<Widget> visibleWidgets = [];
+    
+    for (int i = 0; i < elements.length; i++) {
+      final item = elements[i];
+      
+      // Check if this element should be visible
+      final String elementScope = item.scope ?? '';
+      final bool isShown = formContext.elementShown(
+        scope: elementScope,
+        showOn: item.showOn,
+        parentIsShown: parentIsShown ?? true,
+      );
+      
+      // Only add visible elements and spacing
+      if (isShown) {
+        final widget = FormLayoutItemGenerator.generateItem(
+          item,
+          nestingLevel,
+          isShownFromParent: parentIsShown,
+          layoutDirection: LayoutDirection.vertical,
+        );
+        
+        // Add spacing before this element if it's not the first visible element
+        if (visibleWidgets.isNotEmpty) {
+          visibleWidgets.add(const SizedBox(height: 8.0));
+        }
+        
+        visibleWidgets.add(widget);
+      }
+    }
+    
+    return visibleWidgets;
   }
 }

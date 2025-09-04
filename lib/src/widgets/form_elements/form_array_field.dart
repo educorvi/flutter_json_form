@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
+import 'package:flutter_json_forms/src/widgets/constants.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_checkbox_group_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
@@ -93,7 +94,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
     int? maxItems = trySafeParseInt(widget.formFieldContext.jsonSchema.maxItems);
     int minItems = safeParseInt(widget.formFieldContext.jsonSchema.minItems);
 
-    final labelString = FormFieldUtils.getLabel(widget.formFieldContext);
+    final labelString = FormFieldUtils.getLabel(widget.formFieldContext, getLabel: true);
 
     Widget arrayWidget = Column(
       crossAxisAlignment: CrossAxisAlignment.start,

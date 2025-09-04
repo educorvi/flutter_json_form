@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
@@ -22,12 +23,12 @@ class FormTextField extends StatefulWidget {
 }
 
 class _FormTextFieldState extends State<FormTextField> {
-  late bool obscureText;
+  late bool obscureText = widget.formFieldContext.format == ui.Format.PASSWORD;
 
   @override
   void initState() {
     super.initState();
-    obscureText = widget.formFieldContext.format == ui.Format.PASSWORD;
+    // obscureText = widget.formFieldContext.format == ui.Format.PASSWORD;
   }
 
   @override
@@ -60,7 +61,7 @@ class _FormTextFieldState extends State<FormTextField> {
           context,
           suffixIcon: fieldContext.format == ui.Format.PASSWORD
               ? IconButton(
-                  icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
+                  icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
                   onPressed: () {
                     setState(() {
                       obscureText = !obscureText;
@@ -73,6 +74,7 @@ class _FormTextFieldState extends State<FormTextField> {
         textInputAction: _getMaxLines() > 1 ? TextInputAction.newline : null,
         maxLines: _getMaxLines(),
         keyboardType: _getKeyboardType(),
+        inputFormatters: _getInputFormatters(),
         autofillHints: _getAutocompleteValues(),
       ),
     );
@@ -80,7 +82,7 @@ class _FormTextFieldState extends State<FormTextField> {
 
   void _handleValueChange(String? value) {
     if (widget.formFieldContext.onChanged != null) {
-      widget.formFieldContext.onChanged!(_convertValue(value));
+      widget.formFieldContext.onChanged!(value.toString()); // (_convertValue(value));
     }
   }
 
@@ -129,11 +131,22 @@ class _FormTextFieldState extends State<FormTextField> {
       case ui.Format.TEL:
         return TextInputType.phone;
       default:
-        if (widget.expectedType == int || widget.expectedType == double) {
+        if (widget.expectedType == int) {
           return TextInputType.number;
+        } else if (widget.expectedType == double) {
+          return const TextInputType.numberWithOptions(decimal: true);
         }
         return TextInputType.text;
     }
+  }
+
+  List<TextInputFormatter>? _getInputFormatters() {
+    if (widget.expectedType == int) {
+      return [FilteringTextInputFormatter.digitsOnly];
+    } else if (widget.expectedType == double) {
+      return [FilteringTextInputFormatter.allow(RegExp(r'^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$'))];
+    }
+    return null;
   }
 
   TextAlign _getTextAlign() {

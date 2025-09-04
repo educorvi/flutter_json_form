@@ -90,7 +90,7 @@ class _FormObjectFieldState extends State<FormObjectField> {
       ),
     );
 
-    String? label = FormFieldUtils.getLabel(widget.formFieldContext);
+    String? label = FormFieldUtils.getLabel(widget.formFieldContext, getLabel: true);
 
     Widget objectWidget = label != null
         ? Column(

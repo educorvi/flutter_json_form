@@ -46,8 +46,12 @@ class FormSliderField extends StatelessWidget {
       context: formFieldContext,
       child: FormBuilderSlider(
         name: formFieldContext.id,
-        onChanged: (value) => formFieldContext.onChanged?.call(formFieldContext.type == SchemaType.integer ? value?.toInt() : value),
-        onSaved: (value) => formFieldContext.onSavedCallback?.call(formFieldContext.type == SchemaType.integer ? value?.toInt() : value),
+        onChanged: (value) => formFieldContext.onChanged?.call(switch (formFieldContext.type) {
+          SchemaType.number => value?.toDouble(),
+          _ => value?.toDouble(),
+        }),
+        onSaved: (value) => formFieldContext.onSavedCallback
+            ?.call(switch (formFieldContext.type) { SchemaType.integer => value?.toInt(), SchemaType.number => value?.toDouble(), _ => value }),
         enabled: formFieldContext.enabled,
         validator: FormFieldUtils.createBaseValidator(
           formFieldContext,

@@ -223,9 +223,15 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     });
   }
 
-  /// Returns the saved value only
+  /// Returns the saved value only (populated after saveAndValidate is called)
   Map<String, dynamic> get value {
     return processFormValuesEllaV2(_formSubmitValues);
+  }
+
+  /// Returns the current form values (regardless of validation state)
+  Map<String, dynamic> get currentValue {
+    final currentValues = _formKey.currentState?.value ?? {};
+    return processFormValuesEllaV2(currentValues);
   }
 
   void patchValue(Map<String, dynamic> value) {
@@ -326,7 +332,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
         saveAndValidate: ({bool focusOnInvalid = true, bool autoScrollWhenFocusOnInvalid = false}) =>
             saveAndValidate(focusOnInvalid: focusOnInvalid, autoScrollWhenFocusOnInvalid: autoScrollWhenFocusOnInvalid),
         reset: reset,
-        getFormValues: () => value,
+        getFormValues: () => currentValue,
         child: _generateLayout(),
       ),
     );
@@ -358,20 +364,11 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
 
   void _onFormValueSaved(String scope, dynamic value) {
     // This is called when a form field is saved and determines if it should be in submit values
-    final formContext = FormContext.of(context);
-    if (formContext != null) {
-      final isShown = isElementShown(
-        parentIsShown: true,
-        showOn: null, // You might need to pass showOn info here if needed
-        ritaDependencies: _ritaDependencies,
-        checkValueForShowOn: checkValueForShowOn,
-      );
 
-      if (value != null && value != "" && isShown) {
-        _formSubmitValues[scope] = value;
-      } else {
-        _formSubmitValues.remove(scope);
-      }
+    if (value != null && value != "") {
+      _formSubmitValues[scope] = value;
+    } else {
+      _formSubmitValues.remove(scope);
     }
   }
 
