@@ -1,8 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_json_forms/src/constants.dart';
+import 'package:flutter_json_forms/src/widgets/constants.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
+import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
 
 bool isElementShown({
@@ -110,11 +111,6 @@ Widget handleShowOn({
     secondChild: Container(),
     crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
   );
-}
-
-enum LayoutDirection {
-  vertical,
-  horizontal,
 }
 
 /// Collects all Rita rules from descendant control overrides.

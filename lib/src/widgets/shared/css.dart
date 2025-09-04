@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_json_forms/src/constants.dart';
+import 'package:flutter_json_forms/src/widgets/constants.dart';
 
 /// translates simple css styles to flutter widget styling
 Widget applyCss(BuildContext context, Widget child, {String? cssClass}) {

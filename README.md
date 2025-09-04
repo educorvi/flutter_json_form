@@ -56,15 +56,15 @@ void main() {
 }
 
 class FlutterJsonFormsDemo extends extends StatelessWidget {
-  final GlobalKey<DynamicJsonFormState> formKey;
+  final GlobalKey<FlutterJsonFormState> formKey;
 
   FlutterJsonFormsDemo({super.key}):
-        formKey = GlobalKey<DynamicJsonFormState>();
+        formKey = GlobalKey<FlutterJsonFormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: DynamicJsonForm(
+      body: FlutterJsonForm(
         key: formKey,
         jsonSchema: {...},
         uiSchema: {...},

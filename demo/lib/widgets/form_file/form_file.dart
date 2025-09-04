@@ -12,7 +12,7 @@ class FormFileOld {
   static String path = "../lib/src/schemas/examples";
   static String schemaPostfix = ".schema.json";
   static String uiPostfix = ".ui.json";
-  final GlobalKey<DynamicJsonFormState> formKey;
+  final GlobalKey<FlutterJsonFormState> formKey;
   Map<String, dynamic>? jsonSchema;
   Map<String, dynamic>? uiSchema;
   Map<String, dynamic> formData;
@@ -21,7 +21,7 @@ class FormFileOld {
     required this.name,
     required this.filename,
     this.formData = const {},
-  }) : formKey = GlobalKey<DynamicJsonFormState>();
+  }) : formKey = GlobalKey<FlutterJsonFormState>();
 
   getFilePath() {
     return "$path/$filename";
@@ -88,7 +88,7 @@ class FormFileOld {
                 ],
               ),
               const Divider(),
-              DynamicJsonForm(
+              FlutterJsonForm(
                 key: formKey,
                 validate: true,
                 jsonSchema: jsonSchema,

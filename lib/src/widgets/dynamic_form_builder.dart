@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_json_forms/src/process_form_values.dart';
+import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/html_widget.dart';
@@ -10,14 +11,12 @@ import 'package:http/http.dart' as http;
 
 import '../../flutter_json_forms.dart';
 import '../models/ui_schema.dart' as ui;
-import 'data/list_item.dart';
 import 'form_elements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:flutter_json_forms/src/json_validator.dart';
-import '../constants.dart';
-import '../models/jsonSchema.dart';
+import 'constants.dart';
 
 /// A dynamic form which generates form fields based on a JSON schema and a UI schema
 class DynamicJsonForm extends StatefulWidget {
@@ -251,7 +250,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
   /// [instance] can be a Map<String, dynamic> or a String
   /// if the instance is a String and [parseJson] is true, the instance is parsed to a Map<String, dynamic>
   /// if [parseJson] is false, the instance is used as is
-  _getMap(dynamic instance, String argumentName) {
+  dynamic _getMap(dynamic instance, String argumentName) {
     dynamic data = instance;
     if (widget.parseJson && instance is String) {
       try {

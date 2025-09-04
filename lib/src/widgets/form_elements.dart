@@ -12,7 +12,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
 import 'package:json_schema/json_schema.dart';
 
-import '../constants.dart';
+import 'constants.dart';
 import '../models/ui_schema.dart' as ui;
 import 'custom_form_fields/form_builder_segmented_button.dart';
 import 'data/list_item.dart';
