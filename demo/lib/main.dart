@@ -17,10 +17,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       localizationsDelegates: const [FormBuilderLocalizations.delegate],
       title: 'Flutter Json Forms Demo',
-      // theme: ThemeData(
-      //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
-      //   useMaterial3: true,
-      // ),
       theme: appConstants.theme.getThemeData(Brightness.light),
       darkTheme: appConstants.theme.getThemeData(Brightness.dark),
       home: const FlutterFormDemo(),
@@ -37,16 +33,10 @@ class FlutterFormDemo extends StatefulWidget {
 
 class _FlutterFormDemoState extends State<FlutterFormDemo> {
   late final FormSelector formSelector;
-  // late final formSelectorKey = GlobalKey<FormSelectorState>();
 
   @override
   void initState() {
     super.initState();
-    // formSelector = FormSelector(onFormSelected: (formFile) {
-    //   setState(() {
-    //     selectedFormFile = formFile;
-    //   });
-    // },);
   }
 
   FormFile? selectedFormFile;
@@ -62,28 +52,7 @@ class _FlutterFormDemoState extends State<FlutterFormDemo> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(8),
         children: [
-          // Text(
-          //   'Showcase Form',
-          //   style: Theme.of(context).textTheme.headlineLarge,
-          // ),
-          // const SizedBox(height: 16),
-          // Text(
-          //   'This form showcases the capabilities of the Flutter JSON Forms package. ',
-          //   style: Theme.of(context).textTheme.bodyLarge,
-          // ),
-          // FormSelector(),
-          FormSelector(
-              // key: formSelectorKey,
-              // onFormSelected: (formFile) {
-              //   setState(() {
-              //     selectedFormFile = formFile;
-              //   });
-              // },
-              ),
-          // const SizedBox(height: 16),
-          // SafeArea(
-          //   child: selectedFormFile != null ? selectedFormFile!.getForm() : const SizedBox(),
-          // )
+          FormSelector(),
         ],
       ),
     );

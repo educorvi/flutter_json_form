@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_json_forms/src/widgets/constants.dart';
 
 Container getLineContainer({Widget? child}) {
   return Container(
@@ -23,7 +24,7 @@ Widget withLabel(BuildContext context, String? label, Widget child) {
         label,
         style: Theme.of(context).textTheme.titleMedium,
       ),
-      const SizedBox(height: 8),
+      const SizedBox(height: UIConstants.objectTitlePadding),
       child,
     ],
   );

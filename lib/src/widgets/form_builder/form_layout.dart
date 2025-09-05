@@ -38,7 +38,7 @@ class FormLayout extends StatelessWidget {
         builder: (BuildContext context, BoxConstraints constraints) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: _buildElementsWithSpacing(context, elements, LayoutDirection.horizontal).map((widget) => Expanded(child: widget)).toList(),
+            children: _buildElementsWithSpacing(context, elements, LayoutDirection.horizontal).map((widget) => widget).toList(),
           );
         },
       );
@@ -65,11 +65,14 @@ class FormLayout extends StatelessWidget {
 
       // Only add visible elements and spacing
       if (isShown) {
-        final widget = FormLayoutItemGenerator.generateItem(
+        Widget widget = FormLayoutItemGenerator.generateItem(
           item,
           nestingLevel,
           layoutDirection: layoutDirection,
         );
+        if (layoutDirection == LayoutDirection.horizontal) {
+          widget = Expanded(child: widget);
+        }
 
         // Add spacing before this element if it's not the first visible element
         if (visibleWidgets.isNotEmpty) {
