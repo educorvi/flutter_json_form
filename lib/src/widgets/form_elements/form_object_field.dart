@@ -68,7 +68,8 @@ class _FormObjectFieldState extends State<FormObjectField> {
 
   /// Builds a list of widgets with proper spacing, filtering out hidden elements
   List<Widget> _buildElementsWithSpacing(BuildContext context, FormContext formContext, bool Function() objectIsShown) {
-    final List<Widget> visibleWidgets = [];
+    final List<Widget> allWidgets = [];
+    bool hasVisibleElement = false;
 
     for (var key in widget.formFieldContext.jsonSchema.properties.keys) {
       bool childRequired = widget.formFieldContext.jsonSchema.propertyRequired(key) || widget.formFieldContext.required;
@@ -87,50 +88,51 @@ class _FormObjectFieldState extends State<FormObjectField> {
             checkValueForShowOn: formContext.checkValueForShowOn,
           );
 
-      // Only add visible elements and spacing
+      // Always create the widget
+      final childWidget = FormElementFactory.createFormElement(widget.formFieldContext.createChildContext(
+          childScope: childScope,
+          childId: '${widget.formFieldContext.id}/properties/$key',
+          childJsonSchema: widget.formFieldContext.jsonSchema.properties[key]!,
+          childOptions: childOptions,
+          childShowOn: childShowOn,
+          childInitialValue:
+              widget.formFieldContext.initialValue is Map<String, dynamic> ? widget.formFieldContext.initialValue["/properties/$key"] : null,
+          childRequired: childRequired,
+          // childShowLabel: childShowLabel,
+          childSelfIndices: widget.formFieldContext.selfIndices,
+          childOnChanged: (value) {
+            if (widget.formFieldContext.onChanged != null) {
+              final newValue =
+                  Map<String, dynamic>.from(widget.formFieldContext.initialValue is Map<String, dynamic> ? widget.formFieldContext.initialValue : {});
+              newValue[key] = value;
+              widget.formFieldContext.onChanged!(newValue);
+            }
+          },
+          childOnSavedCallback: (value) {
+            if (value != null && value != "" && childIsShown()) {
+              formSubmitValues[key] = value;
+            } else {
+              formSubmitValues.remove(key);
+            }
+            if (widget.formFieldContext.onSavedCallback != null && key == widget.formFieldContext.jsonSchema.properties.keys.last) {
+              if (formSubmitValues.isNotEmpty) {
+                widget.formFieldContext.onSavedCallback!(formSubmitValues);
+              }
+            }
+          }));
+
+      // Only add spacing if this element is visible and there's already a visible element
       if (childIsShown()) {
-        final widget = FormElementFactory.createFormElement(this.widget.formFieldContext.createChildContext(
-            childScope: childScope,
-            childId: '${this.widget.formFieldContext.id}/properties/$key',
-            childJsonSchema: this.widget.formFieldContext.jsonSchema.properties[key]!,
-            childOptions: childOptions,
-            childShowOn: childShowOn,
-            childInitialValue: this.widget.formFieldContext.initialValue is Map<String, dynamic>
-                ? this.widget.formFieldContext.initialValue["/properties/$key"]
-                : null,
-            childRequired: childRequired,
-            // childShowLabel: childShowLabel,
-            childSelfIndices: this.widget.formFieldContext.selfIndices,
-            childOnChanged: (value) {
-              if (this.widget.formFieldContext.onChanged != null) {
-                final newValue = Map<String, dynamic>.from(
-                    this.widget.formFieldContext.initialValue is Map<String, dynamic> ? this.widget.formFieldContext.initialValue : {});
-                newValue[key] = value;
-                this.widget.formFieldContext.onChanged!(newValue);
-              }
-            },
-            childOnSavedCallback: (value) {
-              if (value != null && value != "" && childIsShown()) {
-                formSubmitValues[key] = value;
-              } else {
-                formSubmitValues.remove(key);
-              }
-              if (this.widget.formFieldContext.onSavedCallback != null && key == this.widget.formFieldContext.jsonSchema.properties.keys.last) {
-                if (formSubmitValues.isNotEmpty) {
-                  this.widget.formFieldContext.onSavedCallback!(formSubmitValues);
-                }
-              }
-            }));
-
-        // Add spacing before this element if it's not the first visible element
-        if (visibleWidgets.isNotEmpty) {
-          visibleWidgets.add(const SizedBox(height: 8.0));
+        if (hasVisibleElement) {
+          allWidgets.add(const SizedBox(height: 8.0));
         }
-
-        visibleWidgets.add(widget);
+        hasVisibleElement = true;
       }
+
+      // Always add the widget (it will handle its own visibility internally)
+      allWidgets.add(childWidget);
     }
 
-    return visibleWidgets;
+    return allWidgets;
   }
 }

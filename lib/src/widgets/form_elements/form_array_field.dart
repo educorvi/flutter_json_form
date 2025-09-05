@@ -56,7 +56,13 @@ class _FormArrayFieldState extends State<FormArrayField> {
 
   @override
   Widget build(BuildContext context) {
-    final formContext = FormContext.of(context)!;
+    final formContext = FormContext.of(context);
+    
+    // If FormContext is not available, show an error with debug info
+    if (formContext == null) {
+      print("FormArrayField: FormContext is null for scope: ${widget.formFieldContext.scope}");
+      return FormError("FormArrayField must be used within a FormContext widget tree. Scope: ${widget.formFieldContext.scope}");
+    }
 
     // Check if this should be rendered as checkbox group
     if (widget.formFieldContext.jsonSchema.items != null) {
@@ -136,8 +142,8 @@ class _FormArrayFieldState extends State<FormArrayField> {
       child: arrayWidget,
       parentIsShown: widget.formFieldContext.parentIsShown,
       showOn: widget.formFieldContext.showOn,
-      ritaDependencies: widget.formFieldContext.ritaDependencies,
-      checkValueForShowOn: widget.formFieldContext.checkValueForShowOn,
+      ritaDependencies: formContext.ritaDependencies,
+      checkValueForShowOn: formContext.checkValueForShowOn,
       selfIndices: widget.formFieldContext.selfIndices,
       ritaEvaluator: widget.formFieldContext.ritaEvaluator,
       getFullFormData: widget.formFieldContext.getFullFormData,
@@ -159,17 +165,50 @@ class _FormArrayFieldState extends State<FormArrayField> {
 
   void _moveItem(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
+      // Convert widget indices back to item indices
+      // Widget layout: Item0 (0), Spacer (1), Item1 (2), Spacer (3), Item2 (4), etc.
+
+      // For oldIndex, we only care about actual items (even indices)
+      int actualOldIndex = oldIndex ~/ 2;
+
+      // For newIndex, we need to handle both items and spacers intelligently
+      int actualNewIndex;
+      if (newIndex % 2 == 0) {
+        // newIndex is on an actual item
+        actualNewIndex = newIndex ~/ 2;
+      } else {
+        // newIndex is on a spacer, so we want to move to the item after the spacer
+        actualNewIndex = (newIndex + 1) ~/ 2;
       }
-      final ListItem item = items.removeAt(oldIndex);
-      items.insert(newIndex, item);
+
+      // Ensure indices are within bounds
+      actualOldIndex = actualOldIndex.clamp(0, items.length - 1);
+      actualNewIndex = actualNewIndex.clamp(0, items.length);
+
+      // Standard reordering logic adjustment
+      if (actualNewIndex > actualOldIndex) {
+        actualNewIndex -= 1;
+      }
+
+      // Ensure we don't go out of bounds after adjustment
+      actualNewIndex = actualNewIndex.clamp(0, items.length - 1);
+
+      if (actualOldIndex != actualNewIndex) {
+        final ListItem item = items.removeAt(actualOldIndex);
+        items.insert(actualNewIndex, item);
+      }
     });
   }
 
   /// Builds a list of array items with proper spacing and reordering capability
-  List<Widget> _buildArrayItemsWithSpacing(FormContext formContext, bool Function() arrayIsShown, int minItems) {
+  List<Widget> _buildArrayItemsWithSpacing(FormContext? formContext, bool Function() arrayIsShown, int minItems) {
     final List<Widget> widgets = [];
+    bool hasVisibleElement = false;
+
+    // Return empty list if formContext is null
+    if (formContext == null) {
+      return widgets;
+    }
 
     for (int index = 0; index < items.length; index++) {
       final childContext = widget.formFieldContext.createChildContext(
@@ -201,14 +240,32 @@ class _FormArrayFieldState extends State<FormArrayField> {
         },
       );
 
-      // Create the array item widget with proper spacing
+      // Check if this array item should be visible
+      // For array items, we assume they're always visible unless there's specific showOn logic
+      // You might need to add proper visibility checking here based on your requirements
+      bool itemIsVisible = true; // Array items are typically always visible
+
+      // Only add spacing if this element is visible and there's already a visible element
+      if (itemIsVisible) {
+        if (hasVisibleElement) {
+          widgets.add(Container(
+            key: Key('spacing_${items[index].id}'),
+            height: 8.0,
+          ));
+        }
+        hasVisibleElement = true;
+      }
+
+      // Calculate the widget index for this item (accounting for spacing widgets)
+      int widgetIndex = widgets.length; // This will be the index of the item widget we're about to add
+
+      // Always create and add the array item widget
       final itemWidget = Container(
         key: Key('${items[index].id}'),
-        margin: index > 0 ? const EdgeInsets.only(top: 8.0) : EdgeInsets.zero,
         child: Row(
           children: [
             ReorderableDragStartListener(
-              index: index,
+              index: widgetIndex, // Use the actual widget index, not the item index
               child: GestureDetector(
                 onTapDown: (_) => FocusScope.of(context).unfocus(),
                 child: const Icon(Icons.drag_handle),
