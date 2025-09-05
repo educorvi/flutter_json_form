@@ -19,6 +19,7 @@ class FormRadioGroupField extends StatelessWidget {
     return FormFieldWrapper(
       context: formFieldContext,
       child: FormBuilderRadioGroup(
+        initialValue: formFieldContext.initialValue,
         name: formFieldContext.id,
         onChanged: formFieldContext.onChanged,
         onSaved: formFieldContext.onSavedCallback,

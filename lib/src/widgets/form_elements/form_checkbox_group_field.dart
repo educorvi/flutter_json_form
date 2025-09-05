@@ -22,6 +22,7 @@ class FormCheckboxGroupField extends StatelessWidget {
         constraints: const BoxConstraints(minWidth: 400),
         child: FormBuilderCheckboxGroup(
           name: context.id,
+          initialValue: context.initialValue,
           onChanged: context.onChanged,
           onSaved: context.onSavedCallback,
           enabled: context.enabled,

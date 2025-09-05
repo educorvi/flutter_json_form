@@ -381,7 +381,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
 
     Widget groupElement = getLineContainer(
         child: Padding(
-      padding: const EdgeInsets.only(left: UIConstants.groupPadding),
+      padding: const EdgeInsets.only(left: UIConstants.groupIndentation),
       child: generateGroupElements(),
     ));
 

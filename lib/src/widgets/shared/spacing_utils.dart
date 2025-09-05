@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
+import 'package:flutter_json_forms/src/widgets/constants.dart';
 
 /// Utility class for handling consistent spacing between form elements
 class SpacingUtils {
@@ -12,7 +13,7 @@ class SpacingUtils {
     required Widget Function(T item, int index) widgetBuilder,
     required bool Function(T item, int index) isVisibleChecker,
     LayoutDirection layoutDirection = LayoutDirection.vertical,
-    double spacing = 8.0,
+    double spacing = UIConstants.elementSpacing,
     Widget Function(T item, int index, bool isVisible, bool hasVisibleElement)? spacingBuilder,
   }) {
     final List<Widget> allWidgets = [];
@@ -60,7 +61,7 @@ class SpacingUtils {
     required Widget Function(dynamic element, int index) widgetBuilder,
     required bool Function(dynamic element, int index) isVisibleChecker,
     LayoutDirection layoutDirection = LayoutDirection.vertical,
-    double spacing = 8.0,
+    double spacing = UIConstants.elementSpacing,
   }) {
     return buildWidgetsWithSpacing<dynamic>(
       items: elements,
@@ -77,7 +78,7 @@ class SpacingUtils {
     required List<String> propertyKeys,
     required Widget Function(String key, int index) widgetBuilder,
     required bool Function(String key, int index) isVisibleChecker,
-    double spacing = 8.0,
+    double spacing = UIConstants.elementSpacing,
   }) {
     return buildWidgetsWithSpacing<String>(
       items: propertyKeys,
@@ -94,7 +95,7 @@ class SpacingUtils {
     required Widget Function(T item, int index) widgetBuilder,
     required bool Function(T item, int index) isVisibleChecker,
     required Widget Function(T item, int index) spacingWidgetBuilder,
-    double spacing = 8.0,
+    double spacing = UIConstants.elementSpacing,
   }) {
     return buildWidgetsWithSpacing<T>(
       items: items,

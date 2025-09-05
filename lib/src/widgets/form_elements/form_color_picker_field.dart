@@ -18,6 +18,7 @@ class FormColorPickerField extends StatelessWidget {
       context: formFieldContext,
       child: FormBuilderColorPickerField(
         name: formFieldContext.id,
+        // initialValue: formFieldContext.initialValue, // TODO
         onChanged: formFieldContext.onChanged,
         onSaved: formFieldContext.onSavedCallback,
         enabled: formFieldContext.enabled,

@@ -578,7 +578,7 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
         //   // },
         // ),
         child: Padding(
-      padding: EdgeInsets.only(left: UIConstants.groupPadding),
+      padding: EdgeInsets.only(left: UIConstants.groupIndentation),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: elements,

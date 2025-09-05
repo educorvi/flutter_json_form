@@ -33,7 +33,7 @@ class FormGroup extends StatelessWidget {
 
     Widget groupElement = getLineContainer(
       child: Padding(
-        padding: const EdgeInsets.only(left: UIConstants.groupPadding),
+        padding: const EdgeInsets.only(left: UIConstants.groupIndentation),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: _buildElementsWithSpacing(context, elements, isShown),
@@ -58,6 +58,12 @@ class FormGroup extends StatelessWidget {
         layoutDirection: LayoutDirection.vertical,
       ),
       isVisibleChecker: (element, index) {
+        // Check if element is explicitly hidden
+        if (element.options?.formattingOptions?.hidden == true) {
+          return false;
+        }
+
+        // Check normal showOn visibility
         final String elementScope = element.scope ?? '';
         return formContext.elementShown(
           scope: elementScope,

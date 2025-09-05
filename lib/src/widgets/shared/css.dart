@@ -7,7 +7,7 @@ Widget applyCss(BuildContext context, Widget child, {String? cssClass}) {
     if (cssClass.contains("bg-light greyBackground")) {
       return Card.filled(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
-        child: Padding(padding: const EdgeInsets.all(UIConstants.groupPadding), child: child),
+        child: Padding(padding: const EdgeInsets.all(UIConstants.groupIndentation), child: child),
       );
     }
   }

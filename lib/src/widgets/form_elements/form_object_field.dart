@@ -47,7 +47,7 @@ class _FormObjectFieldState extends State<FormObjectField> {
 
     Widget objectElements = getLineContainer(
       child: Padding(
-        padding: const EdgeInsets.only(left: UIConstants.groupPadding),
+        padding: const EdgeInsets.only(left: UIConstants.groupIndentation),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: _buildElementsWithSpacing(context, effectiveFormContext, objectIsShown),
@@ -65,6 +65,7 @@ class _FormObjectFieldState extends State<FormObjectField> {
                 label,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
+              const SizedBox(height: UIConstants.objectTitlePadding),
               objectElements,
             ],
           )
@@ -111,8 +112,7 @@ class _FormObjectFieldState extends State<FormObjectField> {
         childJsonSchema: widget.formFieldContext.jsonSchema.properties[key]!,
         childOptions: childOptions,
         childShowOn: childShowOn,
-        childInitialValue:
-            widget.formFieldContext.initialValue is Map<String, dynamic> ? widget.formFieldContext.initialValue["/properties/$key"] : null,
+        childInitialValue: _getChildInitialValue(key),
         childRequired: childRequired,
         childSelfIndices: widget.formFieldContext.selfIndices,
         childOnChanged: (value) {
@@ -145,6 +145,11 @@ class _FormObjectFieldState extends State<FormObjectField> {
     ui.DescendantControlOverrides? descendantControlOverrides =
         widget.formFieldContext.options?.formattingOptions?.descendantControlOverrides?[childScope];
 
+    // // Check if element is explicitly hidden
+    // if (descendantControlOverrides?.options?.formattingOptions?.hidden == true) {
+    //   return false;
+    // }
+
     final childShowOn = descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn;
 
     return isElementShown(
@@ -153,5 +158,27 @@ class _FormObjectFieldState extends State<FormObjectField> {
       ritaDependencies: formContext.ritaDependencies,
       checkValueForShowOn: formContext.checkValueForShowOn,
     );
+  }
+
+  /// Gets the initial value for a child property, handling both top-level and nested objects
+  dynamic _getChildInitialValue(String key) {
+    if (widget.formFieldContext.initialValue is! Map<String, dynamic>) {
+      return null;
+    }
+
+    final Map<String, dynamic> initialValue = widget.formFieldContext.initialValue;
+
+    // First try direct key access (for objects in arrays)
+    if (initialValue.containsKey(key)) {
+      return initialValue[key];
+    }
+
+    // Then try with /properties/ prefix (for top-level objects)
+    final prefixedKey = "/properties/$key";
+    if (initialValue.containsKey(prefixedKey)) {
+      return initialValue[prefixedKey];
+    }
+
+    return null;
   }
 }

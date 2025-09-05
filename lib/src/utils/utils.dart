@@ -156,7 +156,7 @@ Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties,
     } else if (formData != null && formData.containsKey(key)) {
       final formDataKey = formData[key];
       if (formDataKey is List) {
-        dependencies["/properties/$key"] = formDataKey.map((item) => item.toString()).toList();
+        dependencies["/properties/$key"] = formDataKey;
       } else {
         dependencies["/properties/$key"] = formatInput(formData[key], jsonSchema);
       }

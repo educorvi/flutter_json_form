@@ -25,8 +25,10 @@ class FormSelector extends StatefulWidget {
               formData: getFormDataGfk1()),
           ExampleFormFile(name: "Reproduce", filename: "reproduce"),
           ExampleFormFile(
-              name: "Reisekostenantrag mit Prozessautomatisierung",
-              filename: "reisekostenantrag_paut"),
+            name: "Reisekostenantrag mit Prozessautomatisierung",
+            filename: "reisekostenantrag_paut",
+            //formData: getFormDataReisekostenantrag()
+          ),
           ExampleFormFile(name: "Json Schema", filename: "jsonSchema"),
         ],
         uploadFormFile = UploadFormFile(
@@ -221,6 +223,52 @@ class FormSelectorState extends State<FormSelector> {
       ],
     );
   }
+}
+
+Map<String, dynamic> getFormDataReisekostenantrag() {
+  return {
+    "fs_sonstige_kosten": "Hallo",
+    "fg_bankverbindung_fs_kontoauswahl": "Auf das Ihnen bereits bekannte Konto",
+    "fg_art_der_fahrt": [
+      {
+        "fg_art_der_fahrt_fs_art_der_fahrt":
+            "Fahrten zu einer ärztlichen Begutachtung/ Zusatzbegutachtung",
+        "fg_art_der_fahrt_fs_ziel": "1234",
+        "fg_art_der_fahrt_fs_verkehrsmittel":
+            "Taxi (ärztliche Bescheinigung über die Notwendigkeit erforderlich)",
+        "fg_art_der_fahrt_fg_begleit_verdienstausf_fs_verdienstausfall": true,
+        "fg_art_der_fahrt_fg_arr_datumsangaben": [
+          {
+            "fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum":
+                "2025-09-05T00:00:00.000"
+          }
+        ]
+      },
+      {
+        "fg_art_der_fahrt_fs_art_der_fahrt":
+            "Fahrten zum Arzt/ zur Ärztin oder zum Therapeuten/ zur Therapeutin",
+        "fg_art_der_fahrt_fs_verkehrsmittel": "Kraftfahrzeug",
+        "fg_art_der_fahrt_fg_begleit_verdienstausf_fs_verdienstausfall": false,
+        "fg_art_der_fahrt_fg_arr_datumsangaben": [
+          {
+            "fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum":
+                "2025-09-15T00:00:00.000"
+          }
+        ],
+        "fg_art_der_fahrt_fs_ziel": "1234"
+      },
+      {
+        "fg_art_der_fahrt_fs_ziel": "test",
+        "fg_art_der_fahrt_fg_begleit_verdienstausf_fs_verdienstausfall": false,
+        "fg_art_der_fahrt_fg_arr_datumsangaben": [
+          {
+            "fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum":
+                "2025-09-03T00:00:00.000"
+          }
+        ]
+      }
+    ]
+  };
 }
 
 Map<String, dynamic> getFormDataFiverules() {

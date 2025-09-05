@@ -90,12 +90,14 @@ Widget handleShowOn({
                 ? false
                 : isElementShown(
                     parentIsShown: parentIsShown, showOn: showOn, ritaDependencies: ritaDependencies, checkValueForShowOn: checkValueForShowOn));
-        return AnimatedCrossFade(
+        return AnimatedSize(
           duration: const Duration(milliseconds: 400),
-          sizeCurve: Curves.easeInOut,
-          firstChild: child,
-          secondChild: Container(),
-          crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          curve: Curves.easeInOut,
+          child: Visibility(
+            maintainState: true,
+            visible: isVisible,
+            child: child,
+          ),
         );
       },
     );
@@ -104,12 +106,14 @@ Widget handleShowOn({
   // Fallback to existing logic (legacy showOn or precomputed Rita without indices)
   final bool isVisible =
       isElementShown(parentIsShown: parentIsShown, showOn: showOn, ritaDependencies: ritaDependencies, checkValueForShowOn: checkValueForShowOn);
-  return AnimatedCrossFade(
+  return AnimatedSize(
     duration: const Duration(milliseconds: 400),
-    sizeCurve: Curves.easeInOut,
-    firstChild: child,
-    secondChild: Container(),
-    crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+    curve: Curves.easeInOut,
+    child: Visibility(
+      maintainState: true,
+      visible: isVisible,
+      child: child,
+    ),
   );
 }
 

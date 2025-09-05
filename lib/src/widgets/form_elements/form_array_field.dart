@@ -129,6 +129,13 @@ class _FormArrayFieldState extends State<FormArrayField> {
             onReorder: _moveItem,
           ),
         ],
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.tonal(
+            onPressed: maxItems == null || items.length < maxItems ? _addItem : null,
+            child: const Icon(Icons.add),
+          ),
+        ),
         if (widget.formFieldContext.description != null)
           Padding(
             padding: const EdgeInsets.only(top: 10.0),
@@ -137,13 +144,6 @@ class _FormArrayFieldState extends State<FormArrayField> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.tonal(
-            onPressed: maxItems == null || items.length < maxItems ? _addItem : null,
-            child: const Icon(Icons.add),
-          ),
-        ),
       ],
     );
 
