@@ -7,6 +7,7 @@ import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.da
 import '../../models/ui_schema.dart' as ui;
 import '../../utils/show_on.dart';
 import '../shared/common.dart';
+import '../shared/form_element_loading.dart';
 
 class FormObjectField extends StatefulWidget {
   final FormFieldContext formFieldContext;
@@ -22,10 +23,24 @@ class FormObjectField extends StatefulWidget {
 
 class _FormObjectFieldState extends State<FormObjectField> {
   final Map<String, dynamic> formSubmitValues = {};
+  FormContext? _cachedFormContext;
 
   @override
   Widget build(BuildContext context) {
-    final formContext = FormContext.of(context)!;
+    final formContext = FormContext.of(context);
+
+    // Cache the FormContext when it's available
+    if (formContext != null) {
+      _cachedFormContext = formContext;
+    }
+
+    // If FormContext is not available and we don't have a cached one, show a placeholder
+    if (formContext == null && _cachedFormContext == null) {
+      return const FormElementLoading();
+    }
+
+    // Use available FormContext or cached one
+    final effectiveFormContext = formContext ?? _cachedFormContext!;
 
     bool objectIsShown() => widget.formFieldContext.isShownCallback();
 
@@ -34,7 +49,7 @@ class _FormObjectFieldState extends State<FormObjectField> {
         padding: const EdgeInsets.only(left: UIConstants.groupPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: _buildElementsWithSpacing(context, formContext, objectIsShown),
+          children: _buildElementsWithSpacing(context, effectiveFormContext, objectIsShown),
         ),
       ),
     );
@@ -56,10 +71,10 @@ class _FormObjectFieldState extends State<FormObjectField> {
 
     return handleShowOn(
       child: objectWidget,
-      checkValueForShowOn: formContext.checkValueForShowOn,
+      checkValueForShowOn: effectiveFormContext.checkValueForShowOn,
       parentIsShown: widget.formFieldContext.parentIsShown,
       showOn: widget.formFieldContext.showOn,
-      ritaDependencies: formContext.ritaDependencies,
+      ritaDependencies: effectiveFormContext.ritaDependencies,
       selfIndices: widget.formFieldContext.selfIndices,
       ritaEvaluator: widget.formFieldContext.ritaEvaluator,
       getFullFormData: widget.formFieldContext.getFullFormData,
@@ -82,7 +97,7 @@ class _FormObjectFieldState extends State<FormObjectField> {
       final childShowOn = descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn;
 
       bool childIsShown() => isElementShown(
-            parentIsShown: objectIsShown(),
+            parentIsShown: true, // objectIsShown(),
             showOn: childShowOn,
             ritaDependencies: formContext.ritaDependencies,
             checkValueForShowOn: formContext.checkValueForShowOn,

@@ -43,10 +43,11 @@ class FormGroup extends StatelessWidget {
     return withLabel(context, label, groupElement);
   }
 
-  /// Builds a list of widgets with proper spacing, filtering out hidden elements
+  /// Builds a list of widgets with proper spacing - always creates spacing widgets but makes them invisible when not needed
   List<Widget> _buildElementsWithSpacing(BuildContext context, List<ui.LayoutElement> elements, bool? parentIsShown) {
     final formContext = FormContext.of(context)!;
-    final List<Widget> visibleWidgets = [];
+    final List<Widget> allWidgets = [];
+    bool hasVisibleElement = false;
 
     for (int i = 0; i < elements.length; i++) {
       final item = elements[i];
@@ -56,27 +57,32 @@ class FormGroup extends StatelessWidget {
       final bool isShown = formContext.elementShown(
         scope: elementScope,
         showOn: item.showOn,
-        parentIsShown: parentIsShown ?? true,
+        parentIsShown: true, // parentIsShown ??
       );
 
-      // Only add visible elements and spacing
-      if (isShown) {
-        final widget = FormLayoutItemGenerator.generateItem(
-          item,
-          nestingLevel,
-          isShownFromParent: parentIsShown,
-          layoutDirection: LayoutDirection.vertical,
-        );
-
-        // Add spacing before this element if it's not the first visible element
-        if (visibleWidgets.isNotEmpty) {
-          visibleWidgets.add(const SizedBox(height: 8.0));
-        }
-
-        visibleWidgets.add(widget);
+      // Always add spacing widget, but with zero size if not needed
+      if (i > 0) {
+        allWidgets.add(SizedBox(
+          height: (isShown && hasVisibleElement) ? 8.0 : 0.0,
+        ));
       }
+
+      // Track if we have a visible element for next iteration
+      if (isShown) {
+        hasVisibleElement = true;
+      }
+
+      // Always create the widget - handleShowOn will manage visibility
+      final widget = FormLayoutItemGenerator.generateItem(
+        item,
+        nestingLevel,
+        isShownFromParent: parentIsShown,
+        layoutDirection: LayoutDirection.vertical,
+      );
+
+      allWidgets.add(widget);
     }
 
-    return visibleWidgets;
+    return allWidgets;
   }
 }

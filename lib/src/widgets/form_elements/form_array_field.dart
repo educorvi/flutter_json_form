@@ -5,6 +5,7 @@ import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_checkbox_group_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
+import 'package:flutter_json_forms/src/widgets/shared/form_element_loading.dart';
 import 'package:json_schema/json_schema.dart';
 import '../../utils/show_on.dart';
 import '../../utils/parse.dart';
@@ -26,6 +27,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
   List<ListItem> items = [];
   bool itemsInitialized = false;
   int _idCounter = 0;
+  FormContext? _cachedFormContext;
 
   @override
   void initState() {
@@ -57,12 +59,17 @@ class _FormArrayFieldState extends State<FormArrayField> {
   @override
   Widget build(BuildContext context) {
     final formContext = FormContext.of(context);
-    
-    // If FormContext is not available, show an error with debug info
-    if (formContext == null) {
-      print("FormArrayField: FormContext is null for scope: ${widget.formFieldContext.scope}");
-      return FormError("FormArrayField must be used within a FormContext widget tree. Scope: ${widget.formFieldContext.scope}");
+
+    // Cache the FormContext when it's available
+    if (formContext != null) {
+      _cachedFormContext = formContext;
     }
+
+    // If FormContext is not available and we don't have a cached one, show a placeholder
+    if (formContext == null && _cachedFormContext == null) {
+      return const FormElementLoading();
+    } // Use available FormContext or cached one
+    final effectiveFormContext = formContext ?? _cachedFormContext!;
 
     // Check if this should be rendered as checkbox group
     if (widget.formFieldContext.jsonSchema.items != null) {
@@ -90,7 +97,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
       return Text("Tags not yet implemented");
     }
 
-    return _buildArrayWidget(formContext);
+    return _buildArrayWidget(effectiveFormContext);
   }
 
   Widget _buildArrayWidget(FormContext formContext) {
@@ -201,14 +208,9 @@ class _FormArrayFieldState extends State<FormArrayField> {
   }
 
   /// Builds a list of array items with proper spacing and reordering capability
-  List<Widget> _buildArrayItemsWithSpacing(FormContext? formContext, bool Function() arrayIsShown, int minItems) {
+  List<Widget> _buildArrayItemsWithSpacing(FormContext formContext, bool Function() arrayIsShown, int minItems) {
     final List<Widget> widgets = [];
     bool hasVisibleElement = false;
-
-    // Return empty list if formContext is null
-    if (formContext == null) {
-      return widgets;
-    }
 
     for (int index = 0; index < items.length; index++) {
       final childContext = widget.formFieldContext.createChildContext(
