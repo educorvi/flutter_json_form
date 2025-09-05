@@ -8,6 +8,7 @@ import '../../models/ui_schema.dart' as ui;
 import '../../utils/show_on.dart';
 import '../shared/common.dart';
 import '../shared/form_element_loading.dart';
+import '../shared/spacing_utils.dart';
 
 class FormObjectField extends StatefulWidget {
   final FormFieldContext formFieldContext;
@@ -81,73 +82,76 @@ class _FormObjectFieldState extends State<FormObjectField> {
     );
   }
 
-  /// Builds a list of widgets with proper spacing, filtering out hidden elements
+  /// Builds a list of widgets with proper spacing using shared utility
   List<Widget> _buildElementsWithSpacing(BuildContext context, FormContext formContext, bool Function() objectIsShown) {
-    final List<Widget> allWidgets = [];
-    bool hasVisibleElement = false;
+    final propertyKeys = widget.formFieldContext.jsonSchema.properties.keys.toList();
 
-    for (var key in widget.formFieldContext.jsonSchema.properties.keys) {
-      bool childRequired = widget.formFieldContext.jsonSchema.propertyRequired(key) || widget.formFieldContext.required;
-      String childScope = "${widget.formFieldContext.scope}/properties/$key";
+    return SpacingUtils.buildObjectPropertiesWithSpacing(
+      context: context,
+      propertyKeys: propertyKeys,
+      widgetBuilder: (key, index) => _buildChildWidget(key, formContext),
+      isVisibleChecker: (key, index) => _isChildVisible(key, formContext),
+    );
+  }
 
-      ui.DescendantControlOverrides? descendantControlOverrides =
-          widget.formFieldContext.options?.formattingOptions?.descendantControlOverrides?[childScope];
+  /// Creates a child widget for the given property key
+  Widget _buildChildWidget(String key, FormContext formContext) {
+    bool childRequired = widget.formFieldContext.jsonSchema.propertyRequired(key) || widget.formFieldContext.required;
+    String childScope = "${widget.formFieldContext.scope}/properties/$key";
 
-      final childOptions = descendantControlOverrides?.options ?? widget.formFieldContext.options;
-      final childShowOn = descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn;
+    ui.DescendantControlOverrides? descendantControlOverrides =
+        widget.formFieldContext.options?.formattingOptions?.descendantControlOverrides?[childScope];
 
-      bool childIsShown() => isElementShown(
-            parentIsShown: true, // objectIsShown(),
-            showOn: childShowOn,
-            ritaDependencies: formContext.ritaDependencies,
-            checkValueForShowOn: formContext.checkValueForShowOn,
-          );
+    final childOptions = descendantControlOverrides?.options ?? widget.formFieldContext.options;
+    final childShowOn = descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn;
 
-      // Always create the widget
-      final childWidget = FormElementFactory.createFormElement(widget.formFieldContext.createChildContext(
-          childScope: childScope,
-          childId: '${widget.formFieldContext.id}/properties/$key',
-          childJsonSchema: widget.formFieldContext.jsonSchema.properties[key]!,
-          childOptions: childOptions,
-          childShowOn: childShowOn,
-          childInitialValue:
-              widget.formFieldContext.initialValue is Map<String, dynamic> ? widget.formFieldContext.initialValue["/properties/$key"] : null,
-          childRequired: childRequired,
-          // childShowLabel: childShowLabel,
-          childSelfIndices: widget.formFieldContext.selfIndices,
-          childOnChanged: (value) {
-            if (widget.formFieldContext.onChanged != null) {
-              final newValue =
-                  Map<String, dynamic>.from(widget.formFieldContext.initialValue is Map<String, dynamic> ? widget.formFieldContext.initialValue : {});
-              newValue[key] = value;
-              widget.formFieldContext.onChanged!(newValue);
+    return FormElementFactory.createFormElement(widget.formFieldContext.createChildContext(
+        childScope: childScope,
+        childId: '${widget.formFieldContext.id}/properties/$key',
+        childJsonSchema: widget.formFieldContext.jsonSchema.properties[key]!,
+        childOptions: childOptions,
+        childShowOn: childShowOn,
+        childInitialValue:
+            widget.formFieldContext.initialValue is Map<String, dynamic> ? widget.formFieldContext.initialValue["/properties/$key"] : null,
+        childRequired: childRequired,
+        childSelfIndices: widget.formFieldContext.selfIndices,
+        childOnChanged: (value) {
+          if (widget.formFieldContext.onChanged != null) {
+            final newValue =
+                Map<String, dynamic>.from(widget.formFieldContext.initialValue is Map<String, dynamic> ? widget.formFieldContext.initialValue : {});
+            newValue[key] = value;
+            widget.formFieldContext.onChanged!(newValue);
+          }
+        },
+        childOnSavedCallback: (value) {
+          final childIsShown = _isChildVisible(key, formContext);
+          if (value != null && value != "" && childIsShown) {
+            formSubmitValues[key] = value;
+          } else {
+            formSubmitValues.remove(key);
+          }
+          if (widget.formFieldContext.onSavedCallback != null && key == widget.formFieldContext.jsonSchema.properties.keys.last) {
+            if (formSubmitValues.isNotEmpty) {
+              widget.formFieldContext.onSavedCallback!(formSubmitValues);
             }
-          },
-          childOnSavedCallback: (value) {
-            if (value != null && value != "" && childIsShown()) {
-              formSubmitValues[key] = value;
-            } else {
-              formSubmitValues.remove(key);
-            }
-            if (widget.formFieldContext.onSavedCallback != null && key == widget.formFieldContext.jsonSchema.properties.keys.last) {
-              if (formSubmitValues.isNotEmpty) {
-                widget.formFieldContext.onSavedCallback!(formSubmitValues);
-              }
-            }
-          }));
+          }
+        }));
+  }
 
-      // Only add spacing if this element is visible and there's already a visible element
-      if (childIsShown()) {
-        if (hasVisibleElement) {
-          allWidgets.add(const SizedBox(height: 8.0));
-        }
-        hasVisibleElement = true;
-      }
+  /// Checks if a child property should be visible
+  bool _isChildVisible(String key, FormContext formContext) {
+    String childScope = "${widget.formFieldContext.scope}/properties/$key";
 
-      // Always add the widget (it will handle its own visibility internally)
-      allWidgets.add(childWidget);
-    }
+    ui.DescendantControlOverrides? descendantControlOverrides =
+        widget.formFieldContext.options?.formattingOptions?.descendantControlOverrides?[childScope];
 
-    return allWidgets;
+    final childShowOn = descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn;
+
+    return isElementShown(
+      parentIsShown: true,
+      showOn: childShowOn,
+      ritaDependencies: formContext.ritaDependencies,
+      checkValueForShowOn: formContext.checkValueForShowOn,
+    );
   }
 }

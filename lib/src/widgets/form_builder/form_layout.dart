@@ -4,6 +4,7 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_item_generator.dart';
 import '../../models/ui_schema.dart' as ui;
 import '../shared/common.dart';
+import '../shared/spacing_utils.dart';
 
 class FormLayout extends StatelessWidget {
   final ui.Layout layout;
@@ -47,55 +48,35 @@ class FormLayout extends StatelessWidget {
     return withLabel(context, label, content);
   }
 
-  /// Builds a list of widgets with proper spacing - always creates spacing widgets but makes them invisible when not needed
+  /// Builds a list of widgets with proper spacing using shared utility
   List<Widget> _buildElementsWithSpacing(BuildContext context, List<ui.LayoutElement> elements, LayoutDirection layoutDirection) {
     final formContext = FormContext.of(context)!;
-    final List<Widget> allWidgets = [];
-    bool hasVisibleElement = false;
 
-    for (int i = 0; i < elements.length; i++) {
-      final item = elements[i];
+    return SpacingUtils.buildLayoutElementsWithSpacing(
+      context: context,
+      elements: elements,
+      layoutDirection: layoutDirection,
+      widgetBuilder: (element, index) {
+        Widget widget = FormLayoutItemGenerator.generateItem(
+          element,
+          nestingLevel,
+          layoutDirection: layoutDirection,
+        );
 
-      // Check if this element should be visible
-      final String elementScope = item.scope ?? '';
-      final bool isShown = formContext.elementShown(
-        scope: elementScope,
-        showOn: item.showOn,
-        parentIsShown: true,
-      );
-
-      // Always add spacing widget, but with zero size if not needed
-      if (i > 0) {
-        if (layoutDirection == LayoutDirection.vertical) {
-          allWidgets.add(SizedBox(
-            height: (isShown && hasVisibleElement) ? 8.0 : 0.0,
-          ));
-        } else {
-          allWidgets.add(SizedBox(
-            width: (isShown && hasVisibleElement) ? 8.0 : 0.0,
-          ));
+        if (layoutDirection == LayoutDirection.horizontal) {
+          widget = Expanded(child: widget);
         }
-      }
 
-      // Track if we have a visible element for next iteration
-      if (isShown) {
-        hasVisibleElement = true;
-      }
-
-      // Always create the widget - handleShowOn will manage visibility
-      Widget widget = FormLayoutItemGenerator.generateItem(
-        item,
-        nestingLevel,
-        layoutDirection: layoutDirection,
-      );
-
-      if (layoutDirection == LayoutDirection.horizontal) {
-        widget = Expanded(child: widget);
-      }
-
-      allWidgets.add(widget);
-    }
-
-    return allWidgets;
+        return widget;
+      },
+      isVisibleChecker: (element, index) {
+        final String elementScope = element.scope ?? '';
+        return formContext.elementShown(
+          scope: elementScope,
+          showOn: element.showOn,
+          parentIsShown: true,
+        );
+      },
+    );
   }
 }

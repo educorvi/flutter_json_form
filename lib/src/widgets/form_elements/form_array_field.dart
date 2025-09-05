@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
+import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
 import 'package:flutter_json_forms/src/widgets/form_elements/form_checkbox_group_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
@@ -10,6 +11,7 @@ import 'package:json_schema/json_schema.dart';
 import '../../utils/show_on.dart';
 import '../../utils/parse.dart';
 import '../data/list_item.dart';
+import '../shared/spacing_utils.dart';
 
 class FormArrayField extends StatefulWidget {
   final FormFieldContext formFieldContext;
@@ -207,86 +209,79 @@ class _FormArrayFieldState extends State<FormArrayField> {
     });
   }
 
-  /// Builds a list of array items with proper spacing and reordering capability
+  /// Builds a list of array items with proper spacing using shared utility
   List<Widget> _buildArrayItemsWithSpacing(FormContext formContext, bool Function() arrayIsShown, int minItems) {
-    final List<Widget> widgets = [];
-    bool hasVisibleElement = false;
+    return SpacingUtils.buildArrayItemsWithSpacing<ListItem<dynamic>>(
+      items: items,
+      widgetBuilder: (item, index) => _buildArrayItemWidget(item, index, formContext, minItems),
+      isVisibleChecker: (item, index) => true, // Array items are typically always visible
+      spacingWidgetBuilder: (item, index) => Container(
+        key: Key('spacing_${item.id}'),
+        height: 8.0,
+      ),
+    );
+  }
 
-    for (int index = 0; index < items.length; index++) {
-      final childContext = widget.formFieldContext.createChildContext(
-        childScope: '${widget.formFieldContext.scope}/items',
-        childId: '${widget.formFieldContext.id}/items/${items[index].id}',
-        childJsonSchema: widget.formFieldContext.jsonSchema.items!,
-        childInitialValue: items[index].value,
-        childRequired: widget.formFieldContext.required,
-        childShowLabel: false,
-        childSelfIndices: () {
-          final map = <String, int>{};
-          if (widget.formFieldContext.selfIndices != null) {
-            map.addAll(widget.formFieldContext.selfIndices!);
-          }
-          map[widget.formFieldContext.scope] = index;
-          return map;
-        }(),
-        childOnChanged: (value) {
-          items[index].value = value;
-          if (widget.formFieldContext.onChanged != null) {
-            widget.formFieldContext.onChanged!(items.map((e) => e.value).toList());
-          }
-        },
-        childOnSavedCallback: (value) {
-          items[index].value = value;
-          if (widget.formFieldContext.onSavedCallback != null && index == items.length - 1) {
-            widget.formFieldContext.onSavedCallback!(items.map((e) => e.value).toList());
-          }
-        },
-      );
-
-      // Check if this array item should be visible
-      // For array items, we assume they're always visible unless there's specific showOn logic
-      // You might need to add proper visibility checking here based on your requirements
-      bool itemIsVisible = true; // Array items are typically always visible
-
-      // Only add spacing if this element is visible and there's already a visible element
-      if (itemIsVisible) {
-        if (hasVisibleElement) {
-          widgets.add(Container(
-            key: Key('spacing_${items[index].id}'),
-            height: 8.0,
-          ));
+  /// Builds a single array item widget
+  Widget _buildArrayItemWidget(ListItem<dynamic> item, int index, FormContext formContext, int minItems) {
+    final ui.DescendantControlOverrides? overrides =
+        widget.formFieldContext.options?.formattingOptions?.descendantControlOverrides?[widget.formFieldContext.scope];
+    final ui.ControlOptions? childOptions = overrides?.options ?? widget.formFieldContext.options;
+    final ui.ShowOnProperty? childShowOn = overrides?.showOn;
+    final childContext = widget.formFieldContext.createChildContext(
+      childScope: '${widget.formFieldContext.scope}/items',
+      childId: '${widget.formFieldContext.id}/items/${item.id}',
+      childJsonSchema: widget.formFieldContext.jsonSchema.items!,
+      childInitialValue: item.value,
+      childRequired: widget.formFieldContext.required,
+      childShowLabel: false,
+      childOptions: childOptions,
+      childShowOn: childShowOn,
+      childSelfIndices: () {
+        final map = <String, int>{};
+        if (widget.formFieldContext.selfIndices != null) {
+          map.addAll(widget.formFieldContext.selfIndices!);
         }
-        hasVisibleElement = true;
-      }
+        map[widget.formFieldContext.scope] = index;
+        return map;
+      }(),
+      childOnChanged: (value) {
+        items[index].value = value;
+        if (widget.formFieldContext.onChanged != null) {
+          widget.formFieldContext.onChanged!(items.map((e) => e.value).toList());
+        }
+      },
+      childOnSavedCallback: (value) {
+        items[index].value = value;
+        if (widget.formFieldContext.onSavedCallback != null && index == items.length - 1) {
+          widget.formFieldContext.onSavedCallback!(items.map((e) => e.value).toList());
+        }
+      },
+    );
 
-      // Calculate the widget index for this item (accounting for spacing widgets)
-      int widgetIndex = widgets.length; // This will be the index of the item widget we're about to add
+    // Calculate the widget index for this item (accounting for spacing widgets)
+    int widgetIndex = index * 2; // Widget layout: Item0 (0), Spacer (1), Item1 (2), Spacer (3), Item2 (4), etc.
 
-      // Always create and add the array item widget
-      final itemWidget = Container(
-        key: Key('${items[index].id}'),
-        child: Row(
-          children: [
-            ReorderableDragStartListener(
-              index: widgetIndex, // Use the actual widget index, not the item index
-              child: GestureDetector(
-                onTapDown: (_) => FocusScope.of(context).unfocus(),
-                child: const Icon(Icons.drag_handle),
-              ),
+    return Container(
+      key: Key('${item.id}'),
+      child: Row(
+        children: [
+          ReorderableDragStartListener(
+            index: widgetIndex, // Use the actual widget index, not the item index
+            child: GestureDetector(
+              onTapDown: (_) => FocusScope.of(context).unfocus(),
+              child: const Icon(Icons.drag_handle),
             ),
-            Expanded(child: FormElementFactory.createFormElement(childContext)),
-            IconButton(
-              disabledColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
-              icon: const Icon(Icons.close),
-              color: Theme.of(context).colorScheme.error,
-              onPressed: items.length > minItems ? () => _removeItem(index) : null,
-            ),
-          ],
-        ),
-      );
-
-      widgets.add(itemWidget);
-    }
-
-    return widgets;
+          ),
+          Expanded(child: FormElementFactory.createFormElement(childContext)),
+          IconButton(
+            disabledColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
+            icon: const Icon(Icons.close),
+            color: Theme.of(context).colorScheme.error,
+            onPressed: items.length > minItems ? () => _removeItem(index) : null,
+          ),
+        ],
+      ),
+    );
   }
 }
