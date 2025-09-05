@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
+import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:json_schema/json_schema.dart';
 
 class FormFieldContext {
@@ -151,8 +152,13 @@ class FormFieldContext {
 
         // Check child-specific showOn conditions
         if (childShowOn != null) {
-          // Implementation depends on your show logic
-          return true; // Placeholder
+          // Use the same visibility logic as other form elements
+          return isElementShown(
+            parentIsShown: true, // Parent is already checked above
+            showOn: childShowOn,
+            ritaDependencies: ritaDependencies,
+            checkValueForShowOn: checkValueForShowOn,
+          );
         }
         return true;
       },
