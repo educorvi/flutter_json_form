@@ -13,6 +13,10 @@ class FormSelector extends StatefulWidget {
   FormSelector({super.key, this.initialSelectionIndex = 0})
       : formFiles = [
           ExampleFormFile(
+              name: "Reisekostenantrag mit Prozessautomatisierung",
+              filename: "reisekostenantrag_paut",
+              formData: getFormDataReisekostenantrag()),
+          ExampleFormFile(
               name: "SchowcaseAdvanced", filename: "showcase-advanced"),
           ExampleFormFile(name: "Showcase", filename: "showcase"),
           ExampleFormFile(
@@ -24,11 +28,6 @@ class FormSelector extends StatefulWidget {
               filename: "gfk1",
               formData: getFormDataGfk1()),
           ExampleFormFile(name: "Reproduce", filename: "reproduce"),
-          ExampleFormFile(
-            name: "Reisekostenantrag mit Prozessautomatisierung",
-            filename: "reisekostenantrag_paut",
-            //formData: getFormDataReisekostenantrag()
-          ),
           ExampleFormFile(name: "Json Schema", filename: "jsonSchema"),
         ],
         uploadFormFile = UploadFormFile(
