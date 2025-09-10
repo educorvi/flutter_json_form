@@ -5,10 +5,10 @@ class AnimatedTooltip extends StatelessWidget {
   final String label;
 
   const AnimatedTooltip({
-    Key? key,
+    super.key,
     required this.content,
     required this.label,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

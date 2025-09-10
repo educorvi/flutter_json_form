@@ -6,9 +6,9 @@ class CustomHtmlWidget extends StatelessWidget {
   final String htmlData;
 
   const CustomHtmlWidget({
-    Key? key,
+    super.key,
     required this.htmlData,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,4 @@
-library flutter_json_forms;
+library;
 
 export 'src/widgets/dynamic_form_builder.dart' show DynamicJsonForm, DynamicJsonFormState;
 

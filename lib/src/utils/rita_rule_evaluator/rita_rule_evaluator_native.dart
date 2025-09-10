@@ -80,6 +80,11 @@ class RitaRuleEvaluator {
     return result == true || result.toString().trim() == 'true' || result.toString().trim() == '1';
   }
 
+  // Future<void> evaluate(String ruleId, String dataJson) async {
+  //   final result = await _evaluate(ruleId, dataJson);
+  //   _ritaDependencies[ruleId] = result;
+  // }
+
   Future<Map<String, bool>> evaluateAll(String dataJson) async {
     if (!_initialized) await initializeWithBundle();
     Map<String, bool> results = {};
@@ -89,4 +94,10 @@ class RitaRuleEvaluator {
     }
     return results;
   }
+
+  // Future<void> evaluateAll(String dataJson) async {
+  //   _ritaDependencies = await _evaluateAll(dataJson);
+  // }
+
+  // Map<String, bool> get ritaDependencies => _ritaDependencies;
 }

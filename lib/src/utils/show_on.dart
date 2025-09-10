@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
-import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
+import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_Rule_evaluator.dart';
 
 bool isElementShown({
   bool? parentIsShown,

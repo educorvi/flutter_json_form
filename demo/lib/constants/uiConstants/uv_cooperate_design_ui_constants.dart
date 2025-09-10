@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_json_forms_demo/constants/uiConstants/uiConstants.dart';
+import 'package:flutter_json_forms_demo/constants/uiConstants/ui_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class UvCooperativeDesignUiConstants extends UiConstants {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'appIcon.dart';
+import 'app_icon.dart';
 
 final class GoogleMaterialIcon extends AppIcon {
   @override

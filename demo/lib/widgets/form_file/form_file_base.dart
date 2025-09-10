@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 
-import '../jsonDialog.dart';
+import '../json_dialog.dart';
 
 abstract class FormFile {
   final String name;

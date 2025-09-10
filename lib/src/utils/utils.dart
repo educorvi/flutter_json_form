@@ -167,7 +167,7 @@ Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties,
       // if (element["type"] == "string") {
       //   dependencies["/properties/$key"] = "";
       // } else if (element["type"] == "integer" || element["type"] == "number") {
-      //   // TODO use minValue if available. But it would be better to just evaluate all conditions to false if no value is set and let the ui component handle the default value (same behaviour as vue json forms)
+      //   // TODO use minValue if available. But it would be better to just evaluate all conditions to false if no value is set and let the ui component handle the default value (same behavior as vue json forms)
       //   dependencies["/properties/$key"] = 0;
       //   if (element.containsKey('minimum')) {
       //     dependencies["/properties/$key"] = element['minimum'];

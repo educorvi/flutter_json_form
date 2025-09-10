@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-import 'appIcon.dart';
+import 'app_icon.dart';
 
 final class UvCooperateDesignIcon extends AppIcon {
   @override
-  IconData get homePageIconSelected => PhosphorIcons.cards(PhosphorIconsStyle.fill);
+  IconData get homePageIconSelected =>
+      PhosphorIcons.cards(PhosphorIconsStyle.fill);
 
   @override
   IconData get homePageIconUnselected => PhosphorIcons.cards();
 
   @override
-  IconData get databasePageIconSelected => PhosphorIcons.fileText(PhosphorIconsStyle.fill);
+  IconData get databasePageIconSelected =>
+      PhosphorIcons.fileText(PhosphorIconsStyle.fill);
 
   @override
   IconData get databasePageIconUnselected => PhosphorIcons.fileText();
 
   @override
-  IconData get settingsPageIconSelected => PhosphorIcons.gear(PhosphorIconsStyle.fill);
+  IconData get settingsPageIconSelected =>
+      PhosphorIcons.gear(PhosphorIconsStyle.fill);
 
   @override
   IconData get settingsPageIconUnselected => PhosphorIcons.gear();

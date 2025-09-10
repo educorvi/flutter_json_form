@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_json_forms_demo/constants/appIcon/UvCooperativeDesignIcon.dart';
-import 'package:flutter_json_forms_demo/constants/uiConstants/UvCooperateDesignUiConstants.dart';
-import 'package:flutter_json_forms_demo/constants/uiConstants/googleMaterialUiConstants.dart';
-import 'package:flutter_json_forms_demo/constants/uiConstants/uiConstants.dart';
+import 'package:flutter_json_forms_demo/constants/appIcon/uv_cooperate_design_icon.dart';
+import 'package:flutter_json_forms_demo/constants/uiConstants/uv_cooperate_design_ui_constants.dart';
+import 'package:flutter_json_forms_demo/constants/uiConstants/google_material_ui_constants.dart';
+import 'package:flutter_json_forms_demo/constants/uiConstants/ui_constants.dart';
 import 'package:flutter_json_forms_demo/theme.dart';
 
-import 'appIcon/appIcon.dart';
-import 'appIcon/googleMaterialIcon.dart';
+import 'appIcon/app_icon.dart';
+import 'appIcon/google_material_icon.dart';
 
 final appConstants =
     AppConstants(designSystem: DesignSystem.uvCooperativeDesign);
@@ -44,8 +44,6 @@ class AppConstants {
         return IconSet.googleMaterial;
       case DesignSystem.uvCooperativeDesign:
         return IconSet.phosphorIcons;
-      default:
-        return IconSet.googleMaterial;
     }
   }
 }
@@ -90,8 +88,6 @@ class IconFactory {
         return GoogleMaterialIcon();
       case IconSet.phosphorIcons:
         return UvCooperateDesignIcon();
-      default:
-        return GoogleMaterialIcon();
     }
   }
 }
@@ -103,8 +99,6 @@ class UiConstantsFactory {
         return GoogleMaterialUiConstants();
       case DesignSystem.uvCooperativeDesign:
         return UvCooperativeDesignUiConstants();
-      default:
-        return GoogleMaterialUiConstants();
     }
   }
 }

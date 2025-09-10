@@ -1,4 +1,4 @@
-import 'package:flutter_json_forms_demo/constants/uiConstants/uiConstants.dart';
+import 'package:flutter_json_forms_demo/constants/uiConstants/ui_constants.dart';
 
 import 'package:flutter/material.dart';
 

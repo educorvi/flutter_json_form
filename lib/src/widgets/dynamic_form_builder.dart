@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_json_forms/src/process_form_values.dart';
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
-import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
+import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_Rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/html_widget.dart';
 import 'package:flutter_json_forms/src/widgets/shared/css.dart';
@@ -9,7 +9,6 @@ import 'package:flutter_json_forms/src/widgets/shared/common.dart';
 import 'package:flutter_json_forms/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
-import '../../flutter_json_forms.dart';
 import '../models/ui_schema.dart' as ui;
 import 'form_elements.dart';
 import 'package:flutter/material.dart';

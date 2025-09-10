@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
 import 'package:flutter_json_forms/src/process_form_values.dart';
-import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
+import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_Rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_group.dart';
@@ -98,22 +98,22 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
 
   /// return true if the widget is in the loading state (the validation is not finished yet
   /// (async part comes form reading the files. The validation is done synchronously))
-  get isLoading {
+  bool get isLoading {
     return (_jsonSchemaValidationErrors == null || _uiSchemaValidationErrors == null) && !_ritaInitialized;
   }
 
   /// return true if the JSON schema is valid
-  get validJsonSchema {
+  bool get validJsonSchema {
     return !isLoading && _jsonSchemaValidationErrors!.isEmpty;
   }
 
   /// return true if the UI schema is valid
-  get validUISchema {
+  bool get validUISchema {
     return !isLoading && _uiSchemaValidationErrors!.isEmpty;
   }
 
   /// return true if the widget has errors in the JSON or UI schema (only if the validation was turned on and is finished)
-  get hasErrors {
+  bool get hasErrors {
     return !validJsonSchema || !validUISchema;
   }
 

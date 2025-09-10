@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 
-import '../jsonDialog.dart';
+import '../json_dialog.dart';
 
 class FormFileOld {
   final String name;
@@ -23,15 +23,15 @@ class FormFileOld {
     this.formData = const {},
   }) : formKey = GlobalKey<FlutterJsonFormState>();
 
-  getFilePath() {
+  String getFilePath() {
     return "$path/$filename";
   }
 
-  getSchemaPath() {
+  String getSchemaPath() {
     return "${getFilePath()}$schemaPostfix";
   }
 
-  getUiPath() {
+  String getUiPath() {
     return "${getFilePath()}$uiPostfix";
   }
 

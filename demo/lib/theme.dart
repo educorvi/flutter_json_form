@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'constants/uiConstants/uiConstants.dart';
+import 'constants/uiConstants/ui_constants.dart';
 
 final class AppTheme {
-
   final UiConstants uiConstants;
 
   AppTheme(this.uiConstants);
 
   ThemeData getThemeData(Brightness brightness) {
-
     return ThemeData(
       // colorScheme: ColorScheme.fromSeed(
       //   seedColor: const Color(0x00004994),
@@ -37,20 +35,20 @@ final class AppTheme {
         style: ButtonStyle(
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(uiConstants.buttonBorderRadius),
+              borderRadius:
+                  BorderRadius.circular(uiConstants.buttonBorderRadius),
             ),
           ),
-            padding: WidgetStateProperty.all(
-              const EdgeInsets.symmetric(horizontal: 12.0),
-            ),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 12.0),
+          ),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(uiConstants.buttonBorderRadius),
-        ),
-        elevation: uiConstants.buttonElevation
-      ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(uiConstants.buttonBorderRadius),
+          ),
+          elevation: uiConstants.buttonElevation),
       inputDecorationTheme: InputDecorationTheme(
         // isDense: true,
         border: OutlineInputBorder(
@@ -120,7 +118,6 @@ abstract final class UVColors {
 
   static const Color tertiary = blue50;
   static const Color onTertiary = Colors.white;
-
 
   static const Color error = red30;
   static const Color onError = Colors.white;

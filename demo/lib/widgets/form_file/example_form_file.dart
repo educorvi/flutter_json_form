@@ -15,15 +15,15 @@ class ExampleFormFile extends FormFile {
     required this.filename,
   });
 
-  getFilePath() {
+  String getFilePath() {
     return "$path/$filename";
   }
 
-  getSchemaPath() {
+  String getSchemaPath() {
     return "${getFilePath()}$schemaPostfix";
   }
 
-  getUiPath() {
+  String getUiPath() {
     return "${getFilePath()}$uiPostfix";
   }
 
@@ -31,7 +31,7 @@ class ExampleFormFile extends FormFile {
   Future<void> loadSchemas() async {
     if (jsonSchema == null || uiSchema == null) {
       final jsonSchemaString = await rootBundle.loadString(getSchemaPath());
-      String? uiSchemaString = null;
+      String? uiSchemaString;
       try {
         uiSchemaString = await rootBundle.loadString(getUiPath());
       } catch (e) {

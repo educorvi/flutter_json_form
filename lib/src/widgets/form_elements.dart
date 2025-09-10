@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
+import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_Rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/parse.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:flutter_json_forms/src/utils/validators/validators.dart';
@@ -1149,21 +1149,21 @@ class _FormElementFormControlState extends State<FormElementFormControl> {
   // }
 
   /// temporary: get title from path
-  String _getNameFromPath(String path) {
-    final name = path.split('/').last;
-    if (name.isNotEmpty) {
-      return name[0].toUpperCase() + name.substring(1);
-    }
-    return name;
-  }
+  // String _getNameFromPath(String path) {
+  //   final name = path.split('/').last;
+  //   if (name.isNotEmpty) {
+  //     return name[0].toUpperCase() + name.substring(1);
+  //   }
+  //   return name;
+  // }
 
-  /// TODO temporary
-  Text _getNotImplementedWidget() {
-    return Text(
-      "TODO implement $type",
-      style: const TextStyle(color: Colors.red),
-    );
-  }
+  // /// TODO temporary
+  // Text _getNotImplementedWidget() {
+  //   return Text(
+  //     "TODO implement $type",
+  //     style: const TextStyle(color: Colors.red),
+  //   );
+  // }
 
   Widget _wrapField({required Widget child, bool showLabel = true}) {
     final preHtml = options?.formattingOptions?.preHtml;

@@ -1,4 +1,4 @@
-export 'ritaRuleEvaluatorNative.dart' if (dart.library.html) 'ritaRuleEvaluatorWeb.dart';
+export 'rita_rule_evaluator_native.dart' if (dart.library.html) 'rita_rule_evaluator_web.dart';
 
 // import 'dart:async';
 // import 'dart:convert';
