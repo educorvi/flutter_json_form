@@ -35,8 +35,8 @@ dev_dependencies:
 flutter:
   # To add assets to your package, add an assets section, like this:
   assets:
-    - lib/src/schemas/
-    - lib/src/schemas/ui/
+    - assets/schemas/
+    - assets/schemas/ui/
     - assets/js/rita-core.js
 #     - lib/src/schemas/examples/
 

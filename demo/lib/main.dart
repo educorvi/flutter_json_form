@@ -43,17 +43,21 @@ class _FlutterFormDemoState extends State<FlutterFormDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Flutter Json Forms Demo"),
-      ),
-      body: ListView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.all(8),
-        children: [
-          FormSelector(),
-        ],
+    return SelectionArea(
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text("Flutter Json Forms Demo"),
+        ),
+        body: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.all(8),
+          children: [
+            Center(
+                child: SizedBox(
+                    width: 1000, child: SelectionArea(child: FormSelector()))),
+          ],
+        ),
       ),
     );
   }

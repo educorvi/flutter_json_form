@@ -12,13 +12,13 @@ class FormSelector extends StatefulWidget {
 
   FormSelector({super.key, this.initialSelectionIndex = 0})
       : formFiles = [
+          ExampleFormFile(name: "Showcase", filename: "showcase"),
+          ExampleFormFile(name: "Reproduce", filename: "reproduce"),
+          ExampleFormFile(name: "Json Schema", filename: "jsonSchema"),
           ExampleFormFile(
               name: "Reisekostenantrag mit Prozessautomatisierung",
               filename: "reisekostenantrag_paut",
               formData: getFormDataReisekostenantrag()),
-          ExampleFormFile(
-              name: "SchowcaseAdvanced", filename: "showcase-advanced"),
-          ExampleFormFile(name: "Showcase", filename: "showcase"),
           ExampleFormFile(
               name: "5 Sicherheitsregeln",
               filename: "fiverules",
@@ -27,8 +27,6 @@ class FormSelector extends StatefulWidget {
               name: "Gefährdungsbeurteilung für Kleinbetriebe",
               filename: "gfk1",
               formData: getFormDataGfk1()),
-          ExampleFormFile(name: "Reproduce", filename: "reproduce"),
-          ExampleFormFile(name: "Json Schema", filename: "jsonSchema"),
         ],
         uploadFormFile = UploadFormFile(
           name: "Custom Form",
@@ -61,7 +59,7 @@ class FormSelectorState extends State<FormSelector> {
       children: [
         DropdownMenu<FormFile>(
           initialSelection: widget.formFiles[widget.initialSelectionIndex],
-          width: double.infinity,
+          width: 1000,
           dropdownMenuEntries: widget.formFiles
               .map((formFile) => DropdownMenuEntry<FormFile>(
                     value: formFile,

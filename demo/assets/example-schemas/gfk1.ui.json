@@ -1,5 +1,5 @@
 {
-  "$schema": "../../schemas/ui_v2-2/ui.schema.json",
+  "$schema": "../../schemas/ui/ui.schema.json",
   "version": "2.0",
   "layout": {
     "type": "VerticalLayout",
@@ -18,7 +18,9 @@
       },
       {
         "type": "Group",
-        "label": "Sicherheitstechnische- und betriebsärztliche Betreuung",
+        "options": {
+          "label": "Sicherheitstechnische- und betriebsärztliche Betreuung"
+        },
         "elements": [
           {
             "type": "HTML",
@@ -229,7 +231,9 @@
                 }
               }
             ],
-            "label": "Schulungsmaßnahmen und sonstige Aufgaben für Branchen mit sehr geringer Gefährdung",
+            "options": {
+              "label": "Schulungsmaßnahmen und sonstige Aufgaben für Branchen mit sehr geringer Gefährdung"
+            },
             "showOn": {
               "path": "#/properties/edic5bc528e85a84d3fb9819513a9db653c",
               "type": "EQUALS",
@@ -324,7 +328,9 @@
                 }
               }
             ],
-            "label": "Schulungsmaßnahmen und sonstige Aufgaben für die Branchen: Druck/Papierverarbeitung, Filmproduktion/Veranstaltungstechnik, Augenoptik/Hörakustik, Uhrmacher und Filmtheater",
+            "options": {
+              "label": "Schulungsmaßnahmen und sonstige Aufgaben für die Branchen: Druck/Papierverarbeitung, Filmproduktion/Veranstaltungstechnik, Augenoptik/Hörakustik, Uhrmacher und Filmtheater"
+            },
             "showOn": {
               "path": "#/properties/edic5bc528e85a84d3fb9819513a9db653c",
               "type": "EQUALS",
@@ -447,7 +453,9 @@
                 }
               }
             ],
-            "label": "Schulungsmaßnahmen und sonstige Aufgaben für alle anderen Branchen der Betreuungsgruppe 2",
+            "options": {
+              "label": "Schulungsmaßnahmen und sonstige Aufgaben für alle anderen Branchen der Betreuungsgruppe 2"
+            },
             "showOn": {
               "path": "#/properties/edic5bc528e85a84d3fb9819513a9db653c",
               "type": "EQUALS",
@@ -458,7 +466,9 @@
       },
       {
         "type": "Group",
-        "label": "Unterweisungen",
+        "options": {
+          "label": "Unterweisungen"
+        },
         "elements": [
           {
             "type": "HTML",
@@ -609,7 +619,9 @@
       },
       {
         "type": "Group",
-        "label": "Erste-Hilfe",
+        "options": {
+          "label": "Erste-Hilfe"
+        },
         "elements": [
           {
             "type": "HTML",
@@ -731,7 +743,9 @@
       },
       {
         "type": "Group",
-        "label": "Brandschutz",
+        "options": {
+          "label": "Brandschutz"
+        },
         "elements": [
           {
             "type": "HTML",
@@ -853,7 +867,9 @@
       },
       {
         "type": "Group",
-        "label": "Prüfung von Arbeitsmitteln",
+        "options": {
+          "label": "Prüfung von Arbeitsmitteln"
+        },
         "elements": [
           {
             "type": "HTML",

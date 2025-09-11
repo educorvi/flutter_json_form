@@ -9,7 +9,7 @@ import '../json_dialog.dart';
 class FormFileOld {
   final String name;
   final String? filename;
-  static String path = "../lib/src/schemas/examples";
+  static String path = "assets/example-schemas";
   static String schemaPostfix = ".schema.json";
   static String uiPostfix = ".ui.json";
   final GlobalKey<FlutterJsonFormState> formKey;

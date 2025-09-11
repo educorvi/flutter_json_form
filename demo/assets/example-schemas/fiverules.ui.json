@@ -1,7 +1,7 @@
 {
-    "$schema": "../../schemas/ui_v2-2/ui.schema.json",
+    "$schema": "../../schemas/ui/ui.schema.json",
     "version": "2.0",
-    "layout":{
+    "layout": {
         "type": "VerticalLayout",
         "elements": [
             {
@@ -52,7 +52,9 @@
             },
             {
                 "type": "Group",
-                "label": "Freigeschaltet",
+                "options": {
+                    "label": "Freigeschaltet"
+                },
                 "elements": [
                     {
                         "options": {
@@ -146,7 +148,9 @@
             },
             {
                 "type": "Group",
-                "label": "Gegen Wiedereinschalten gesichert",
+                "options": {
+                    "label": "Gegen Wiedereinschalten gesichert"
+                },
                 "elements": [
                     {
                         "options": {
@@ -184,7 +188,9 @@
             },
             {
                 "type": "Group",
-                "label": "Spannungsfreiheit allpolig festgestellt an der Arbeitsstelle",
+                "options": {
+                    "label": "Spannungsfreiheit allpolig festgestellt an der Arbeitsstelle"
+                },
                 "elements": [
                     {
                         "options": {
@@ -197,7 +203,9 @@
             },
             {
                 "type": "Group",
-                "label": "Geerdet und kurzgeschlossen",
+                "options": {
+                    "label": "Geerdet und kurzgeschlossen"
+                },
                 "elements": [
                     {
                         "options": {
@@ -223,7 +231,9 @@
             },
             {
                 "type": "Group",
-                "label": "Benachbarte, unter Spannung stehende Teile abgedeckt",
+                "options": {
+                    "label": "Benachbarte, unter Spannung stehende Teile abgedeckt"
+                },
                 "elements": [
                     {
                         "type": "HTML",

@@ -5,7 +5,7 @@ import 'package:flutter_json_forms_demo/widgets/form_file/form_file_base.dart';
 
 class ExampleFormFile extends FormFile {
   final String? filename;
-  static String path = "../lib/src/schemas/examples";
+  static String path = "assets/example-schemas";
   static String schemaPostfix = ".schema.json";
   static String uiPostfix = ".ui.json";
 
