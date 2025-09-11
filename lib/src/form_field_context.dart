@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
-import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
+import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_Rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:json_schema/json_schema.dart';
 
@@ -24,7 +24,7 @@ class FormFieldContext {
   final RitaRuleEvaluator? ritaEvaluator;
   final Map<String, dynamic> Function()? getFullFormData;
   final bool showLabel;
-  final void Function(dynamic)? onSavedCallback;
+  final void Function(dynamic, {Map<String, int>? computedSelfIndices})? onSavedCallback;
 
   // Computed properties
   late final String? title;
@@ -97,18 +97,19 @@ class FormFieldContext {
         scope: scope,
         showOn: showOn,
         parentIsShown: parentIsShown,
+        selfIndices: selfIndices,
       ),
       initialValue: initialValue ?? jsonSchema.defaultValue,
       nestingLevel: nestingLevel,
       parentIsShown: parentIsShown,
-      ritaDependencies: formContext.ritaDependencies,
+      ritaDependencies: formContext.ritaDependencies, //formContext.ritaDependencies,
       checkValueForShowOn: formContext.checkValueForShowOn,
       showOn: showOn,
       selfIndices: selfIndices,
       ritaEvaluator: formContext.ritaEvaluator,
       getFullFormData: formContext.getFullFormData,
       showLabel: showLabel,
-      onSavedCallback: (dynamic value) {
+      onSavedCallback: (dynamic value, {Map<String, int>? computedSelfIndices}) {
         if (onSavedCallback != null) {
           onSavedCallback(value);
         }
@@ -116,6 +117,7 @@ class FormFieldContext {
           scope: scope,
           showOn: showOn,
           parentIsShown: parentIsShown,
+          selfIndices: computedSelfIndices ?? selfIndices,
         )) {
           formContext.onFormValueSaved(scope, value);
         }
@@ -135,7 +137,7 @@ class FormFieldContext {
     bool childShowLabel = true,
     Map<String, int>? childSelfIndices,
     void Function(dynamic)? childOnChanged,
-    void Function(dynamic)? childOnSavedCallback,
+    void Function(dynamic, {Map<String, int>? computedSelfIndices})? childOnSavedCallback,
   }) {
     return FormFieldContext(
       options: childOptions ?? options,

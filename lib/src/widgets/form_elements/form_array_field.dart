@@ -123,13 +123,15 @@ class _FormArrayFieldState extends State<FormArrayField> {
           ),
         if (items.isNotEmpty) ...[
           ReorderableListView(
+            buildDefaultDragHandles: false,
             shrinkWrap: true,
             physics: const ClampingScrollPhysics(),
             children: _buildArrayItemsWithSpacing(formContext, arrayIsShown, minItems),
             onReorder: _moveItem,
           ),
         ],
-        SizedBox(
+        Container(
+          padding: const EdgeInsets.only(top: 10.0),
           width: double.infinity,
           child: FilledButton.tonal(
             onPressed: maxItems == null || items.length < maxItems ? _addItem : null,
@@ -228,6 +230,16 @@ class _FormArrayFieldState extends State<FormArrayField> {
         widget.formFieldContext.options?.formattingOptions?.descendantControlOverrides?[widget.formFieldContext.scope];
     final ui.ControlOptions? childOptions = overrides?.options ?? widget.formFieldContext.options;
     final ui.ShowOnProperty? childShowOn = overrides?.showOn;
+
+    final childSelfIndices = () {
+      final map = <String, int>{};
+      if (widget.formFieldContext.selfIndices != null) {
+        map.addAll(widget.formFieldContext.selfIndices!);
+      }
+      map[widget.formFieldContext.scope] = index;
+      return map;
+    }();
+
     final childContext = widget.formFieldContext.createChildContext(
       childScope: '${widget.formFieldContext.scope}/items',
       childId: '${widget.formFieldContext.id}/items/${item.id}',
@@ -237,24 +249,17 @@ class _FormArrayFieldState extends State<FormArrayField> {
       childShowLabel: false,
       childOptions: childOptions,
       childShowOn: childShowOn,
-      childSelfIndices: () {
-        final map = <String, int>{};
-        if (widget.formFieldContext.selfIndices != null) {
-          map.addAll(widget.formFieldContext.selfIndices!);
-        }
-        map[widget.formFieldContext.scope] = index;
-        return map;
-      }(),
+      childSelfIndices: childSelfIndices,
       childOnChanged: (value) {
         items[index].value = value;
         if (widget.formFieldContext.onChanged != null) {
           widget.formFieldContext.onChanged!(items.map((e) => e.value).toList());
         }
       },
-      childOnSavedCallback: (value) {
+      childOnSavedCallback: (value, {Map<String, int>? computedSelfIndices}) {
         items[index].value = value;
         if (widget.formFieldContext.onSavedCallback != null && index == items.length - 1) {
-          widget.formFieldContext.onSavedCallback!(items.map((e) => e.value).toList());
+          widget.formFieldContext.onSavedCallback!(items.map((e) => e.value).toList(), computedSelfIndices: childSelfIndices);
         }
       },
     );

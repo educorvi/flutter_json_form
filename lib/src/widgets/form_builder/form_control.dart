@@ -5,7 +5,6 @@ import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
 import '../../models/ui_schema.dart' as ui;
 
-import '../../utils/show_on.dart';
 import '../../utils/utils.dart';
 
 class FormControl extends StatelessWidget {
@@ -42,11 +41,11 @@ class FormControl extends StatelessWidget {
     //       checkValueForShowOn: formContext.checkValueForShowOn,
     //     );
 
-    bool isShown = formContext.elementShown(
-      scope: scope,
-      showOn: control.showOn,
-      parentIsShown: parentIsShown,
-    );
+    // bool isShown = formContext.elementShown(
+    //   scope: scope,
+    //   showOn: control.showOn,
+    //   parentIsShown: parentIsShown,
+    // );
 
     return FormElementFactory.createFormElement(FormFieldContext.fromFormContext(
       context: context,
@@ -62,7 +61,16 @@ class FormControl extends StatelessWidget {
       parentIsShown: parentIsShown,
       selfIndices: const {},
       onChanged: (value) => formContext.onFormValueChanged(scope, value),
-      onSavedCallback: (value) => isShown ? formContext.onFormValueSaved(scope, value) : null,
+      onSavedCallback: (value) => {
+        formContext.elementShown(
+          scope: scope,
+          showOn: control.showOn,
+          parentIsShown: parentIsShown,
+          selfIndices: const {}, // Form controls don't have selfIndices
+        )
+            ? formContext.onFormValueSaved(scope, value)
+            : null,
+      },
     ));
     // return FormElementFormControl(
     //   options: options,

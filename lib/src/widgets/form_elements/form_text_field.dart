@@ -28,7 +28,6 @@ class _FormTextFieldState extends State<FormTextField> {
   @override
   void initState() {
     super.initState();
-    // obscureText = widget.formFieldContext.format == ui.Format.PASSWORD;
   }
 
   @override
@@ -99,7 +98,6 @@ class _FormTextFieldState extends State<FormTextField> {
       case int:
         return int.tryParse(value);
       case double:
-        // Replace comma with dot for decimal parsing
         final normalized = value.replaceAll(',', '.');
         return double.tryParse(normalized);
       case String:
@@ -146,7 +144,6 @@ class _FormTextFieldState extends State<FormTextField> {
     if (widget.expectedType == int) {
       return [FilteringTextInputFormatter.digitsOnly];
     } else if (widget.expectedType == double) {
-      // Allow only one dot or comma as decimal separator
       return [FilteringTextInputFormatter.allow(RegExp(r'^[0-9]*[.,]?[0-9]*'))];
     }
     return null;

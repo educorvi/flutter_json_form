@@ -65,6 +65,7 @@ class FormLayoutItemGenerator {
             showOn: item.showOn,
             child: child,
             ritaDependencies: formContext.ritaDependencies,
+            ritaEvaluator: formContext.ritaEvaluator,
             checkValueForShowOn: formContext.checkValueForShowOn,
             layoutDirection: layoutDirection,
           ),

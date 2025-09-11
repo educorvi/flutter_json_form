@@ -3,8 +3,8 @@ import 'dart:convert' show json;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:json_schema/json_schema.dart' show JsonSchema, RefProvider;
 
-const String _jsonMetaSchemaPath = "packages/flutter_json_forms/lib/src/schemas/json-schema_draft7.json";
-const String _uiMetaSchemaPathFolder = "packages/flutter_json_forms/lib/src/schemas/ui";
+const String _jsonMetaSchemaPath = "packages/flutter_json_forms/assets/schemas/json-schema_draft7.json";
+const String _uiMetaSchemaPathFolder = "packages/flutter_json_forms/assets/schemas/ui";
 
 class SchemaManager {
   static final SchemaManager _instance = SchemaManager._internal();

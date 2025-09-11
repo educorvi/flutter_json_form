@@ -123,8 +123,8 @@ class _FormObjectFieldState extends State<FormObjectField> {
             widget.formFieldContext.onChanged!(newValue);
           }
         },
-        childOnSavedCallback: (value) {
-          final childIsShown = _isChildVisible(key, formContext);
+        childOnSavedCallback: (value, {Map<String, int>? computedSelfIndices}) {
+          final childIsShown = _isChildVisible(key, formContext, computedSelfIndices: computedSelfIndices);
           if (value != null && value != "" && childIsShown) {
             formSubmitValues[key] = value;
           } else {
@@ -139,7 +139,7 @@ class _FormObjectFieldState extends State<FormObjectField> {
   }
 
   /// Checks if a child property should be visible
-  bool _isChildVisible(String key, FormContext formContext) {
+  bool _isChildVisible(String key, FormContext formContext, {Map<String, int>? computedSelfIndices}) {
     String childScope = "${widget.formFieldContext.scope}/properties/$key";
 
     ui.DescendantControlOverrides? descendantControlOverrides =
@@ -152,12 +152,19 @@ class _FormObjectFieldState extends State<FormObjectField> {
 
     final childShowOn = descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn;
 
-    return isElementShown(
-      parentIsShown: true,
+    return formContext.elementShown(
+      scope: childScope,
       showOn: childShowOn,
-      ritaDependencies: formContext.ritaDependencies,
-      checkValueForShowOn: formContext.checkValueForShowOn,
+      parentIsShown: true,
+      selfIndices: computedSelfIndices ?? widget.formFieldContext.selfIndices,
     );
+
+    // return isElementShown(
+    //   parentIsShown: true,
+    //   showOn: childShowOn,
+    //   ritaDependencies: formContext.ritaDependencies,
+    //   checkValueForShowOn: formContext.checkValueForShowOn,
+    // );
   }
 
   /// Gets the initial value for a child property, handling both top-level and nested objects

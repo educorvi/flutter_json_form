@@ -69,6 +69,7 @@ class FormGroup extends StatelessWidget {
           scope: elementScope,
           showOn: element.showOn,
           parentIsShown: true,
+          selfIndices: const {}, // Groups don't have selfIndices
         );
       },
     );

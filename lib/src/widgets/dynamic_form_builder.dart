@@ -458,6 +458,7 @@ class DynamicJsonFormState extends State<DynamicJsonForm> {
           showOn: item.showOn,
           child: child,
           ritaDependencies: _ritaDependencies,
+          ritaEvaluator: ritaRuleEvaluator,
           checkValueForShowOn: checkValueForShowOn,
           layoutDirection: layoutDirection),
       cssClass: item.options?.cssClass,

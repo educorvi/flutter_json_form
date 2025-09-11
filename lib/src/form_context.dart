@@ -1,12 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
+import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_Rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:json_schema/json_schema.dart';
-import 'utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
+// import 'utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
 
 class FormContext extends InheritedWidget {
   final Map<String, dynamic> showOnDependencies;
   final Map<String, bool> ritaDependencies;
+  final int ritaDependenciesRevision;
   final JsonSchema jsonSchemaModel;
   final RitaRuleEvaluator ritaEvaluator;
   final Function(String, dynamic) setValueForShowOn;
@@ -18,11 +21,14 @@ class FormContext extends InheritedWidget {
   final Function({bool focusOnInvalid, bool autoScrollWhenFocusOnInvalid}) saveAndValidate;
   final VoidCallback reset;
   final Map<String, dynamic> Function() getFormValues;
+  final void Function(String, Map<String, int>?, bool) storeRitaArrayResult;
+  final bool Function(ui.ShowOnProperty?, Map<String, int>?, bool?) checkElementShownWithRita;
 
   const FormContext({
     super.key,
     required this.showOnDependencies,
     required this.ritaDependencies,
+    required this.ritaDependenciesRevision,
     required this.jsonSchemaModel,
     required this.ritaEvaluator,
     required this.setValueForShowOn,
@@ -34,6 +40,8 @@ class FormContext extends InheritedWidget {
     required this.saveAndValidate,
     required this.reset,
     required this.getFormValues,
+    required this.storeRitaArrayResult,
+    required this.checkElementShownWithRita,
     required super.child,
   });
 
@@ -42,14 +50,25 @@ class FormContext extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(FormContext oldWidget) =>
-      showOnDependencies != oldWidget.showOnDependencies || ritaDependencies != oldWidget.ritaDependencies;
+  bool updateShouldNotify(FormContext oldWidget) {
+    // Use mapEquals for deep comparison to ensure updates are triggered when content changes
+    return !mapEquals(showOnDependencies, oldWidget.showOnDependencies) ||
+        !mapEquals(ritaDependencies, oldWidget.ritaDependencies) ||
+        ritaDependenciesRevision != oldWidget.ritaDependenciesRevision;
+  }
 
   bool elementShown({
     required String scope,
     ui.ShowOnProperty? showOn,
     bool? parentIsShown,
+    Map<String, int>? selfIndices,
   }) {
+    // Use Rita checking if selfIndices are provided
+    if (selfIndices != null && selfIndices.isNotEmpty) {
+      return checkElementShownWithRita(showOn, selfIndices, parentIsShown);
+    }
+
+    // Fall back to traditional showOn evaluation
     return isElementShown(
       parentIsShown: parentIsShown ?? true,
       showOn: showOn,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_Rule_evaluator.dart';
@@ -74,29 +75,15 @@ Widget handleShowOn({
   }
   // If this element has a Rita rule and evaluator/context are provided, evaluate per element with $selfIndices
   if (showOn.rule != null && showOn.id != null && ritaEvaluator != null && getFullFormData != null) {
-    final evalData = {
-      r"$selfIndices": selfIndices ?? <String, int>{},
-      ...getFullFormData(),
-    };
-    final future = ritaEvaluator.evaluate(showOn.id!, jsonEncode(evalData));
-    return FutureBuilder<bool>(
-      future: future,
-      builder: (context, snapshot) {
-        final bool isVisible = snapshot.data == true
-            // While pending, preserve previous layout behavior similar to Vue's computed/ref (default to false to avoid flicker)
-            ? true
-            : (snapshot.connectionState == ConnectionState.waiting
-                ? false
-                : isElementShown(
-                    parentIsShown: parentIsShown, showOn: showOn, ritaDependencies: ritaDependencies, checkValueForShowOn: checkValueForShowOn));
-        return AnimatedCrossFade(
-          duration: const Duration(milliseconds: 400),
-          sizeCurve: Curves.easeInOut,
-          firstChild: child,
-          secondChild: Container(),
-          crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-        );
-      },
+    return _RitaRuleWidget(
+      showOn: showOn,
+      ritaEvaluator: ritaEvaluator,
+      getFullFormData: getFullFormData,
+      selfIndices: selfIndices,
+      parentIsShown: parentIsShown,
+      ritaDependencies: ritaDependencies,
+      checkValueForShowOn: checkValueForShowOn,
+      child: child,
     );
   }
 
@@ -143,4 +130,85 @@ List<ui.ShowOnProperty> collectRitaRules(List<ui.LayoutElement> elements) {
     }
   }
   return rules;
+}
+
+/// A widget that re-evaluates Rita rules whenever the FormContext changes
+class _RitaRuleWidget extends StatelessWidget {
+  final ui.ShowOnProperty showOn;
+  final RitaRuleEvaluator ritaEvaluator;
+  final Map<String, dynamic> Function() getFullFormData;
+  final Map<String, int>? selfIndices;
+  final bool? parentIsShown;
+  final Map<String, bool>? ritaDependencies;
+  final dynamic Function(String) checkValueForShowOn;
+  final Widget child;
+
+  const _RitaRuleWidget({
+    required this.showOn,
+    required this.ritaEvaluator,
+    required this.getFullFormData,
+    required this.selfIndices,
+    required this.parentIsShown,
+    required this.ritaDependencies,
+    required this.checkValueForShowOn,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Listen to FormContext changes via dependency
+    final formContext = FormContext.of(context);
+
+    return FutureBuilder<bool>(
+      // Use revision to force rebuild when dependencies change
+      // key: ValueKey('${showOn.id}_${formContext?.ritaDependenciesRevision}_${selfIndices?.entries.map((e) => '${e.key}:${e.value}').join(',')}'),
+      future: _evaluateRule(formContext),
+      builder: (context, snapshot) {
+        final bool isVisible = snapshot.data == true
+            ? true
+            : (snapshot.connectionState == ConnectionState.waiting
+                ? false
+                : isElementShown(
+                    parentIsShown: parentIsShown,
+                    showOn: showOn,
+                    ritaDependencies: ritaDependencies,
+                    checkValueForShowOn: checkValueForShowOn,
+                  ));
+
+        return AnimatedCrossFade(
+          duration: const Duration(milliseconds: 400),
+          sizeCurve: Curves.easeInOut,
+          firstChild: child,
+          secondChild: Container(),
+          crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+        );
+      },
+    );
+  }
+
+  Future<bool> _evaluateRule(FormContext? formContext) async {
+    try {
+      final evalData = {
+        r"$selfIndices": selfIndices ?? <String, int>{},
+        ...getFullFormData(),
+      };
+
+      final result = await ritaEvaluator.evaluate(showOn.id!, jsonEncode(evalData));
+
+      // Store the result in FormContext for later use during form submission
+      if (formContext != null && showOn.id != null) {
+        formContext.storeRitaArrayResult(showOn.id!, selfIndices, result);
+      }
+
+      return result;
+    } catch (e) {
+      // Fall back to traditional showOn evaluation
+      return isElementShown(
+        parentIsShown: parentIsShown,
+        showOn: showOn,
+        ritaDependencies: ritaDependencies,
+        checkValueForShowOn: checkValueForShowOn,
+      );
+    }
+  }
 }

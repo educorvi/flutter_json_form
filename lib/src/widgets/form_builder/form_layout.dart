@@ -81,6 +81,7 @@ class FormLayout extends StatelessWidget {
           scope: elementScope,
           showOn: element.showOn,
           parentIsShown: true,
+          selfIndices: const {}, // Layouts don't have selfIndices
         );
       },
     );
