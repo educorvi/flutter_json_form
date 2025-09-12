@@ -195,12 +195,14 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     ritaRuleEvaluator.initializeWithBundle().then(
       (_) {
         ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies)))).then((value) {
-          setState(() {
-            _ritaDependencies.clear();
-            _ritaDependencies.addAll(value);
-            _ritaDependenciesRevision++;
-            _ritaInitialized = true;
-          });
+          if (mounted) {
+            setState(() {
+              _ritaDependencies.clear();
+              _ritaDependencies.addAll(value);
+              _ritaDependenciesRevision++;
+              _ritaInitialized = true;
+            });
+          }
         });
       },
     );
@@ -405,11 +407,13 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies))));
 
     // Update UI in a single setState call to avoid race conditions
-    setState(() {
-      _ritaDependencies.clear();
-      _ritaDependencies.addAll(ritaDependencies);
-      _ritaDependenciesRevision++;
-    });
+    if (mounted) {
+      setState(() {
+        _ritaDependencies.clear();
+        _ritaDependencies.addAll(ritaDependencies);
+        _ritaDependenciesRevision++;
+      });
+    }
   }
 
   /// gets a value for a showOn condition

@@ -104,8 +104,8 @@ class RitaRuleEvaluator {
     _initialized = false;
     _disposed = true;
     ritaRules.clear();
-    _ritaCompleter?.completeError('Disposed');
-    _ritaCompleter = null;
+    // _ritaCompleter?.completeError('Disposed');
+    // _ritaCompleter = null;
     jsRuntime.clearXhrPendingCalls();
     jsRuntime.dispose();
     // If this method exists and cleans up timers/resources
