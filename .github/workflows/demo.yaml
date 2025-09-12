@@ -40,8 +40,64 @@ jobs:
         run: dart format --set-exit-if-changed .
         working-directory: ${{ env.PATH_TO_APP }}
 
-  test_and_build:
-    name: "Web: Test Demo App & build on tags"
+  # integration_test_ios:
+  #   name: "Integration Tests iOS"
+  #   needs: lint
+  #   runs-on: macOS-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: futureware-tech/simulator-action@v3
+  #       with:
+  #         model: 'iPhone 16'
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: "master"
+  #         flutter-version: "3.32.8"
+  #         cache: true
+  #     - name: Install dependencies
+  #       run: flutter pub get
+  #       working-directory: ${{ env.PATH_TO_APP }}
+  #     - run: flutter test integration_test
+  #       working-directory: ${{ env.PATH_TO_APP }}
+
+  # integration_test_android:
+  #   name: "Integration Tests Android"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+
+  #     - name: Setup Java
+  #       uses: actions/setup-java@v2
+  #       with:
+  #         distribution: 'zulu'
+  #         java-version: '11'
+
+  #     - name: Setup Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: "master"
+  #         flutter-version: "3.32.8"
+  #         cache: true
+
+  #     - name: Install Android SDK
+  #       uses: malinskiy/action-android/install-sdk@release/0.1.2
+  #     - run: echo $ANDROID_HOME
+  #     - run: sdkmanager --install "build-tools;30.0.3"
+  #     - name: Install dependencies
+  #       run: flutter pub get
+  #       working-directory: ${{ env.PATH_TO_APP }}
+  #     - name: Run integration tests (Android)
+  #       uses: malinskiy/action-android/emulator-run-cmd@release/0.1.2
+  #       with:
+  #         cmd: flutter test demo/integration_test/demo_test.dart
+  #         api: 31
+  #         cmdOptions: -no-snapshot-save -noaudio -no-boot-anim -cores 2 -memory 3072 -no-window
+  #         tag: google_apis
+  #         abi: x86_64
+
+  integration_test_web:
+    name: "Integration Tests Web"
     needs: lint
     runs-on: ubuntu-latest
     steps:
@@ -54,11 +110,6 @@ jobs:
           channel: "master"
           flutter-version: "3.32.8"
           cache: true
-
-      - name: Setup Pages
-        if: startsWith(github.ref, 'refs/tags/v') # Only run on version tags
-        id: pages
-        uses: actions/configure-pages@v5
 
       - name: Install dependencies
         run: flutter pub get
@@ -82,22 +133,44 @@ jobs:
           echo "All tests did not pass. Please check the logs for more information."
           exit 1
           fi
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ env.PATH_TO_APP }}
+
+  build_web:
+    name: "Build Web"
+    needs: integration_test_web
+    if: startsWith(github.ref, 'refs/tags/v') # Only deploy on version tags
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "3.32.8"
+          cache: true
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_APP }}
 
       - name: Build app for web
-        # if: startsWith(github.ref, 'refs/tags/v') # Only build for deployment on tags
         run: flutter build web --base-href "${{ steps.pages.outputs.base_path }}/"
         working-directory: ${{ env.PATH_TO_APP }}
 
       - name: Upload artifact
-        if: startsWith(github.ref, 'refs/tags/v') # Only upload artifacts on tags
         uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ env.PATH_TO_APP }}/build/web
 
   deploy:
     name: Deploy Demo App to GitHub Pages
-    needs: test_and_build
+    needs: build_web
     if: startsWith(github.ref, 'refs/tags/v') # Only deploy on version tags
     runs-on: ubuntu-latest
     permissions:
