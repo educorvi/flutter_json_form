@@ -33,8 +33,7 @@ class FormBuilderSegmentedButton<T> extends FormBuilderFieldDecoration<T> {
     super.valueTransformer,
     super.onReset,
     super.restorationId,
-  })  : assert(selected == null && onSelectionChanged == null ||
-            selected != null && onSelectionChanged != null),
+  })  : assert(selected == null && onSelectionChanged == null || selected != null && onSelectionChanged != null),
         super(
           builder: (FormFieldState<T?> field) {
             final state = field as _FormBuilderFieldDecorationState<T>;
@@ -62,12 +61,10 @@ class FormBuilderSegmentedButton<T> extends FormBuilderFieldDecoration<T> {
         );
 
   @override
-  FormBuilderFieldDecorationState<FormBuilderSegmentedButton<T>, T>
-      createState() => _FormBuilderFieldDecorationState<T>();
+  FormBuilderFieldDecorationState<FormBuilderSegmentedButton<T>, T> createState() => _FormBuilderFieldDecorationState<T>();
 }
 
-class _FormBuilderFieldDecorationState<T>
-    extends FormBuilderFieldDecorationState<FormBuilderSegmentedButton<T>, T> {}
+class _FormBuilderFieldDecorationState<T> extends FormBuilderFieldDecorationState<FormBuilderSegmentedButton<T>, T> {}
 
 /// TODO remove asserts and selected ?? and onSelectionChanged ?? checks
 /// (In other Form Builder Methods, these methods arent supported, so selected

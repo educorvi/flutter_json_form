@@ -19,10 +19,8 @@ final class GoogleMaterialUiConstants extends UiConstants {
   double? get buttonElevation => null; // use default Google Material elevation
 
   @override
-  TextTheme? get textThemeLight =>
-      null; // use default Google Material text theme
+  TextTheme? get textThemeLight => null; // use default Google Material text theme
 
   @override
-  TextTheme? get textThemeDark =>
-      null; // use default Google Material text theme
+  TextTheme? get textThemeDark => null; // use default Google Material text theme
 }

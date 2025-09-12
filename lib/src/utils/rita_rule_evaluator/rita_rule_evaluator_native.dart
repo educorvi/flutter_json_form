@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_js/flutter_js.dart' show getJavascriptRuntime, JavascriptRuntime;
-import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
+import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 
 class RitaRuleEvaluator {
   final JavascriptRuntime jsRuntime;
@@ -73,7 +73,7 @@ class RitaRuleEvaluator {
     try {
       jsRuntime.evaluate('ritaEvalById("$ruleId", $dataJson);');
     } catch (e) {
-      print("JS Exception during evaluate: $e");
+      // print("JS Exception during evaluate: $e");
       return false;
     }
     final result = await _ritaCompleter!.future;

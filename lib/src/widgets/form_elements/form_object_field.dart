@@ -4,7 +4,7 @@ import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
-import '../../models/ui_schema.dart' as ui;
+import '../../models/ui_schema.g.dart' as ui;
 import '../../utils/show_on.dart';
 import '../shared/common.dart';
 import '../shared/form_element_loading.dart';

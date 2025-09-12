@@ -1,9 +1,11 @@
+// ignore_for_file: deprecated_member_use, avoid_web_libraries_in_flutter
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:js' as js;
 import 'package:flutter/services.dart';
-import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
+import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 
 class RitaRuleEvaluator {
   bool _initialized = false;
@@ -56,7 +58,7 @@ class RitaRuleEvaluator {
 
       _jsLoaded = true;
     } catch (e) {
-      print('Error loading Rita JavaScript: $e');
+      // print('Error loading Rita JavaScript: $e');
     }
   }
 
@@ -83,7 +85,7 @@ class RitaRuleEvaluator {
       js.context.callMethod('registerRitaRules', [rita]);
       _initialized = true;
     } catch (e) {
-      print('Error initializing Rita rules: $e');
+      // print('Error initializing Rita rules: $e');
     }
   }
 

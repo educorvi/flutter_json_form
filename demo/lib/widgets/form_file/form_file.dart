@@ -37,7 +37,7 @@ class FormFileOld {
 
   Future<void> loadSchemas() async {
     if (jsonSchema == null || uiSchema == null) {
-      print(getSchemaPath());
+      // print(getSchemaPath());
       final jsonSchemaString = await rootBundle.loadString(getSchemaPath());
       final uiSchemaString = await rootBundle.loadString(getUiPath());
       jsonSchema = json.decode(jsonSchemaString);
@@ -62,27 +62,23 @@ class FormFileOld {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(
-              child: Text('Error loading schemas: ${snapshot.error}'));
+          return Center(child: Text('Error loading schemas: ${snapshot.error}'));
         } else {
           return Column(
             children: [
               Text(
                 name,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   FilledButton.tonal(
-                    onPressed: () =>
-                        showJsonDialog(context, 'JSON Schema', jsonSchema),
+                    onPressed: () => showJsonDialog(context, 'JSON Schema', jsonSchema),
                     child: const Text('Show JSON Schema'),
                   ),
                   FilledButton.tonal(
-                    onPressed: () =>
-                        showJsonDialog(context, 'UI Schema', uiSchema),
+                    onPressed: () => showJsonDialog(context, 'UI Schema', uiSchema),
                     child: const Text('Show UI Schema'),
                   ),
                 ],

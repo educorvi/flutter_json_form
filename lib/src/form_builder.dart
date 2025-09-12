@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
+import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/process_form_values.dart';
-import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_Rule_evaluator.dart';
+import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_group.dart';
@@ -19,13 +19,13 @@ class FlutterJsonForm extends StatefulWidget {
   /// The [jsonSchema] used to generate the JsonForm
   ///
   /// Must be a valid JSON schema according to the JSON schema meta schema draft-07
-  /// depending on [parseJson] the [jsonSchema] can be a Map<String, dynamic> or a String
+  /// depending on [parseJson] the [jsonSchema] can be a `Map<String, dynamic>` or a String
   final dynamic jsonSchema;
 
   /// The [uiSchema] used to generate the JsonForm
   ///
   /// Must be a valid UI Schema according to the UI schema meta schema
-  /// depending on [parseJson] the [jsonSchema] can be a Map<String, dynamic> or a String
+  /// depending on [parseJson] the [jsonSchema] can be a `Map<String, dynamic>` or a String
   ///
   /// The [uiSchema] can customize the form fields and the layout of the form in various ways
   /// It is optional to provide a [uiSchema]. If none is provided, a default one will be generated which shows all elements of the [jsonSchema]
@@ -36,14 +36,14 @@ class FlutterJsonForm extends StatefulWidget {
   /// Defaults to true
   final bool validate;
 
-  /// [parseJson] controls whether the [jsonSchema] and [uiSchema] should be parsed from a String to a Map<String, dynamic>
+  /// [parseJson] controls whether the [jsonSchema] and [uiSchema] should be parsed from a String to a `Map<String, dynamic>`
   ///
   /// Defaults to false
   final bool parseJson;
 
   /// [onFormSubmit] is a callback function which gets called when the form is submitted
   ///
-  /// The function gets called with the form values as a Map<String, dynamic> as a parameter
+  /// The function gets called with the form values as a `Map<String, dynamic>` as a parameter
   // final void Function(Map<String, dynamic>?)? onFormSubmit;
 
   /// [OnFormSubmitFormat] specifies the format of the form data when the form is submitted
@@ -93,12 +93,12 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
 
   /// Rita Rule Evaluator
   late final RitaRuleEvaluator ritaRuleEvaluator;
-  Map<String, bool> _ritaDependencies = {};
+  final Map<String, bool> _ritaDependencies = {};
   bool _ritaInitialized = false;
 
   /// Storage for Rita rule results with array indices
   /// Key format: "ruleId|selfIndicesJson" -> bool result
-  Map<String, bool> _ritaArrayDependencies = {};
+  final Map<String, bool> _ritaArrayDependencies = {};
 
   /// Revision counter to track when Rita dependencies change
   /// This helps FutureBuilder know when to re-evaluate array elements
@@ -252,8 +252,8 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     _formKey.currentState?.patchValue(value);
   }
 
-  /// [instance] can be a Map<String, dynamic> or a String
-  /// if the instance is a String and [parseJson] is true, the instance is parsed to a Map<String, dynamic>
+  /// [instance] can be a `Map<String, dynamic>` or a String
+  /// if the instance is a String and [parseJson] is true, the instance is parsed to a `Map<String, dynamic>`
   /// if [parseJson] is false, the instance is used as is
   dynamic _getMap(dynamic instance, String argumentName) {
     dynamic data = instance;

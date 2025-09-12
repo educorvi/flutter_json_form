@@ -3,7 +3,7 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
-import '../../models/ui_schema.dart' as ui;
+import '../../models/ui_schema.g.dart' as ui;
 
 import '../../utils/utils.dart';
 

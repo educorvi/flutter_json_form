@@ -18,7 +18,7 @@ class CustomHtmlWidget extends StatelessWidget {
       onTapUrl: (url) async {
         final Uri uri = Uri.parse(url);
         if (!await launchUrl(uri)) {
-          print('Could not launch $url');
+          // print('Could not launch $url');
         }
         return true;
       },

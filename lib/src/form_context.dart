@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
-import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_Rule_evaluator.dart';
+import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
+import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:json_schema/json_schema.dart';
 // import 'utils/rita_rule_evaluator/ritaRuleEvaluator.dart';

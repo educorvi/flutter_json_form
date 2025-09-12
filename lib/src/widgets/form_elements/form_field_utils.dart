@@ -40,7 +40,7 @@ class FormFieldUtils {
     }
 
     final titleString = context.title ?? getScope();
-    return context.required && titleString != null ? ('${titleString}*') : titleString;
+    return context.required && titleString != null ? ('$titleString*') : titleString;
   }
 
   /// Creates standardized validator that respects visibility

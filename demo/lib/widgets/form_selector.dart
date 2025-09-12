@@ -16,17 +16,9 @@ class FormSelector extends StatefulWidget {
           ExampleFormFile(name: "Reproduce", filename: "reproduce"),
           ExampleFormFile(name: "Json Schema", filename: "jsonSchema"),
           ExampleFormFile(
-              name: "Reisekostenantrag mit Prozessautomatisierung",
-              filename: "reisekostenantrag_paut",
-              formData: getFormDataReisekostenantrag()),
-          ExampleFormFile(
-              name: "5 Sicherheitsregeln",
-              filename: "fiverules",
-              formData: getFormDataFiverules()),
-          ExampleFormFile(
-              name: "Gefährdungsbeurteilung für Kleinbetriebe",
-              filename: "gfk1",
-              formData: getFormDataGfk1()),
+              name: "Reisekostenantrag mit Prozessautomatisierung", filename: "reisekostenantrag_paut", formData: getFormDataReisekostenantrag()),
+          ExampleFormFile(name: "5 Sicherheitsregeln", filename: "fiverules", formData: getFormDataFiverules()),
+          ExampleFormFile(name: "Gefährdungsbeurteilung für Kleinbetriebe", filename: "gfk1", formData: getFormDataGfk1()),
         ],
         uploadFormFile = UploadFormFile(
           name: "Custom Form",
@@ -90,13 +82,9 @@ class FormSelectorState extends State<FormSelector> {
                   children: [
                     FilledButton.tonal(
                       onPressed: () async {
-                        final jsonSchemaFile = await FilePicker.platform
-                            .pickFiles(
-                                allowedExtensions: ['json'],
-                                type: FileType.custom);
+                        final jsonSchemaFile = await FilePicker.platform.pickFiles(allowedExtensions: ['json'], type: FileType.custom);
                         if (jsonSchemaFile != null) {
-                          widget.uploadFormFile.setJsonSchemaFile(
-                              jsonSchemaFile.files.single.path!);
+                          widget.uploadFormFile.setJsonSchemaFile(jsonSchemaFile.files.single.path!);
                           setState(() {
                             file1ready = true;
                           });
@@ -111,8 +99,7 @@ class FormSelectorState extends State<FormSelector> {
                                 builder: (context) {
                                   return AlertDialog(
                                     title: const Text('Custom Form File'),
-                                    content: const Text(
-                                        'Custom form file added successfully.'),
+                                    content: const Text('Custom form file added successfully.'),
                                     actions: [
                                       TextButton(
                                         onPressed: () {
@@ -133,23 +120,16 @@ class FormSelectorState extends State<FormSelector> {
                         children: [
                           const Text('JSON Schema'),
                           const SizedBox(width: 8),
-                          if (file1ready)
-                            const Icon(Icons.check, color: Colors.green)
-                          else
-                            const Icon(Icons.upload),
+                          if (file1ready) const Icon(Icons.check, color: Colors.green) else const Icon(Icons.upload),
                         ],
                       ),
                     ),
                     const SizedBox(width: 16),
                     FilledButton.tonal(
                       onPressed: () async {
-                        final uiSchemaFile = await FilePicker.platform
-                            .pickFiles(
-                                allowedExtensions: ['json'],
-                                type: FileType.custom);
+                        final uiSchemaFile = await FilePicker.platform.pickFiles(allowedExtensions: ['json'], type: FileType.custom);
                         if (uiSchemaFile != null) {
-                          widget.uploadFormFile
-                              .setUiSchemaFile(uiSchemaFile.files.single.path!);
+                          widget.uploadFormFile.setUiSchemaFile(uiSchemaFile.files.single.path!);
                           setState(() {
                             file2ready = true;
                           });
@@ -164,8 +144,7 @@ class FormSelectorState extends State<FormSelector> {
                                 builder: (context) {
                                   return AlertDialog(
                                     title: const Text('Custom Form File'),
-                                    content: const Text(
-                                        'Custom form file added successfully.'),
+                                    content: const Text('Custom form file added successfully.'),
                                     actions: [
                                       TextButton(
                                         onPressed: () {
@@ -186,10 +165,7 @@ class FormSelectorState extends State<FormSelector> {
                         children: [
                           const Text('UI Schema'),
                           const SizedBox(width: 8),
-                          if (file2ready)
-                            const Icon(Icons.check, color: Colors.green)
-                          else
-                            const Icon(Icons.upload),
+                          if (file2ready) const Icon(Icons.check, color: Colors.green) else const Icon(Icons.upload),
                         ],
                       ),
                     ),
@@ -228,29 +204,20 @@ Map<String, dynamic> getFormDataReisekostenantrag() {
     "fg_bankverbindung_fs_kontoauswahl": "Auf das Ihnen bereits bekannte Konto",
     "fg_art_der_fahrt": [
       {
-        "fg_art_der_fahrt_fs_art_der_fahrt":
-            "Fahrten zu einer ärztlichen Begutachtung/ Zusatzbegutachtung",
+        "fg_art_der_fahrt_fs_art_der_fahrt": "Fahrten zu einer ärztlichen Begutachtung/ Zusatzbegutachtung",
         "fg_art_der_fahrt_fs_ziel": "1234",
-        "fg_art_der_fahrt_fs_verkehrsmittel":
-            "Taxi (ärztliche Bescheinigung über die Notwendigkeit erforderlich)",
+        "fg_art_der_fahrt_fs_verkehrsmittel": "Taxi (ärztliche Bescheinigung über die Notwendigkeit erforderlich)",
         "fg_art_der_fahrt_fg_begleit_verdienstausf_fs_verdienstausfall": true,
         "fg_art_der_fahrt_fg_arr_datumsangaben": [
-          {
-            "fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum":
-                "2025-09-05T00:00:00.000"
-          }
+          {"fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum": "2025-09-05T00:00:00.000"}
         ]
       },
       {
-        "fg_art_der_fahrt_fs_art_der_fahrt":
-            "Fahrten zum Arzt/ zur Ärztin oder zum Therapeuten/ zur Therapeutin",
+        "fg_art_der_fahrt_fs_art_der_fahrt": "Fahrten zum Arzt/ zur Ärztin oder zum Therapeuten/ zur Therapeutin",
         "fg_art_der_fahrt_fs_verkehrsmittel": "Kraftfahrzeug",
         "fg_art_der_fahrt_fg_begleit_verdienstausf_fs_verdienstausfall": false,
         "fg_art_der_fahrt_fg_arr_datumsangaben": [
-          {
-            "fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum":
-                "2025-09-15T00:00:00.000"
-          }
+          {"fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum": "2025-09-15T00:00:00.000"}
         ],
         "fg_art_der_fahrt_fs_ziel": "1234"
       },
@@ -258,10 +225,7 @@ Map<String, dynamic> getFormDataReisekostenantrag() {
         "fg_art_der_fahrt_fs_ziel": "test",
         "fg_art_der_fahrt_fg_begleit_verdienstausf_fs_verdienstausfall": false,
         "fg_art_der_fahrt_fg_arr_datumsangaben": [
-          {
-            "fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum":
-                "2025-09-03T00:00:00.000"
-          }
+          {"fg_art_der_fahrt_fg_arr_datumsangaben_fs_datum": "2025-09-03T00:00:00.000"}
         ]
       }
     ]
@@ -274,8 +238,7 @@ Map<String, dynamic> getFormDataFiverules() {
     "person-in-der-rolle-des-anlagenverantwortlichen": "qe",
     "person-in-der-rolle-des-arbeitsverantwortlichen": "we",
     "arbeitsausfuhrende-person": "we",
-    "zusatzliche-personliche-schutzausrustung":
-        ["gegen elektrischen Schlag"] as List<dynamic>,
+    "zusatzliche-personliche-schutzausrustung": ["gegen elektrischen Schlag"] as List<dynamic>,
     "stehen-andere-anlagenteile-weiterhin-unter": "nein",
     "edi43ba285a6396493da82241d5ecec090d": "NH-Sicherungen",
     "edi812abac1f12d44d18d4415cb1ddb1984": "12",
@@ -288,10 +251,7 @@ Map<String, dynamic> getFormDataFiverules() {
     "edi594b8869f8884cb4b76d376d960c3b74": "qw",
     "ediec7dc4dfa3b646818f003c01c9f1709c": "in die NH-Sicherungsunterteile",
     "edi8eb283983de7413b9b8b9530fb227543": "teilweiser Berührungsschutz",
-    "edid11961ed04714161961a663f2e9cae09": [
-      "isolierende Formteile",
-      "isolierende Tücher"
-    ]
+    "edid11961ed04714161961a663f2e9cae09": ["isolierende Formteile", "isolierende Tücher"]
   };
 }
 
@@ -300,15 +260,11 @@ Map<String, dynamic> getFormDataGfk1() {
     "edi8b505fbc30dc4886ac64c349ac69e6bd": "eine externe Betreuung",
     "edi9f7346b16e2f4b458c0ed18bea737293": {
       "edi5c58446c8aad47d5afde2baae293ad2c": "Maßnahme durchgeführt",
-      "edi87b00b6afd0645b8933a898d34b9af9b": {
-        "edi87b00b6afd0645b8933a898d34b9af9b_ref1": true
-      },
+      "edi87b00b6afd0645b8933a898d34b9af9b": {"edi87b00b6afd0645b8933a898d34b9af9b_ref1": true},
       "edi388a83c4b652492590445f30283d1780": "Maßnahme veranlasst"
     },
     "edi53eeed3e5bfe4535875b0e726286ada0": "Maßnahme durchgeführt",
-    "edi1ceb1850266e4b24a027cb041363b3fd": {
-      "edi1ceb1850266e4b24a027cb041363b3fd_ref1": true
-    },
+    "edi1ceb1850266e4b24a027cb041363b3fd": {"edi1ceb1850266e4b24a027cb041363b3fd_ref1": true},
     "edif75daee98a2a441fab451a57fd3f9d8a": "Maßnahme veranlasst",
     "edi9d17a5183df84951a6299a99fdc5e9d3": "Maßnahme veranlasst",
     "edia2d018bbe168436bb8a1aa3bc3c4ad03": "Maßnahme veranlasst",
@@ -362,13 +318,8 @@ Map<String, dynamic> getOther() {
     "edi9f7346b16e2f4b458c0ed18bea737293": {
       "edi5c58446c8aad47d5afde2baae293ad2c": "Maßnahme durchgeführt",
       "edi388a83c4b652492590445f30283d1780": "Maßnahme veranlasst",
-      "edi87b00b6afd0645b8933a898d34b9af9b": {
-        "edi87b00b6afd0645b8933a898d34b9af9b_ref1": false
-      }
+      "edi87b00b6afd0645b8933a898d34b9af9b": {"edi87b00b6afd0645b8933a898d34b9af9b_ref1": false}
     },
-    "edi1ceb1850266e4b24a027cb041363b3fd": {
-      "edi1ceb1850266e4b24a027cb041363b3fd_ref0": "Test",
-      "edi1ceb1850266e4b24a027cb041363b3fd_ref1": true
-    }
+    "edi1ceb1850266e4b24a027cb041363b3fd": {"edi1ceb1850266e4b24a027cb041363b3fd_ref0": "Test", "edi1ceb1850266e4b24a027cb041363b3fd_ref1": true}
   };
 }

@@ -8,8 +8,7 @@ import 'package:flutter_json_forms_demo/theme.dart';
 import 'appIcon/app_icon.dart';
 import 'appIcon/google_material_icon.dart';
 
-final appConstants =
-    AppConstants(designSystem: DesignSystem.uvCooperativeDesign);
+final appConstants = AppConstants(designSystem: DesignSystem.uvCooperativeDesign);
 
 enum DesignSystem {
   googleMaterial,
@@ -30,8 +29,7 @@ class AppConstants {
 
   AppConstants({required DesignSystem designSystem})
       : network = NetworkConstants(),
-        navigationBar =
-            NavigationBarConstants(iconSet: _getIconSystem(designSystem)),
+        navigationBar = NavigationBarConstants(iconSet: _getIconSystem(designSystem)),
         icons = IconConstants(iconSet: _getIconSystem(designSystem)) {
     final uiConstants = UiConstantsFactory.getUiConstants(designSystem);
     ui = uiConstants;
@@ -57,8 +55,7 @@ class NetworkConstants {
 class IconConstants {
   final AppIcon appIcon;
 
-  IconConstants({required IconSet iconSet})
-      : appIcon = IconFactory.getIconSet(iconSet);
+  IconConstants({required IconSet iconSet}) : appIcon = IconFactory.getIconSet(iconSet);
 
 // Widget _icon(IconData icon, {double size = 24.0, Color? color}) {
 //   return Icon(icon, size: size, color: color);

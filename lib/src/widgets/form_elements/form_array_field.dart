@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
-import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
+import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/widgets/form_elements/form_checkbox_group_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
@@ -126,8 +126,8 @@ class _FormArrayFieldState extends State<FormArrayField> {
             buildDefaultDragHandles: false,
             shrinkWrap: true,
             physics: const ClampingScrollPhysics(),
-            children: _buildArrayItemsWithSpacing(formContext, arrayIsShown, minItems),
             onReorder: _moveItem,
+            children: _buildArrayItemsWithSpacing(formContext, arrayIsShown, minItems),
           ),
         ],
         Container(

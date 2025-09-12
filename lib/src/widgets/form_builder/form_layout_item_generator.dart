@@ -9,7 +9,7 @@ import 'package:flutter_json_forms/src/widgets/form_builder/form_group.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_html.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_layout.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_not_implemented.dart';
-import '../../models/ui_schema.dart' as ui;
+import '../../models/ui_schema.g.dart' as ui;
 import '../shared/css.dart';
 import '../../utils/show_on.dart';
 

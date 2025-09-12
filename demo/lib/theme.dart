@@ -35,8 +35,7 @@ final class AppTheme {
         style: ButtonStyle(
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(uiConstants.buttonBorderRadius),
+              borderRadius: BorderRadius.circular(uiConstants.buttonBorderRadius),
             ),
           ),
           padding: WidgetStateProperty.all(

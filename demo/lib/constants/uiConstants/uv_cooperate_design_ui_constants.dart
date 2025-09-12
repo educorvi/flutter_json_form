@@ -19,10 +19,8 @@ class UvCooperativeDesignUiConstants extends UiConstants {
   double? get buttonElevation => 0.0;
 
   @override
-  TextTheme? get textThemeLight =>
-      GoogleFonts.sourceSans3TextTheme(ThemeData.light().textTheme);
+  TextTheme? get textThemeLight => GoogleFonts.sourceSans3TextTheme(ThemeData.light().textTheme);
 
   @override
-  TextTheme? get textThemeDark =>
-      GoogleFonts.sourceSans3TextTheme(ThemeData.dark().textTheme);
+  TextTheme? get textThemeDark => GoogleFonts.sourceSans3TextTheme(ThemeData.dark().textTheme);
 }

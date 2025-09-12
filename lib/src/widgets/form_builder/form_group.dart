@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_item_generator.dart';
-import '../../models/ui_schema.dart' as ui;
+import '../../models/ui_schema.g.dart' as ui;
 import '../shared/common.dart';
 import '../../utils/show_on.dart';
 import '../constants.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
+import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/widgets/data/list_item.dart';
 import 'package:json_schema/json_schema.dart';
 

@@ -793,8 +793,10 @@ class ControlFormattingOptions {
   factory ControlFormattingOptions.fromJson(Map<String, dynamic> json) => ControlFormattingOptions(
         append: json["append"],
         cssClass: json["cssClass"],
-        descendantControlOverrides: json["descendantControlOverrides"] == null ? null : Map.from(json["descendantControlOverrides"]!)
-            .map((k, v) => MapEntry<String, DescendantControlOverrides>(k, DescendantControlOverrides.fromJson(v))),
+        descendantControlOverrides: json["descendantControlOverrides"] == null
+            ? null
+            : Map.from(json["descendantControlOverrides"]!)
+                .map((k, v) => MapEntry<String, DescendantControlOverrides>(k, DescendantControlOverrides.fromJson(v))),
         disabled: json["disabled"],
         help: json["help"] == null ? null : Help.fromJson(json["help"]),
         hidden: json["hidden"],
@@ -808,7 +810,8 @@ class ControlFormattingOptions {
   Map<String, dynamic> toJson() => {
         "append": append,
         "cssClass": cssClass,
-        "descendantControlOverrides": descendantControlOverrides == null ? null : Map.from(descendantControlOverrides!).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
+        "descendantControlOverrides":
+            descendantControlOverrides == null ? null : Map.from(descendantControlOverrides!).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
         "disabled": disabled,
         "help": help?.toJson(),
         "hidden": hidden,
@@ -1639,28 +1642,27 @@ class LayoutElementOptions {
   final FieldSpecificOptions? fieldSpecificOptions;
   final ControlFormattingOptions? formattingOptions;
 
-    
-    ///The layout's CSS classes
-    String? cssClass;
-    
-    ///Specifies that the form-data should not be validated on submission
-    bool? formnovalidate;
-    
-    ///Options that are passed to the submit function. This will not change the behaviour of
-    ///VueJsonForm itself, but can bes used by the application/the webcomponent to change the
-    ///behaviour of the submit function.
-    SubmitOptions? submitOptions;
-    
-    ///Different color variants
-    ColorVariant? variant;
-    
-    ///Display the buttons vertical
-    bool? vertical;
+  ///The layout's CSS classes
+  String? cssClass;
 
-    ///Defines whether the fields label is shown
-    ///
-    ///Adds a label for groups (only for type=Group)
-    dynamic label;
+  ///Specifies that the form-data should not be validated on submission
+  bool? formnovalidate;
+
+  ///Options that are passed to the submit function. This will not change the behaviour of
+  ///VueJsonForm itself, but can bes used by the application/the webcomponent to change the
+  ///behaviour of the submit function.
+  SubmitOptions? submitOptions;
+
+  ///Different color variants
+  ColorVariant? variant;
+
+  ///Display the buttons vertical
+  bool? vertical;
+
+  ///Defines whether the fields label is shown
+  ///
+  ///Adds a label for groups (only for type=Group)
+  dynamic label;
 
   LayoutElementOptions({
     this.fieldSpecificOptions,

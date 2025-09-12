@@ -11,7 +11,7 @@ import 'package:flutter_json_forms/src/widgets/form_elements/form_slider_field.d
 import 'package:flutter_json_forms/src/widgets/form_elements/form_switch_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_text_field.dart';
 import 'package:json_schema/json_schema.dart';
-import '../../models/ui_schema.dart' as ui;
+import '../../models/ui_schema.g.dart' as ui;
 
 class PrimitiveFieldFactory {
   static Widget createField(FormFieldContext context) {

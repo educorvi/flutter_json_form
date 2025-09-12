@@ -11,103 +11,103 @@ dynamic jsonSchemaFromJson(String str) => json.decode(str);
 String jsonSchemaToJson(dynamic data) => json.encode(data);
 
 class JsonSchemaModel {
-    String? comment;
-    String? id;
-    String? ref;
-    String? schema;
-    dynamic additionalItems;
-    dynamic additionalProperties;
-    List<dynamic>? allOf;
-    List<dynamic>? anyOf;
-    dynamic jsonSchemaConst;
-    dynamic contains;
-    String? contentEncoding;
-    String? contentMediaType;
-    dynamic jsonSchemaDefault;
-    // Map<String, dynamic>? definitions;
-    Map<String, dynamic>? dependencies;
-    String? description;
-    dynamic jsonSchemaElse;
-    List<dynamic>? jsonSchemaEnum;
-    List<dynamic>? examples;
-    double? exclusiveMaximum;
-    double? exclusiveMinimum;
-    String? format;
-    dynamic jsonSchemaIf;
-    dynamic items;
-    double? maximum;
-    int? maxItems;
-    int? maxLength;
-    int? maxProperties;
-    double? minimum;
-    int? minItems;
-    int? minLength;
-    int? minProperties;
-    double? multipleOf;
-    dynamic not;
-    List<dynamic>? oneOf;
-    String? pattern;
-    Map<String, dynamic>? patternProperties;
-    Map<String, dynamic>? properties;
-    dynamic propertyNames;
-    bool? readOnly;
-    List<String>? required;
-    dynamic then;
-    String? title;
-    dynamic type;
-    bool? uniqueItems;
-    bool? writeOnly;
+  String? comment;
+  String? id;
+  String? ref;
+  String? schema;
+  dynamic additionalItems;
+  dynamic additionalProperties;
+  List<dynamic>? allOf;
+  List<dynamic>? anyOf;
+  dynamic jsonSchemaConst;
+  dynamic contains;
+  String? contentEncoding;
+  String? contentMediaType;
+  dynamic jsonSchemaDefault;
+  // Map<String, dynamic>? definitions;
+  Map<String, dynamic>? dependencies;
+  String? description;
+  dynamic jsonSchemaElse;
+  List<dynamic>? jsonSchemaEnum;
+  List<dynamic>? examples;
+  double? exclusiveMaximum;
+  double? exclusiveMinimum;
+  String? format;
+  dynamic jsonSchemaIf;
+  dynamic items;
+  double? maximum;
+  int? maxItems;
+  int? maxLength;
+  int? maxProperties;
+  double? minimum;
+  int? minItems;
+  int? minLength;
+  int? minProperties;
+  double? multipleOf;
+  dynamic not;
+  List<dynamic>? oneOf;
+  String? pattern;
+  Map<String, dynamic>? patternProperties;
+  Map<String, dynamic>? properties;
+  dynamic propertyNames;
+  bool? readOnly;
+  List<String>? required;
+  dynamic then;
+  String? title;
+  dynamic type;
+  bool? uniqueItems;
+  bool? writeOnly;
 
-    JsonSchemaModel({
-        this.comment,
-        this.id,
-        this.ref,
-        this.schema,
-        this.additionalItems,
-        this.additionalProperties,
-        this.allOf,
-        this.anyOf,
-        this.jsonSchemaConst,
-        this.contains,
-        this.contentEncoding,
-        this.contentMediaType,
-        this.jsonSchemaDefault,
-        // this.definitions,
-        this.dependencies,
-        this.description,
-        this.jsonSchemaElse,
-        this.jsonSchemaEnum,
-        this.examples,
-        this.exclusiveMaximum,
-        this.exclusiveMinimum,
-        this.format,
-        this.jsonSchemaIf,
-        this.items,
-        this.maximum,
-        this.maxItems,
-        this.maxLength,
-        this.maxProperties,
-        this.minimum,
-        this.minItems,
-        this.minLength,
-        this.minProperties,
-        this.multipleOf,
-        this.not,
-        this.oneOf,
-        this.pattern,
-        this.patternProperties,
-        this.properties,
-        this.propertyNames,
-        this.readOnly,
-        this.required,
-        this.then,
-        this.title,
-        this.type,
-        this.uniqueItems,
-        this.writeOnly,
-    });
+  JsonSchemaModel({
+    this.comment,
+    this.id,
+    this.ref,
+    this.schema,
+    this.additionalItems,
+    this.additionalProperties,
+    this.allOf,
+    this.anyOf,
+    this.jsonSchemaConst,
+    this.contains,
+    this.contentEncoding,
+    this.contentMediaType,
+    this.jsonSchemaDefault,
+    // this.definitions,
+    this.dependencies,
+    this.description,
+    this.jsonSchemaElse,
+    this.jsonSchemaEnum,
+    this.examples,
+    this.exclusiveMaximum,
+    this.exclusiveMinimum,
+    this.format,
+    this.jsonSchemaIf,
+    this.items,
+    this.maximum,
+    this.maxItems,
+    this.maxLength,
+    this.maxProperties,
+    this.minimum,
+    this.minItems,
+    this.minLength,
+    this.minProperties,
+    this.multipleOf,
+    this.not,
+    this.oneOf,
+    this.pattern,
+    this.patternProperties,
+    this.properties,
+    this.propertyNames,
+    this.readOnly,
+    this.required,
+    this.then,
+    this.title,
+    this.type,
+    this.uniqueItems,
+    this.writeOnly,
+  });
 
-    factory JsonSchemaModel.fromJson(Map<String, dynamic> json) => JsonSchemaModel(
+  factory JsonSchemaModel.fromJson(Map<String, dynamic> json) => JsonSchemaModel(
         comment: json["\u0024comment"],
         id: json["\u0024id"],
         ref: json["\u0024ref"],
@@ -144,7 +144,8 @@ class JsonSchemaModel {
         not: json["not"],
         oneOf: json["oneOf"] == null ? [] : List<dynamic>.from(json["oneOf"]!.map((x) => x)),
         pattern: json["pattern"],
-        patternProperties: json["patternProperties"] == null ? null : Map.from(json["patternProperties"]!).map((k, v) => MapEntry<String, dynamic>(k, v)),
+        patternProperties:
+            json["patternProperties"] == null ? null : Map.from(json["patternProperties"]!).map((k, v) => MapEntry<String, dynamic>(k, v)),
         properties: json["properties"] == null ? null : Map.from(json["properties"]!).map((k, v) => MapEntry<String, dynamic>(k, v)),
         propertyNames: json["propertyNames"],
         readOnly: json["readOnly"],
@@ -154,9 +155,9 @@ class JsonSchemaModel {
         type: json["type"],
         uniqueItems: json["uniqueItems"],
         writeOnly: json["writeOnly"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "\u0024comment": comment,
         "\u0024id": id,
         "\u0024ref": ref,
@@ -203,107 +204,107 @@ class JsonSchemaModel {
         "type": type,
         "uniqueItems": uniqueItems,
         "writeOnly": writeOnly,
-    };
+      };
 }
 
 class CoreSchemaMetaSchemaClass {
-    String? comment;
-    String? id;
-    String? ref;
-    String? schema;
-    dynamic additionalItems;
-    dynamic additionalProperties;
-    List<dynamic>? allOf;
-    List<dynamic>? anyOf;
-    dynamic coreSchemaMetaSchemaConst;
-    dynamic contains;
-    String? contentEncoding;
-    String? contentMediaType;
-    dynamic coreSchemaMetaSchemaDefault;
-    Map<String, dynamic>? definitions;
-    Map<String, dynamic>? dependencies;
-    String? description;
-    dynamic coreSchemaMetaSchemaElse;
-    List<dynamic>? coreSchemaMetaSchemaEnum;
-    List<dynamic>? examples;
-    double? exclusiveMaximum;
-    double? exclusiveMinimum;
-    String? format;
-    dynamic coreSchemaMetaSchemaIf;
-    dynamic items;
-    double? maximum;
-    int? maxItems;
-    int? maxLength;
-    int? maxProperties;
-    double? minimum;
-    int? minItems;
-    int? minLength;
-    int? minProperties;
-    double? multipleOf;
-    dynamic not;
-    List<dynamic>? oneOf;
-    String? pattern;
-    Map<String, dynamic>? patternProperties;
-    Map<String, dynamic>? properties;
-    dynamic propertyNames;
-    bool? readOnly;
-    List<String>? required;
-    dynamic then;
-    String? title;
-    dynamic type;
-    bool? uniqueItems;
-    bool? writeOnly;
+  String? comment;
+  String? id;
+  String? ref;
+  String? schema;
+  dynamic additionalItems;
+  dynamic additionalProperties;
+  List<dynamic>? allOf;
+  List<dynamic>? anyOf;
+  dynamic coreSchemaMetaSchemaConst;
+  dynamic contains;
+  String? contentEncoding;
+  String? contentMediaType;
+  dynamic coreSchemaMetaSchemaDefault;
+  Map<String, dynamic>? definitions;
+  Map<String, dynamic>? dependencies;
+  String? description;
+  dynamic coreSchemaMetaSchemaElse;
+  List<dynamic>? coreSchemaMetaSchemaEnum;
+  List<dynamic>? examples;
+  double? exclusiveMaximum;
+  double? exclusiveMinimum;
+  String? format;
+  dynamic coreSchemaMetaSchemaIf;
+  dynamic items;
+  double? maximum;
+  int? maxItems;
+  int? maxLength;
+  int? maxProperties;
+  double? minimum;
+  int? minItems;
+  int? minLength;
+  int? minProperties;
+  double? multipleOf;
+  dynamic not;
+  List<dynamic>? oneOf;
+  String? pattern;
+  Map<String, dynamic>? patternProperties;
+  Map<String, dynamic>? properties;
+  dynamic propertyNames;
+  bool? readOnly;
+  List<String>? required;
+  dynamic then;
+  String? title;
+  dynamic type;
+  bool? uniqueItems;
+  bool? writeOnly;
 
-    CoreSchemaMetaSchemaClass({
-        this.comment,
-        this.id,
-        this.ref,
-        this.schema,
-        this.additionalItems,
-        this.additionalProperties,
-        this.allOf,
-        this.anyOf,
-        this.coreSchemaMetaSchemaConst,
-        this.contains,
-        this.contentEncoding,
-        this.contentMediaType,
-        this.coreSchemaMetaSchemaDefault,
-        this.definitions,
-        this.dependencies,
-        this.description,
-        this.coreSchemaMetaSchemaElse,
-        this.coreSchemaMetaSchemaEnum,
-        this.examples,
-        this.exclusiveMaximum,
-        this.exclusiveMinimum,
-        this.format,
-        this.coreSchemaMetaSchemaIf,
-        this.items,
-        this.maximum,
-        this.maxItems,
-        this.maxLength,
-        this.maxProperties,
-        this.minimum,
-        this.minItems,
-        this.minLength,
-        this.minProperties,
-        this.multipleOf,
-        this.not,
-        this.oneOf,
-        this.pattern,
-        this.patternProperties,
-        this.properties,
-        this.propertyNames,
-        this.readOnly,
-        this.required,
-        this.then,
-        this.title,
-        this.type,
-        this.uniqueItems,
-        this.writeOnly,
-    });
+  CoreSchemaMetaSchemaClass({
+    this.comment,
+    this.id,
+    this.ref,
+    this.schema,
+    this.additionalItems,
+    this.additionalProperties,
+    this.allOf,
+    this.anyOf,
+    this.coreSchemaMetaSchemaConst,
+    this.contains,
+    this.contentEncoding,
+    this.contentMediaType,
+    this.coreSchemaMetaSchemaDefault,
+    this.definitions,
+    this.dependencies,
+    this.description,
+    this.coreSchemaMetaSchemaElse,
+    this.coreSchemaMetaSchemaEnum,
+    this.examples,
+    this.exclusiveMaximum,
+    this.exclusiveMinimum,
+    this.format,
+    this.coreSchemaMetaSchemaIf,
+    this.items,
+    this.maximum,
+    this.maxItems,
+    this.maxLength,
+    this.maxProperties,
+    this.minimum,
+    this.minItems,
+    this.minLength,
+    this.minProperties,
+    this.multipleOf,
+    this.not,
+    this.oneOf,
+    this.pattern,
+    this.patternProperties,
+    this.properties,
+    this.propertyNames,
+    this.readOnly,
+    this.required,
+    this.then,
+    this.title,
+    this.type,
+    this.uniqueItems,
+    this.writeOnly,
+  });
 
-    factory CoreSchemaMetaSchemaClass.fromJson(Map<String, dynamic> json) => CoreSchemaMetaSchemaClass(
+  factory CoreSchemaMetaSchemaClass.fromJson(Map<String, dynamic> json) => CoreSchemaMetaSchemaClass(
         comment: json["\u0024comment"],
         id: json["\u0024id"],
         ref: json["\u0024ref"],
@@ -350,9 +351,9 @@ class CoreSchemaMetaSchemaClass {
         type: json["type"],
         uniqueItems: json["uniqueItems"],
         writeOnly: json["writeOnly"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "\u0024comment": comment,
         "\u0024id": id,
         "\u0024ref": ref,
@@ -399,37 +400,29 @@ class CoreSchemaMetaSchemaClass {
         "type": type,
         "uniqueItems": uniqueItems,
         "writeOnly": writeOnly,
-    };
+      };
 }
 
-enum SimpleTypes {
-    ARRAY,
-    BOOLEAN,
-    INTEGER,
-    NULL,
-    NUMBER,
-    OBJECT,
-    STRING
-}
+enum SimpleTypes { ARRAY, BOOLEAN, INTEGER, NULL, NUMBER, OBJECT, STRING }
 
 final simpleTypesValues = EnumValues({
-    "array": SimpleTypes.ARRAY,
-    "boolean": SimpleTypes.BOOLEAN,
-    "integer": SimpleTypes.INTEGER,
-    "null": SimpleTypes.NULL,
-    "number": SimpleTypes.NUMBER,
-    "object": SimpleTypes.OBJECT,
-    "string": SimpleTypes.STRING
+  "array": SimpleTypes.ARRAY,
+  "boolean": SimpleTypes.BOOLEAN,
+  "integer": SimpleTypes.INTEGER,
+  "null": SimpleTypes.NULL,
+  "number": SimpleTypes.NUMBER,
+  "object": SimpleTypes.OBJECT,
+  "string": SimpleTypes.STRING
 });
 
 class EnumValues<T> {
-    Map<String, T> map;
-    late Map<T, String> reverseMap;
+  Map<String, T> map;
+  late Map<T, String> reverseMap;
 
-    EnumValues(this.map);
+  EnumValues(this.map);
 
-    Map<T, String> get reverse {
-        reverseMap = map.map((k, v) => MapEntry(v, k));
-        return reverseMap;
-    }
+  Map<T, String> get reverse {
+    reverseMap = map.map((k, v) => MapEntry(v, k));
+    return reverseMap;
+  }
 }

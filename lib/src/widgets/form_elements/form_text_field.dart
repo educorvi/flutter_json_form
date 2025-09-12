@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
-import 'package:flutter_json_forms/src/models/ui_schema.dart' as ui;
+import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/parse.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_wrapper.dart';
@@ -95,12 +95,12 @@ class _FormTextFieldState extends State<FormTextField> {
     if (value == null || value.isEmpty) return null;
 
     switch (widget.expectedType) {
-      case int:
+      case == int:
         return int.tryParse(value);
-      case double:
+      case == double:
         final normalized = value.replaceAll(',', '.');
         return double.tryParse(normalized);
-      case String:
+      case == String:
       default:
         return value;
     }

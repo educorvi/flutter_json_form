@@ -53,9 +53,7 @@ class _FlutterFormDemoState extends State<FlutterFormDemo> {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(8),
           children: [
-            Center(
-                child: SizedBox(
-                    width: 1000, child: SelectionArea(child: FormSelector()))),
+            Center(child: SizedBox(width: 1000, child: SelectionArea(child: FormSelector()))),
           ],
         ),
       ),

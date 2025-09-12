@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_button.dart';
-import '../../models/ui_schema.dart' as ui;
+import '../../models/ui_schema.g.dart' as ui;
 
 class FormButtonGroup extends StatelessWidget {
   final ui.Buttongroup buttonGroup;

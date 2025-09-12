@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:http/http.dart' as http;
-import '../../models/ui_schema.dart' as ui;
+import '../../models/ui_schema.g.dart' as ui;
 
 class FormButton extends StatelessWidget {
   final ui.Button button;
