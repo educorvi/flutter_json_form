@@ -40,25 +40,26 @@ jobs:
         run: dart format --set-exit-if-changed .
         working-directory: ${{ env.PATH_TO_APP }}
 
-  # integration_test_ios:
-  #   name: "Integration Tests iOS"
-  #   needs: lint
-  #   runs-on: macOS-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: futureware-tech/simulator-action@v3
-  #       with:
-  #         model: 'iPhone 16'
-  #     - uses: subosito/flutter-action@v2
-  #       with:
-  #         channel: "master"
-  #         flutter-version: "3.32.8"
-  #         cache: true
-  #     - name: Install dependencies
-  #       run: flutter pub get
-  #       working-directory: ${{ env.PATH_TO_APP }}
-  #     - run: flutter test integration_test
-  #       working-directory: ${{ env.PATH_TO_APP }}
+  integration_test_ios:
+    name: "Integration Tests iOS"
+    needs: lint
+    if: startsWith(github.ref, 'refs/tags/v') # Only run on version tags
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: futureware-tech/simulator-action@v3
+        with:
+          model: 'iPhone 16'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "3.32.8"
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_APP }}
+      - run: flutter test integration_test
+        working-directory: ${{ env.PATH_TO_APP }}
 
   integration_test_android:
     name: "Integration Tests Android"
@@ -104,44 +105,45 @@ jobs:
           tag: google_apis
           abi: x86_64
 
-  # integration_test_web:
-  #   name: "Integration Tests Web"
-  #   needs: lint
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
+  integration_test_web:
+    name: "Integration Tests Web"
+    needs: lint
+    if: startsWith(github.ref, 'refs/tags/v') # Only run on version tags
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-  #     - name: Setup Flutter
-  #       uses: subosito/flutter-action@v2
-  #       with:
-  #         channel: "master"
-  #         flutter-version: "3.32.8"
-  #         cache: true
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "3.32.8"
+          cache: true
 
-  #     - name: Install dependencies
-  #       run: flutter pub get
-  #       working-directory: ${{ env.PATH_TO_APP }}
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_APP }}
 
-  #     - name: Install ChromeDriver
-  #       uses: browser-actions/setup-chrome@v2
-  #       with:
-  #         install-chromedriver: true
-  #     - name: Verify ChromeDriver install
-  #       run: chromedriver --version
+      - name: Install ChromeDriver
+        uses: browser-actions/setup-chrome@v2
+        with:
+          install-chromedriver: true
+      - name: Verify ChromeDriver install
+        run: chromedriver --version
 
-  #     - name: Run integration tests (Web)
-  #       run: |
-  #         chromedriver --port=4444 &
-  #         flutter drive --driver=test_driver/integration_test.dart --target=integration_test/demo_test.dart -d web-server --dart-define=CI=true | tee output.log
-  #         # We have to check the output for failed tests matching the string "[E]"
-  #         output=$(<output.log)
-  #         if [[ "$output" =~ \[E\] ]]; then
-  #         # You will see "All tests passed." in the logs even when tests failed.
-  #         echo "All tests did not pass. Please check the logs for more information."
-  #         exit 1
-  #         fi
-  #       working-directory: ${{ env.PATH_TO_APP }}
+      - name: Run integration tests (Web)
+        run: |
+          chromedriver --port=4444 &
+          flutter drive --driver=test_driver/integration_test.dart --target=integration_test/demo_test.dart -d web-server --dart-define=CI=true | tee output.log
+          # We have to check the output for failed tests matching the string "[E]"
+          output=$(<output.log)
+          if [[ "$output" =~ \[E\] ]]; then
+          # You will see "All tests passed." in the logs even when tests failed.
+          echo "All tests did not pass. Please check the logs for more information."
+          exit 1
+          fi
+        working-directory: ${{ env.PATH_TO_APP }}
 
   build_web:
     name: "Build Web"
