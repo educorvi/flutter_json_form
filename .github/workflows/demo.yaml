@@ -125,7 +125,7 @@ jobs:
       - name: Run integration tests (Web)
         run: |
           chromedriver --port=4444 &
-          flutter drive --driver=test_driver/integration_test.dart --target=integration_test/demo_test.dart -d chrome --dart-define=CI=true
+          flutter drive --driver=test_driver/integration_test.dart --target=integration_test/demo_test.dart -d web-server --dart-define=CI=true | tee output.log
           # We have to check the output for failed tests matching the string "[E]"
           output=$(<output.log)
           if [[ "$output" =~ \[E\] ]]; then
