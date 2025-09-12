@@ -2,9 +2,13 @@ name: Test Flutter Json Forms
 
 on:
   push:
-    # Run on all pushes including tags
+    branches:
+      - "**"
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+" # tag-pattern on pub.dev: 'v{{version}}'
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  pull_request:
+    branches:
+      - "**"
 
 env:
   PATH_TO_APP: .
