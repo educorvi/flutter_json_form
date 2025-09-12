@@ -1,4 +1,4 @@
-name: Pipeline Demo App
+name: Demo App
 
 on:
   push:
@@ -15,7 +15,7 @@ env:
 
 jobs:
   lint:
-    name: Lint Package
+    name: Lint Demo App
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,7 +41,7 @@ jobs:
         working-directory: ${{ env.PATH_TO_APP }}
 
   build_and_test:
-    name: Build & Test App
+    name: Build & Test Demo App
     needs: lint
     runs-on: ubuntu-latest
     steps:
@@ -80,7 +80,7 @@ jobs:
           path: ${{ env.PATH_TO_APP }}/build/web
 
   deploy:
-    name: Deploy to GitHub Pages
+    name: Deploy Demo App to GitHub Pages
     needs: build_and_test
     if: startsWith(github.ref, 'refs/tags/v') # Only deploy on version tags
     runs-on: ubuntu-latest

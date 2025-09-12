@@ -132,4 +132,11 @@ class RitaRuleEvaluator {
     }
     return results;
   }
+
+  void dispose() {
+    // No specific disposal needed for web
+    _initialized = false;
+    _jsLoaded = false;
+    ritaRules.clear();
+  }
 }

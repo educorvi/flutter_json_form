@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:flutter_js/extensions/xhr.dart';
 import 'package:flutter_js/flutter_js.dart' show getJavascriptRuntime, JavascriptRuntime;
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 
@@ -10,11 +11,12 @@ class RitaRuleEvaluator {
   bool _initialized = false;
   Completer<dynamic>? _ritaCompleter;
   Map<String, ui.ShowOnProperty> ritaRules = {};
+  bool _disposed = false;
 
   RitaRuleEvaluator._(this.jsRuntime);
 
   static RitaRuleEvaluator create() {
-    final jsRuntime = getJavascriptRuntime();
+    final jsRuntime = getJavascriptRuntime(xhr: false);
     return RitaRuleEvaluator._(jsRuntime);
   }
 
@@ -68,6 +70,7 @@ class RitaRuleEvaluator {
   }
 
   Future<bool> evaluate(String ruleId, String dataJson) async {
+    if (_disposed) return false;
     if (!_initialized) await initializeWithBundle();
     _ritaCompleter = Completer<dynamic>();
     try {
@@ -89,10 +92,23 @@ class RitaRuleEvaluator {
     if (!_initialized) await initializeWithBundle();
     Map<String, bool> results = {};
     for (final rule in ritaRules.values) {
+      if (_disposed) return results;
       final result = await evaluate(rule.id!, dataJson);
       results[rule.id!] = result;
     }
     return results;
+  }
+
+  Future<void> dispose() async {
+    if (!_initialized) return;
+    _initialized = false;
+    _disposed = true;
+    ritaRules.clear();
+    _ritaCompleter?.completeError('Disposed');
+    _ritaCompleter = null;
+    jsRuntime.clearXhrPendingCalls();
+    jsRuntime.dispose();
+    // If this method exists and cleans up timers/resources
   }
 
   // Future<void> evaluateAll(String dataJson) async {

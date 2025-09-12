@@ -138,6 +138,12 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    ritaRuleEvaluator.dispose();
+    super.dispose();
+  }
+
   /// Initializes the JavaScript engine and rule set
   void _initializeJsEngineAndRuleSet() {
     ritaRuleEvaluator = RitaRuleEvaluator.create();

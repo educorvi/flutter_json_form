@@ -39,8 +39,8 @@ flutter:
     - assets/schemas/
     - assets/schemas/ui/
     - assets/js/rita-core.js
-#     - lib/src/schemas/examples/
-
+  #     - lib/src/schemas/examples/
+  uses-material-design: true
 #
 # For details regarding assets in packages, see
 # https://flutter.dev/assets-and-images/#from-packages
