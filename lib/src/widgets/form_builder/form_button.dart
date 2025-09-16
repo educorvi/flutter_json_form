@@ -50,6 +50,7 @@ class FormButton extends StatelessWidget {
             final headers = request.headers;
             final body = jsonEncode(formContext.getFormValues());
 
+            // ignore: unused_local_variable
             http.Response response;
             switch (method) {
               case 'GET':

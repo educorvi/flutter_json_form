@@ -241,7 +241,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
   void reset({bool resetFormData = true}) {
     /// Custom patch logic for resetting form values to match field types
     /// Only called if formData is set and resetFormData is true
-    void _customResetPatch() {
+    void customResetPatch() {
       final formKeyState = _formKey.currentState?.instantValue ?? {};
       final patchState = Map<String, dynamic>.from(_showOnDependencies);
       formKeyState.forEach((key, value) {
@@ -284,7 +284,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
       // } else {
       //   _formKey.currentState?.reset();
       // }
-      _customResetPatch();
+      customResetPatch();
     });
   }
 

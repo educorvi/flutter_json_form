@@ -12,10 +12,11 @@ class FormFieldUtils {
     Widget? prefix,
     Widget? suffix,
     Widget? suffixIcon,
+    String? hintText,
   }) {
     return InputDecoration(
       labelText: context.showLabel ? getLabel(context) : null,
-      hintText: context.placeholder,
+      hintText: context.placeholder ?? hintText,
       border: !border ? InputBorder.none : Theme.of(buildContext).inputDecorationTheme.border,
       helperText: context.description,
       helperMaxLines: 10,
