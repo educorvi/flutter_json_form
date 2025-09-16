@@ -60,6 +60,8 @@ jobs:
       - run: flutter test integration_test
         working-directory: ${{ env.PATH_TO_APP }}
 
+
+  # Skip for now as there are problems setting the working directory for the emulator action (doesn't support it)
   integration_test_android:
     if: false
     name: "Integration Tests Android"

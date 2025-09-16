@@ -1,0 +1,62 @@
+{
+    "version": "2.0",
+    "$schema": "https://educorvi.github.io/vue-json-form/schemas/ui.schema.json",
+    "layout": {
+        "type": "Group",
+        "options": {
+            "label": "Registration"
+        },
+        "elements": [
+            {
+                "type": "HorizontalLayout",
+                "elements": [
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/firstName",
+                        "options": {
+                            "placeholder": "First Name"
+                        }
+                    },
+                    {
+                        "type": "Control",
+                        "scope": "#/properties/lastName",
+                        "options": {
+                            "placeholder": "Last Name"
+                        }
+                    }
+                ]
+            },
+            {
+                "type": "Control",
+                "scope": "#/properties/newsletter",
+                "options": {
+                    "label": "Sign up for newsletter"
+                }
+            },
+            {
+                "type": "Control",
+                "scope": "#/properties/email",
+                "showOn": {
+                    "path": "#/properties/newsletter",
+                    "type": "EQUALS",
+                    "referenceValue": true
+                },
+                "options": {
+                    "placeholder": "Email address",
+                    "format": "email"
+                }
+            },
+            {
+                "type": "Button",
+                "buttonType": "submit",
+                "text": "Sign Up",
+                "options": {
+                    "variant": "primary",
+                    "submitOptions": {
+                        "action": "save"
+                    }
+                }
+            }
+        ]
+    }
+}

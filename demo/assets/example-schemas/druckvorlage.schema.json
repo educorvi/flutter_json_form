@@ -1,0 +1,257 @@
+{
+    "type": "object",
+    "properties": {
+        "name-der-versicherten-person": {
+            "title": "Name der versicherten Person",
+            "description": "Key/Value Feld mit einer Textzeile",
+            "type": "string"
+        },
+        "beschreibung-des-unfallhergangs": {
+            "title": "Beschreibung des Unfallhergangs",
+            "description": "Key/Value Feld als Textfeld",
+            "type": "string"
+        },
+        "geburtsdatum": {
+            "title": "Geburtsdatum",
+            "description": "Key/Value in der Ausprägung Datum",
+            "type": "string",
+            "format": "date"
+        },
+        "zeitpunkt-des-unfalls": {
+            "title": "Zeitpunkt des Unfalls",
+            "description": "Key/Value in der Ausprägung Datum/Uhrzeit",
+            "type": "string",
+            "format": "date-time"
+        },
+        "beginn-der-taeglichen-arbeitszeit": {
+            "title": "Beginn der täglichen Arbeitszeit",
+            "description": "Key/Value in der Ausprägung Uhrzeit",
+            "type": "string",
+            "format": "time"
+        },
+        "stellen": {
+            "title": "Anzahl der offenen Stellen (auch halbe Stellen)",
+            "description": "Key/Value in der Ausprägung Dezimalzahl",
+            "type": "number"
+        },
+        "nehmen-sie-schmerzstillende-medikamente-ein": {
+            "title": "Bitte markieren wenn Sie schmerzstillende Medikamente einnehmen.",
+            "description": "Key/Value in der besonderen Ausprägung des Boolean-Feldes ja/nein Antworten",
+            "type": "boolean"
+        },
+        "hat-sich-der-unfall-auf-dem-weg-zur-arbeit-ereignet": {
+            "title": "Hat sich der Unfall auf dem Weg zur Arbeit ereignet?",
+            "description": "Key/Value bei Einfachauswahl Radiobutton mit den Antwortoptionen ja/nein",
+            "type": "string",
+            "enum": [
+                "Ja",
+                "Nein"
+            ]
+        },
+        "welcher-altersgruppe-gehoeren-sie-an": {
+            "title": "Welcher Altersgruppe gehören Sie an?",
+            "description": "Key/Value als Einfachauswahl aus mehreren Optionen.",
+            "type": "string",
+            "enum": [
+                "< 18 Jahre",
+                "18 - 30 Jahre",
+                "31 - 50 Jahre",
+                "51 - 67 Jahre",
+                "> 68 Jahre"
+            ]
+        },
+        "staatsangehoerigkeit": {
+            "title": "Staatsangehörigkeit",
+            "description": "Key/Value in der Ausprägung des Auswahlmenüs, ausgewählte Option soll angezeigt werden.",
+            "type": "string",
+            "enum": [
+                "Deutschland",
+                "Österreich",
+                "Niederlande",
+                "Belgien",
+                "Luxemburg",
+                "Italien",
+                "Tschechien",
+                "Polen"
+            ]
+        },
+        "was-ist-an-ihrer-brille-kaputt-gegangen-mehrfachnennungen-moeglich": {
+            "title": "Was ist an ihrer Brille kaputt gegangen (Mehrfachnennungen möglich)",
+            "description": "Mehrfach-Auswahlfeld, die ausgewählten Optionen sollen in der Druckvorlage angezeigt werden.",
+            "type": "array",
+            "items": {
+                "enum": [
+                    "rechtes Glas",
+                    "linkes Glas",
+                    "Gestell"
+                ],
+                "type": "string"
+            }
+        },
+        "welche-aussagen-zu-ihrem-unfall-treffen-zu": {
+            "title": "Welche Aussagen zu Ihrem Unfall treffen zu?",
+            "description": "Umfangreichere Mehrfachauswahl, die ausgewählten Optionen sollen angezeigt werden.",
+            "type": "string",
+            "enum": [
+                "Der Unfall ist auf dem Betriebsgelände passiert.",
+                "Der Unfall ist auf dem Weg von oder zur Arbeit passiert.",
+                "Es war ein fremdes Fahrzeug am Unfall beteiligt.",
+                "Der Unfall wurde von mir verusacht.",
+                "Der Unfall wurde von dem fremden Fahrzeug oder einer anderen Person verursacht.",
+                "Es gab Zeugen des Unfalls."
+            ]
+        },
+        "mitgliedschaften-in-krankenkassen": {
+            "type": "array",
+            "title": "Mitgliedschaften in Krankenkassen",
+            "description": "Array-Feld mit wenigen Eingabemöglichkeiten für tabellarische Darstellungen im Druckbeleg",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name-der-krankenkasse": {
+                        "title": "Name der Krankenkasse",
+                        "type": "string"
+                    },
+                    "versicherungsnummer": {
+                        "title": "Versicherungsnummer",
+                        "type": "string"
+                    },
+                    "mitglied-von": {
+                        "title": "Mitglied von",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "mitglied-bis": {
+                        "title": "Mitglied bis",
+                        "type": "string",
+                        "format": "date"
+                    }
+                },
+                "required": [
+                    "name-der-krankenkasse",
+                    "versicherungsnummer"
+                ],
+                "dependentRequired": {}
+            }
+        },
+        "gewerbezweige-des-unternehmens": {
+            "type": "array",
+            "title": "Gewerbezweige des Unternehmens",
+            "description": "Komplexes Array mit inneren Abhängigkeiten. Nur die ausgewählten Optionen sollen dargestellt werden.",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "art-des-gewerbezweiges": {
+                        "title": "Art des Gewerbezweiges",
+                        "type": "string",
+                        "enum": [
+                            "Handel mit Warenumgang",
+                            "Handel ohne Warenumgang",
+                            "Spedition oder Lieferdienst",
+                            "sonstiger Gewerbezweig"
+                        ]
+                    },
+                    "beschreibung-des-gewerbezweiges": {
+                        "title": "Beschreibung des Gewerbezweiges",
+                        "type": "string"
+                    },
+                    "anteiliger-arbeitsumfang-des-gewerbezweiges-in": {
+                        "title": "Anteiliger Arbeitsumfang des Gewerbezweiges in %.",
+                        "type": "integer"
+                    },
+                    "hier-angeben-welche-fahrzeuge-eingesetzt-werden": {
+                        "title": "Hier angeben welche Fahrzeuge eingesetzt werden?",
+                        "type": "string"
+                    },
+                    "hier-angeben-welche-maschinen-und-anlagen-eingesetzt-werden": {
+                        "title": "Hier angeben welche Maschinen und Anlagen eingesetzt werden.",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "art-des-gewerbezweiges",
+                    "beschreibung-des-gewerbezweiges",
+                    "anteiliger-arbeitsumfang-des-gewerbezweiges-in"
+                ],
+                "dependentRequired": {}
+            }
+        },
+        "strasse-und-hausnummer": {
+            "title": "Straße und Hausnummer",
+            "type": "string"
+        },
+        "postleitzahl": {
+            "title": "Postleitzahl",
+            "type": "string"
+        },
+        "ort": {
+            "title": "Ort",
+            "type": "string"
+        },
+        "telefon": {
+            "title": "Telefon",
+            "type": "string",
+            "pattern": "^\\+?(\\d{1,3})?[-.\\s]?(\\(?\\d{1,4}\\)?)?[-.\\s]?\\d{1,4}[-.\\s]?\\d{1,4}[-.\\s]?\\d{1,9}$"
+        },
+        "e-mail": {
+            "title": "E-Mail",
+            "type": "string"
+        },
+        "auswahl-der-rechtsform": {
+            "title": "Auswahl der Rechtsform",
+            "type": "string",
+            "enum": [
+                "Einzelunternehmen (e.K.)",
+                "GmbH",
+                "AG"
+            ]
+        },
+        "in-welchem-register-ist-das-unternehmen-verzeichnet": {
+            "title": "In welchem Register ist das Unternehmen verzeichnet?",
+            "type": "string",
+            "enum": [
+                "HRA (Personengesellschaften)",
+                "HRB (Kaptialgesellschaften)",
+                "Handwerksrolle",
+                "kein Registereintrag"
+            ]
+        },
+        "registernummer": {
+            "title": "Registernummer",
+            "type": "string"
+        },
+        "bitte-laden-sie-ihre-anlagen-hoch": {
+            "title": "Bitte laden Sie Ihre Anlagen hoch.",
+            "description": "Liste von hochgeladenen Dateien aus dem Multi-Fileupload-Feld",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        }
+    },
+    "required": [
+        "name-der-versicherten-person",
+        "beschreibung-des-unfallhergangs",
+        "geburtsdatum",
+        "zeitpunkt-des-unfalls",
+        "beginn-der-taeglichen-arbeitszeit",
+        "stellen",
+        "nehmen-sie-schmerzstillende-medikamente-ein",
+        "hat-sich-der-unfall-auf-dem-weg-zur-arbeit-ereignet",
+        "welcher-altersgruppe-gehoeren-sie-an",
+        "staatsangehoerigkeit",
+        "was-ist-an-ihrer-brille-kaputt-gegangen-mehrfachnennungen-moeglich",
+        "welche-aussagen-zu-ihrem-unfall-treffen-zu",
+        "mitgliedschaften-in-krankenkassen",
+        "gewerbezweige-des-unternehmens",
+        "strasse-und-hausnummer",
+        "postleitzahl",
+        "ort",
+        "auswahl-der-rechtsform",
+        "in-welchem-register-ist-das-unternehmen-verzeichnet"
+    ],
+    "dependentRequired": {}
+}

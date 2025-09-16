@@ -48,6 +48,9 @@ abstract class FormFile {
                 jsonSchema: jsonSchema,
                 uiSchema: uiSchema,
                 formData: formData,
+                onFormSubmitCallback: (formValues) {
+                  showJsonDialog(context, 'Form Submitted', formValues);
+                },
               ),
               const Divider(),
               Row(

@@ -1,0 +1,292 @@
+{
+    "version": "2.0",
+    "layout": {
+        "type": "VerticalLayout",
+        "elements": [
+            {
+                "type": "HTML",
+                "htmlData": "<h2>Kleiner Textbaustein mit Überschrift und Hinweisen</h2>\n<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>"
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/name-der-versicherten-person"
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/beschreibung-des-unfallhergangs",
+                "options": {
+                    "multi": true
+                }
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/geburtsdatum",
+                "options": {
+                    "format": "date"
+                }
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/zeitpunkt-des-unfalls",
+                "options": {
+                    "format": "datetime-local"
+                }
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/beginn-der-taeglichen-arbeitszeit",
+                "options": {
+                    "format": "time"
+                }
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/stellen"
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/nehmen-sie-schmerzstillende-medikamente-ein"
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/hat-sich-der-unfall-auf-dem-weg-zur-arbeit-ereignet",
+                "options": {
+                    "displayAs": "radiobuttons",
+                    "stacked": true
+                }
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/welcher-altersgruppe-gehoeren-sie-an",
+                "options": {
+                    "displayAs": "radiobuttons",
+                    "stacked": true
+                }
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/staatsangehoerigkeit"
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/was-ist-an-ihrer-brille-kaputt-gegangen-mehrfachnennungen-moeglich",
+                "options": {
+                    "stacked": true
+                }
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/welche-aussagen-zu-ihrem-unfall-treffen-zu"
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/mitgliedschaften-in-krankenkassen",
+                "options": {
+                    "descendantControlOverrides": {
+                        "/properties/mitgliedschaften-in-krankenkassen/items/properties/mitglied-von": {
+                            "options": {
+                                "format": "date"
+                            }
+                        },
+                        "/properties/mitgliedschaften-in-krankenkassen/items/properties/mitglied-bis": {
+                            "options": {
+                                "format": "date"
+                            }
+                        }
+                    },
+                    "addButtonText": "weitere Krankenkasse"
+                }
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/gewerbezweige-des-unternehmens",
+                "options": {
+                    "descendantControlOverrides": {
+                        "/properties/gewerbezweige-des-unternehmens/items/properties/beschreibung-des-gewerbezweiges": {
+                            "showOn": {
+                                "id": "ritaRule-beschreibung-des-gewerbezweiges",
+                                "rule": {
+                                    "type": "exists",
+                                    "array": {
+                                        "type": "atom",
+                                        "path": "gewerbezweige-des-unternehmens",
+                                        "default": []
+                                    },
+                                    "placeholder": "$array_item1",
+                                    "indexPlaceholder": "$index1",
+                                    "rule": {
+                                        "type": "and",
+                                        "arguments": [
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$index1",
+                                                        "default": -1
+                                                    },
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$selfIndices./properties/gewerbezweige-des-unternehmens",
+                                                        "default": -1
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "$array_item1.art-des-gewerbezweiges",
+                                                        "default": ""
+                                                    },
+                                                    "sonstiger Gewerbezweig"
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "/properties/gewerbezweige-des-unternehmens/items/properties/anteiliger-arbeitsumfang-des-gewerbezweiges-in": {
+                            "options": {
+                                "append": "%"
+                            }
+                        },
+                        "/properties/gewerbezweige-des-unternehmens/items/properties/hier-angeben-welche-fahrzeuge-eingesetzt-werden": {
+                            "options": {
+                                "multi": true
+                            }
+                        },
+                        "/properties/gewerbezweige-des-unternehmens/items/properties/hier-angeben-welche-maschinen-und-anlagen-eingesetzt-werden": {
+                            "options": {
+                                "multi": true
+                            }
+                        }
+                    },
+                    "addButtonText": "weiterer Gewerbezweig"
+                }
+            },
+            {
+                "type": "Group",
+                "options": {
+                    "label": "Angaben zum Unternehmen"
+                },
+                "elements": [
+                    {
+                        "type": "HTML",
+                        "htmlData": "<p>Bitte stellen Sie uns die Angaben zum Unternehmen möglichst vollständig zur Verfügung.</p>"
+                    },
+                    {
+                        "type": "Group",
+                        "options": {
+                            "label": "Angaben zur Anschrift"
+                        },
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "/properties/strasse-und-hausnummer"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "/properties/postleitzahl"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "/properties/ort"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "/properties/telefon",
+                                "options": {
+                                    "format": "tel"
+                                }
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "/properties/e-mail"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Group",
+                        "options": {
+                            "label": "Angaben zur Rechtsform"
+                        },
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "/properties/auswahl-der-rechtsform"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "/properties/in-welchem-register-ist-das-unternehmen-verzeichnet",
+                                "options": {
+                                    "displayAs": "radiobuttons",
+                                    "stacked": true
+                                }
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "/properties/registernummer",
+                                "showOn": {
+                                    "id": "ritaRule-registernummer",
+                                    "rule": {
+                                        "type": "or",
+                                        "arguments": [
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "in-welchem-register-ist-das-unternehmen-verzeichnet",
+                                                        "default": ""
+                                                    },
+                                                    "HRA (Personengesellschaften)"
+                                                ]
+                                            },
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "in-welchem-register-ist-das-unternehmen-verzeichnet",
+                                                        "default": ""
+                                                    },
+                                                    "HRB (Kaptialgesellschaften)"
+                                                ]
+                                            },
+                                            {
+                                                "type": "comparison",
+                                                "operation": "equal",
+                                                "arguments": [
+                                                    {
+                                                        "type": "atom",
+                                                        "path": "in-welchem-register-ist-das-unternehmen-verzeichnet",
+                                                        "default": ""
+                                                    },
+                                                    "Handwerksrolle"
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "Control",
+                "scope": "/properties/bitte-laden-sie-ihre-anlagen-hoch",
+                "options": {
+                    "acceptedFileType": "*"
+                }
+            }
+        ]
+    }
+}

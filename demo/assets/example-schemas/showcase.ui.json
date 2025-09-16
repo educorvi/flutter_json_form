@@ -251,7 +251,10 @@
             "text": "Submit without validation",
             "options": {
               "variant": "warning",
-              "formnovalidate": true
+              "formnovalidate": true,
+              "submitOptions": {
+                "action": "save"
+              }
             }
           },
           {

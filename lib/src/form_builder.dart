@@ -41,10 +41,10 @@ class FlutterJsonForm extends StatefulWidget {
   /// Defaults to false
   final bool parseJson;
 
-  /// [onFormSubmit] is a callback function which gets called when the form is submitted
+  /// [onFormSubmitCallback] is a callback function which gets called when the form is submitted
   ///
   /// The function gets called with the form values as a `Map<String, dynamic>` as a parameter
-  // final void Function(Map<String, dynamic>?)? onFormSubmit;
+  final void Function(Map<String, dynamic>?)? onFormSubmitCallback;
 
   /// [OnFormSubmitFormat] specifies the format of the form data when the form is submitted
   // final OnFormSubmitFormat onFormSubmitFormat;
@@ -61,6 +61,7 @@ class FlutterJsonForm extends StatefulWidget {
     this.validate = true,
     this.parseJson = false,
     this.formData,
+    this.onFormSubmitCallback,
   });
 
   @override
@@ -388,6 +389,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
       // initialValue: _showOnDependencies,
       key: _formKey,
       child: FormContext(
+        onFormSubmitCallback: widget.onFormSubmitCallback,
         showOnDependencies: _showOnDependencies,
         ritaDependencies: _ritaDependencies,
         ritaDependenciesRevision: _ritaDependenciesRevision,

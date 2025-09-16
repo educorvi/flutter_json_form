@@ -39,7 +39,7 @@ class FormButton extends StatelessWidget {
 
       if (!valid) return;
 
-      final action = submitOptions?.action ?? 'submit';
+      final action = submitOptions?.action;
 
       switch (action) {
         case 'request':
@@ -67,17 +67,20 @@ class FormButton extends StatelessWidget {
               default:
                 throw Exception('Unsupported HTTP method: $method');
             }
-            debugPrint('Request response: ${response.statusCode} ${response.body}');
+            // debugPrint('Request response: ${response.statusCode} ${response.body}');
           }
           break;
         case 'save':
-          debugPrint('Save action: ${jsonEncode(formContext.getFormValues())}');
+          if (formContext.onFormSubmitCallback != null) {
+            formContext.onFormSubmitCallback!(formContext.getFormValues());
+          }
+          // debugPrint('Save action: ${jsonEncode(formContext.getFormValues())}');
           break;
         case 'print':
           debugPrint('Print action: ${jsonEncode(formContext.getFormValues())}');
           break;
         default:
-          debugPrint('Default submit: ${jsonEncode(formContext.getFormValues())}');
+        // debugPrint('Default submit: ${jsonEncode(formContext.getFormValues())}');
       }
     }
 

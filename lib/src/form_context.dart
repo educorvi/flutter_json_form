@@ -7,6 +7,7 @@ import 'package:json_schema/json_schema.dart';
 // import 'utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
 
 class FormContext extends InheritedWidget {
+  final void Function(Map<String, dynamic>?)? onFormSubmitCallback;
   final Map<String, dynamic> showOnDependencies;
   final Map<String, bool> ritaDependencies;
   final int ritaDependenciesRevision;
@@ -27,6 +28,7 @@ class FormContext extends InheritedWidget {
 
   const FormContext({
     super.key,
+    this.onFormSubmitCallback,
     required this.showOnDependencies,
     required this.ritaDependencies,
     required this.ritaDependenciesRevision,

@@ -12,7 +12,9 @@ class FormSelector extends StatefulWidget {
 
   FormSelector({super.key, this.initialSelectionIndex = 0})
       : formFiles = [
+          ExampleFormFile(name: "Registration", filename: "registration", formData: getRegistration()),
           ExampleFormFile(name: "Showcase", filename: "showcase"),
+          ExampleFormFile(name: "Druckvorlage", filename: "druckvorlage"),
           ExampleFormFile(name: "Reproduce", filename: "reproduce"),
           ExampleFormFile(name: "Json Schema", filename: "jsonSchema"),
           ExampleFormFile(
@@ -321,5 +323,11 @@ Map<String, dynamic> getOther() {
       "edi87b00b6afd0645b8933a898d34b9af9b": {"edi87b00b6afd0645b8933a898d34b9af9b_ref1": false}
     },
     "edi1ceb1850266e4b24a027cb041363b3fd": {"edi1ceb1850266e4b24a027cb041363b3fd_ref0": "Test", "edi1ceb1850266e4b24a027cb041363b3fd_ref1": true}
+  };
+}
+
+Map<String, dynamic> getRegistration() {
+  return {
+    "firstName": "John",
   };
 }
