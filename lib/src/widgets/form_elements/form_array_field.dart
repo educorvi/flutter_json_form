@@ -30,6 +30,8 @@ class _FormArrayFieldState extends State<FormArrayField> {
   bool itemsInitialized = false;
   int _idCounter = 0;
   FormContext? _cachedFormContext;
+  int _lastResetRevision = 0; // Track the last reset revision we've seen
+  int _lastRitaDependenciesRevision = 0; // Track the last Rita dependencies revision
 
   @override
   void initState() {
@@ -58,6 +60,39 @@ class _FormArrayFieldState extends State<FormArrayField> {
     }
   }
 
+  /// Initialize items for reset - ignores current initialValue and uses only schema defaults
+  void _initializeItemsForReset() {
+    if (!itemsInitialized) {
+      itemsInitialized = true;
+
+      // On reset, ignore current initialValue and use only schema defaults
+      int minItems = safeParseInt(widget.formFieldContext.jsonSchema.minItems);
+      for (int i = 0; i < minItems; i++) {
+        // Use schema default value if available, otherwise null
+        dynamic defaultValue = widget.formFieldContext.jsonSchema.items?.defaultValue;
+        items.add(ListItem<dynamic>(id: _idCounter++, value: defaultValue));
+      }
+    }
+  }
+
+  /// Get the proper initial value for an array item
+  /// This should be the default value from schema, not the current runtime value
+  // dynamic _getInitialValueForArrayItem(ListItem<dynamic> item, int index) {
+  //   // If the item has a value (from initial form data), use it
+  //   if (item.value != null) {
+  //     return item.value;
+  //   }
+
+  //   // Otherwise, use default value from schema if available
+  //   final itemSchema = widget.formFieldContext.jsonSchema.items;
+  //   if (itemSchema?.defaultValue != null) {
+  //     return itemSchema!.defaultValue;
+  //   }
+
+  //   // Return null as fallback (will be handled by the form field)
+  //   return null;
+  // }
+
   @override
   Widget build(BuildContext context) {
     final formContext = FormContext.of(context);
@@ -70,8 +105,38 @@ class _FormArrayFieldState extends State<FormArrayField> {
     // If FormContext is not available and we don't have a cached one, show a placeholder
     if (formContext == null && _cachedFormContext == null) {
       return const FormElementLoading();
-    } // Use available FormContext or cached one
+    }
+
+    // Use available FormContext or cached one
     final effectiveFormContext = formContext ?? _cachedFormContext!;
+
+    // Check if form was reset and we need to re-initialize items
+    if (effectiveFormContext.formResetRevision != _lastResetRevision) {
+      _lastResetRevision = effectiveFormContext.formResetRevision;
+      // Reset the array items to initial state - force reset to schema defaults
+      itemsInitialized = false;
+      items.clear();
+      _idCounter = 0;
+      _initializeItemsForReset(); // Use special reset initialization
+
+      // Force a rebuild to ensure child widgets get new initial values
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   if (mounted) {
+      //     setState(() {});
+      //   }
+      // });
+    }
+
+    // Check if Rita dependencies have changed and trigger rebuild for dependent fields
+    if (effectiveFormContext.ritaDependenciesRevision != _lastRitaDependenciesRevision) {
+      _lastRitaDependenciesRevision = effectiveFormContext.ritaDependenciesRevision;
+      // Force a rebuild to ensure child widgets get updated dependency context
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   if (mounted) {
+      //     setState(() {});
+      //   }
+      // });
+    }
 
     // Check if this should be rendered as checkbox group
     if (widget.formFieldContext.jsonSchema.items != null) {
@@ -207,6 +272,12 @@ class _FormArrayFieldState extends State<FormArrayField> {
       if (actualOldIndex != actualNewIndex) {
         final ListItem item = items.removeAt(actualOldIndex);
         items.insert(actualNewIndex, item);
+
+        // Trigger dependency re-evaluation after reordering
+        // This is crucial for showOn/Rita rules that depend on array indices
+        if (widget.formFieldContext.onChanged != null) {
+          widget.formFieldContext.onChanged!(items.map((e) => e.value).toList());
+        }
       }
     });
   }
@@ -244,7 +315,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
       childScope: '${widget.formFieldContext.scope}/items',
       childId: '${widget.formFieldContext.id}/items/${item.id}',
       childJsonSchema: widget.formFieldContext.jsonSchema.items!,
-      childInitialValue: item.value,
+      childInitialValue: item.value, // _getInitialValueForArrayItem(item, index),
       childRequired: widget.formFieldContext.required,
       childShowLabel: false,
       childOptions: childOptions,
@@ -255,6 +326,9 @@ class _FormArrayFieldState extends State<FormArrayField> {
         if (widget.formFieldContext.onChanged != null) {
           widget.formFieldContext.onChanged!(items.map((e) => e.value).toList());
         }
+        // Force rebuild of this array field when any child changes
+        // This is crucial for nested arrays where child state changes need to be reflected immediately
+        setState(() {});
       },
       childOnSavedCallback: (value, {Map<String, int>? computedSelfIndices}) {
         items[index].value = value;

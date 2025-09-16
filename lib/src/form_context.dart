@@ -10,6 +10,7 @@ class FormContext extends InheritedWidget {
   final Map<String, dynamic> showOnDependencies;
   final Map<String, bool> ritaDependencies;
   final int ritaDependenciesRevision;
+  final int formResetRevision;
   final JsonSchema jsonSchemaModel;
   final RitaRuleEvaluator ritaEvaluator;
   final Function(String, dynamic) setValueForShowOn;
@@ -29,6 +30,7 @@ class FormContext extends InheritedWidget {
     required this.showOnDependencies,
     required this.ritaDependencies,
     required this.ritaDependenciesRevision,
+    required this.formResetRevision,
     required this.jsonSchemaModel,
     required this.ritaEvaluator,
     required this.setValueForShowOn,

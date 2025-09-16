@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
+import 'package:flutter_json_forms/src/utils/parse.dart';
 import 'package:flutter_json_forms/src/widgets/data/list_item.dart';
 import 'package:json_schema/json_schema.dart';
 
@@ -137,13 +138,28 @@ Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties,
     final String key = entry.key;
     final JsonSchema jsonSchema = entry.value;
     // set default values for fields. If a form data is provided, use this
-    bool isObject;
+    SchemaType? schemaType;
     try {
-      isObject = jsonSchema.type == SchemaType.object;
+      schemaType = jsonSchema.type;
     } catch (e) {
-      isObject = false;
+      schemaType = null;
     }
-    if (isObject) {
+    if (schemaType == SchemaType.array) {
+      if (formData != null && formData.containsKey(key)) {
+        dependencies["/properties/$key"] = formData[key];
+      } else if (jsonSchema.defaultValue != null) {
+        dependencies["/properties/$key"] = jsonSchema.defaultValue;
+      } else if (jsonSchema.minItems != null) {
+        dependencies["/properties/$key"] = List.filled(
+          safeParseInt(jsonSchema.minItems),
+          null,
+          growable: true,
+        );
+      } else {
+        dependencies["/properties/$key"] = [];
+      }
+    }
+    if (schemaType == SchemaType.object) {
       final recursiveFormData = formData == null
           ? null
           : formData.containsKey(key)

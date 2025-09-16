@@ -104,6 +104,10 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
   /// This helps FutureBuilder know when to re-evaluate array elements
   int _ritaDependenciesRevision = 0;
 
+  /// Revision counter to track when form is reset
+  /// This helps array fields know when to re-initialize their items
+  int _formResetRevision = 0;
+
   /// return true if the widget is in the loading state (the validation is not finished yet
   /// (async part comes form reading the files. The validation is done synchronously))
   bool get isLoading {
@@ -232,16 +236,54 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
   }
 
   /// Reset form to `initialValue` set on FormBuilder or on each field.
-  void reset() {
+  /// if initial formData was provided and [resetFormData] is true (default), the provided formData gets also reset and only default values from the jsonSchema are present in the form after reset
+  void reset({bool resetFormData = true}) {
+    /// Custom patch logic for resetting form values to match field types
+    /// Only called if formData is set and resetFormData is true
+    void _customResetPatch() {
+      final formKeyState = _formKey.currentState?.instantValue ?? {};
+      final patchState = Map<String, dynamic>.from(_showOnDependencies);
+      formKeyState.forEach((key, value) {
+        if (patchState.containsKey(key)) {
+          final targetType = value?.runtimeType;
+          final patchValue = patchState[key];
+          if (targetType == String) {
+            patchState[key] = patchValue?.toString();
+          } else if (targetType == int) {
+            patchState[key] = patchValue is int ? patchValue : int.tryParse(patchValue?.toString() ?? '');
+          } else if (targetType == double) {
+            patchState[key] = patchValue is double ? patchValue : double.tryParse(patchValue?.toString() ?? '');
+          } else if (targetType == bool) {
+            if (patchValue is bool) {
+              patchState[key] = patchValue;
+            } else if (patchValue is String) {
+              patchState[key] = patchValue.toLowerCase() == 'true';
+            } else {
+              patchState[key] = false;
+            }
+          } else if (targetType == List) {
+            // Use schema to determine minItems if possible, otherwise []
+            patchState[key] = patchValue is List ? patchValue : []; // Or use schema/minItems if available
+          }
+        } else {
+          // Key not in patchState, set to null
+          patchState[key] = null;
+        }
+      });
+      _formKey.currentState?.patchValue(patchState);
+    }
+
     setState(() {
-      resetShowOnDependencies(_showOnDependencies);
-      // _formKey.currentState!.reset();
-      _showOnDependencies.clear();
       _showOnDependencies = initShowOnDependencies(jsonSchemaModel.properties, null);
       _ritaDependencies.clear();
       _ritaDependenciesRevision++;
-
-      _formKey.currentState!.patchValue(_showOnDependencies);
+      _formResetRevision++; // Increment reset counter for array fields
+      // if (formData.isNotEmpty && resetFormData) {
+      //   _customResetPatch();
+      // } else {
+      //   _formKey.currentState?.reset();
+      // }
+      _customResetPatch();
     });
   }
 
@@ -251,8 +293,13 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
   }
 
   /// Returns the current form values (regardless of validation state)
-  Map<String, dynamic> get currentValue {
-    final currentValues = _formKey.currentState?.value ?? {};
+  // Map<String, dynamic> get currentValue {
+  //   final currentValues = _formKey.currentState?.value ?? {};
+  //   return processFormValuesEllaV2(currentValues);
+  // }
+
+  Map<String, dynamic> get instantValue {
+    final currentValues = _formKey.currentState?.instantValue ?? {};
     return processFormValuesEllaV2(currentValues);
   }
 
@@ -338,12 +385,13 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
   /// Creates the FormBuilder widget
   FormBuilder _getFormBuilder() {
     return FormBuilder(
-      initialValue: _showOnDependencies,
+      // initialValue: _showOnDependencies,
       key: _formKey,
       child: FormContext(
         showOnDependencies: _showOnDependencies,
         ritaDependencies: _ritaDependencies,
         ritaDependenciesRevision: _ritaDependenciesRevision,
+        formResetRevision: _formResetRevision,
         jsonSchemaModel: jsonSchemaModel,
         ritaEvaluator: ritaRuleEvaluator,
         setValueForShowOn: setValueForShowOn,
@@ -355,7 +403,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
         saveAndValidate: ({bool focusOnInvalid = true, bool autoScrollWhenFocusOnInvalid = false}) =>
             saveAndValidate(focusOnInvalid: focusOnInvalid, autoScrollWhenFocusOnInvalid: autoScrollWhenFocusOnInvalid),
         reset: reset,
-        getFormValues: () => currentValue,
+        getFormValues: () => instantValue,
         storeRitaArrayResult: _storeRitaArrayResult,
         checkElementShownWithRita: isElementShownWithRita,
         child: _generateLayout(),

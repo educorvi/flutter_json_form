@@ -39,6 +39,7 @@ class FormLayout extends StatelessWidget {
         builder: (BuildContext context, BoxConstraints constraints) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: _buildElementsWithSpacing(context, elements, LayoutDirection.horizontal).map((widget) => widget).toList(),
           );
         },

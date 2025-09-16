@@ -57,7 +57,7 @@ class FormControl extends StatelessWidget {
       options: options,
       format: format,
       showOn: control.showOn,
-      initialValue: formContext.checkValueForShowOn(scope),
+      initialValue: formContext.checkValueForShowOn(scope), // null, //
       parentIsShown: parentIsShown,
       selfIndices: const {},
       onChanged: (value) => formContext.onFormValueChanged(scope, value),
