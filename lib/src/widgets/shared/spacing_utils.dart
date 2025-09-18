@@ -26,10 +26,8 @@ class SpacingUtils {
       // Always add spacing widget, but with zero size if not needed
       if (i > 0) {
         if (spacingBuilder != null) {
-          // Use custom spacing builder if provided
           allWidgets.add(spacingBuilder(item, i, isVisible, hasVisibleElement));
         } else {
-          // Use default spacing
           if (layoutDirection == LayoutDirection.vertical) {
             allWidgets.add(SizedBox(
               height: (isVisible && hasVisibleElement) ? spacing : 0.0,
@@ -42,12 +40,11 @@ class SpacingUtils {
         }
       }
 
-      // Track if we have a visible element for next iteration
+      // Track if we there is a visible element for the next iteration
       if (isVisible) {
         hasVisibleElement = true;
       }
 
-      // Always create and add the widget
       allWidgets.add(widgetBuilder(item, i));
     }
 
@@ -104,10 +101,8 @@ class SpacingUtils {
       layoutDirection: LayoutDirection.vertical,
       spacing: spacing,
       spacingBuilder: (item, index, isVisible, hasVisibleElement) {
-        // For arrays, we need the custom spacing widget but with dynamic height
         final spacingWidget = spacingWidgetBuilder(item, index);
 
-        // If it's a Container, modify its height
         if (spacingWidget is Container) {
           return SizedBox(
             key: spacingWidget.key,
@@ -117,7 +112,6 @@ class SpacingUtils {
           );
         }
 
-        // Fallback to regular SizedBox
         return SizedBox(
           height: (isVisible && hasVisibleElement) ? spacing : 0.0,
         );

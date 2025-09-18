@@ -4,7 +4,6 @@ import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:json_schema/json_schema.dart';
-// import 'utils/rita_rule_evaluator/ritaRuleEvaluator.dart';
 
 class FormContext extends InheritedWidget {
   final void Function(Map<String, dynamic>?)? onFormSubmitCallback;
@@ -72,7 +71,7 @@ class FormContext extends InheritedWidget {
       return checkElementShownWithRita(showOn, selfIndices, parentIsShown);
     }
 
-    // Fall back to traditional showOn evaluation
+    // Fall back to old showOn evaluation
     return isElementShown(
       parentIsShown: parentIsShown ?? true,
       showOn: showOn,

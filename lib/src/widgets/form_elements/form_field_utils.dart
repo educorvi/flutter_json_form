@@ -50,6 +50,7 @@ class FormFieldUtils {
     List<FormFieldValidator>? additionalValidators,
   }) {
     return (valueCandidate) {
+      // if the form element is not shown, no validation has to be done as the field should be ignored
       if (!context.isShownCallback()) {
         return null;
       }

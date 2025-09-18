@@ -17,7 +17,6 @@ class AnimatedTooltip extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: () {
-          // Optionally, you can show a dialog or snackbar as a fallback
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(content)),
           );

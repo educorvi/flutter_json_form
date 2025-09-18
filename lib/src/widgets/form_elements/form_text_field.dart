@@ -34,7 +34,6 @@ class _FormTextFieldState extends State<FormTextField> {
   Widget build(BuildContext context) {
     final fieldContext = widget.formFieldContext;
 
-    // Convert initial value to string
     String initialValueString = "";
     if (fieldContext.initialValue != null) {
       try {

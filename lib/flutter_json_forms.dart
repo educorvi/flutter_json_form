@@ -4,7 +4,7 @@ export 'src/form_builder.dart' show FlutterJsonForm, FlutterJsonFormState;
 
 export 'src/json_validator.dart' show setupDynamicJsonFormValidation;
 
-export 'src/process_form_values.dart' show processFormValuesEllaV1, processFormValuesEllaV2;
+// export 'src/process_form_values.dart' show processFormValuesEllaV1, processFormValuesEllaV2;
 
 // TODO maybe export function for creating a default uiSchema for a json Schema
 

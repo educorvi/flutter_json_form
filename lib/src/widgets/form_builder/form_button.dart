@@ -34,7 +34,6 @@ class FormButton extends StatelessWidget {
     }
 
     Future<void> handleSubmit() async {
-      // If formnovalidate is true, skip validation
       bool valid = formNoValidate ? true : formContext.saveAndValidate();
 
       if (!valid) return;
@@ -66,22 +65,20 @@ class FormButton extends StatelessWidget {
                 response = await http.delete(url, headers: headers, body: body);
                 break;
               default:
-                throw Exception('Unsupported HTTP method: $method');
+                debugPrint('Unsupported HTTP method: $method');
             }
-            // debugPrint('Request response: ${response.statusCode} ${response.body}');
           }
           break;
         case 'save':
           if (formContext.onFormSubmitCallback != null) {
             formContext.onFormSubmitCallback!(formContext.getFormValues());
           }
-          // debugPrint('Save action: ${jsonEncode(formContext.getFormValues())}');
           break;
         case 'print':
           debugPrint('Print action: ${jsonEncode(formContext.getFormValues())}');
           break;
         default:
-        // debugPrint('Default submit: ${jsonEncode(formContext.getFormValues())}');
+          debugPrint('$action action : ${jsonEncode(formContext.getFormValues())}');
       }
     }
 

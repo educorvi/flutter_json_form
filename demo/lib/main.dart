@@ -3,10 +3,36 @@ import 'package:flutter_json_forms/flutter_json_forms.dart';
 import 'package:flutter_json_forms_demo/constants/constants.dart';
 import 'package:flutter_json_forms_demo/widgets/form_file/form_file_base.dart';
 import 'package:flutter_json_forms_demo/widgets/form_selector.dart';
+import 'package:logging/logging.dart';
 
 void main() {
+  // Initialize logging for the Flutter JSON Forms package
+  Logger.root.level = Level.ALL;
+
+  _setupCustomLogging();
+
   runApp(const MyApp());
   // setupDynamicJsonFormValidation();
+}
+
+/// Custom logging setup for the demo app
+void _setupCustomLogging() {
+  Logger.root.onRecord.listen((record) {
+    final time = record.time.toIso8601String().substring(11, 23);
+    final level = record.level.name.padRight(7);
+    final logger =
+        record.loggerName.length > 30 ? '...${record.loggerName.substring(record.loggerName.length - 27)}' : record.loggerName.padRight(30);
+
+    print('[$time] $level $logger: ${record.message}');
+
+    if (record.error != null) {
+      print('  ↳ Error: ${record.error}');
+    }
+
+    if (record.stackTrace != null && record.level >= Level.SEVERE) {
+      print('  ↳ Stack: ${record.stackTrace}');
+    }
+  });
 }
 
 class MyApp extends StatelessWidget {

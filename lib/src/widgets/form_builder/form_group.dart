@@ -58,18 +58,16 @@ class FormGroup extends StatelessWidget {
         layoutDirection: LayoutDirection.vertical,
       ),
       isVisibleChecker: (element, index) {
-        // Check if element is explicitly hidden
         if (element.options?.formattingOptions?.hidden == true) {
           return false;
         }
 
-        // Check normal showOn visibility
         final String elementScope = element.scope ?? '';
         return formContext.elementShown(
           scope: elementScope,
           showOn: element.showOn,
           parentIsShown: true,
-          selfIndices: const {}, // Groups don't have selfIndices
+          selfIndices: const {},
         );
       },
     );

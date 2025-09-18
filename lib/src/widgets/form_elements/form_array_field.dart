@@ -7,6 +7,7 @@ import 'package:flutter_json_forms/src/widgets/form_elements/form_checkbox_group
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_element_loading.dart';
+import 'package:flutter_json_forms/src/utils/logger.dart';
 import 'package:json_schema/json_schema.dart';
 import '../../utils/show_on.dart';
 import '../../utils/parse.dart';
@@ -30,8 +31,9 @@ class _FormArrayFieldState extends State<FormArrayField> {
   bool itemsInitialized = false;
   int _idCounter = 0;
   FormContext? _cachedFormContext;
-  int _lastResetRevision = 0; // Track the last reset revision we've seen
-  int _lastRitaDependenciesRevision = 0; // Track the last Rita dependencies revision
+  int _lastResetRevision = 0;
+  int _lastRitaDependenciesRevision = 0;
+  static final _logger = FormLogger.arrayField;
 
   @override
   void initState() {
@@ -75,24 +77,6 @@ class _FormArrayFieldState extends State<FormArrayField> {
     }
   }
 
-  /// Get the proper initial value for an array item
-  /// This should be the default value from schema, not the current runtime value
-  // dynamic _getInitialValueForArrayItem(ListItem<dynamic> item, int index) {
-  //   // If the item has a value (from initial form data), use it
-  //   if (item.value != null) {
-  //     return item.value;
-  //   }
-
-  //   // Otherwise, use default value from schema if available
-  //   final itemSchema = widget.formFieldContext.jsonSchema.items;
-  //   if (itemSchema?.defaultValue != null) {
-  //     return itemSchema!.defaultValue;
-  //   }
-
-  //   // Return null as fallback (will be handled by the form field)
-  //   return null;
-  // }
-
   @override
   Widget build(BuildContext context) {
     final formContext = FormContext.of(context);
@@ -102,7 +86,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
       _cachedFormContext = formContext;
     }
 
-    // If FormContext is not available and we don't have a cached one, show a placeholder
+    // If FormContext is not available and there is no cached one, show a placeholder
     if (formContext == null && _cachedFormContext == null) {
       return const FormElementLoading();
     }
@@ -110,32 +94,18 @@ class _FormArrayFieldState extends State<FormArrayField> {
     // Use available FormContext or cached one
     final effectiveFormContext = formContext ?? _cachedFormContext!;
 
-    // Check if form was reset and we need to re-initialize items
+    // Check if form was reset and items need to be re-initialized
     if (effectiveFormContext.formResetRevision != _lastResetRevision) {
       _lastResetRevision = effectiveFormContext.formResetRevision;
-      // Reset the array items to initial state - force reset to schema defaults
       itemsInitialized = false;
       items.clear();
       _idCounter = 0;
-      _initializeItemsForReset(); // Use special reset initialization
-
-      // Force a rebuild to ensure child widgets get new initial values
-      // WidgetsBinding.instance.addPostFrameCallback((_) {
-      //   if (mounted) {
-      //     setState(() {});
-      //   }
-      // });
+      _initializeItemsForReset();
     }
 
     // Check if Rita dependencies have changed and trigger rebuild for dependent fields
     if (effectiveFormContext.ritaDependenciesRevision != _lastRitaDependenciesRevision) {
       _lastRitaDependenciesRevision = effectiveFormContext.ritaDependenciesRevision;
-      // Force a rebuild to ensure child widgets get updated dependency context
-      // WidgetsBinding.instance.addPostFrameCallback((_) {
-      //   if (mounted) {
-      //     setState(() {});
-      //   }
-      // });
     }
 
     // Check if this should be rendered as checkbox group
@@ -227,19 +197,24 @@ class _FormArrayFieldState extends State<FormArrayField> {
   }
 
   void _addItem() {
+    _logger.fine('Adding new array item');
     setState(() {
       _idCounter++;
       items.add(ListItem<dynamic>(id: _idCounter, value: null));
     });
+    _logger.finer('Array now has ${items.length} items');
   }
 
   void _removeItem(int index) {
+    _logger.fine('Removing array item at index $index');
     setState(() {
       items.removeAt(index);
     });
+    _logger.finer('Array now has ${items.length} items');
   }
 
   void _moveItem(int oldIndex, int newIndex) {
+    _logger.fine('Moving array item from $oldIndex to $newIndex');
     setState(() {
       // Convert widget indices back to item indices
       // Widget layout: Item0 (0), Spacer (1), Item1 (2), Spacer (3), Item2 (4), etc.

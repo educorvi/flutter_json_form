@@ -5,6 +5,7 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
+import 'package:flutter_json_forms/src/utils/logger.dart';
 
 bool isElementShown({
   bool? parentIsShown,
@@ -12,40 +13,59 @@ bool isElementShown({
   Map<String, bool>? ritaDependencies,
   required dynamic Function(String path) checkValueForShowOn,
 }) {
-  if (parentIsShown == false) return false;
-  if (showOn == null) return true;
+  final logger = FormLogger.showOn;
+
+  if (parentIsShown == false) {
+    logger.fine('Element hidden due to parent visibility');
+    return false;
+  }
+  if (showOn == null) {
+    logger.finer('No showOn condition - element visible');
+    return true;
+  }
   if (showOn.rule != null && showOn.id != null && ritaDependencies != null) {
     // Rita rule: use precomputed dependency
-    return ritaDependencies[showOn.id!] == true;
+    final result = ritaDependencies[showOn.id!] == true;
+    logger.finest('Rita rule ${showOn.id}: $result');
+    return result;
   }
   // Fallback: classic showOn
   final value = checkValueForShowOn(showOn.path ?? "");
   if (value == null && showOn.referenceValue != null) {
+    logger.fine('ShowOn path "${showOn.path}" returned null, expecting ${showOn.referenceValue} - hidden');
     return false;
   }
 
-  return evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
+  final result = evaluateCondition(showOn.type, checkValueForShowOn(showOn.path ?? ""), showOn.referenceValue);
+  logger.fine('ShowOn condition: ${showOn.path} ${showOn.type} ${showOn.referenceValue} = $result (value: $value)');
+  return result;
 }
 
 /// evaluates the condition based on the operator and the operands
 bool evaluateCondition(ui.ShowOnFunctionType? operator, dynamic operand1, dynamic operand2) {
-  // TODO as the types are dynamic, type error could occur here. Use stronger typing if possible!
-  // maybe try to do the check and if an exception occurs, render an error in the ui
-  switch (operator) {
-    case ui.ShowOnFunctionType.EQUALS:
-      return operand1 == operand2;
-    case ui.ShowOnFunctionType.GREATER:
-      return operand1 > operand2;
-    case ui.ShowOnFunctionType.SMALLER:
-      return operand1 < operand2;
-    case ui.ShowOnFunctionType.GREATER_OR_EQUAL:
-      return operand1 >= operand2;
-    case ui.ShowOnFunctionType.SMALLER_OR_EQUAL:
-      return operand1 <= operand2;
-    case ui.ShowOnFunctionType.NOT_EQUALS:
-      return operand1 != operand2;
-    case null:
-      return false;
+  final logger = FormLogger.showOn;
+
+  try {
+    switch (operator) {
+      case ui.ShowOnFunctionType.EQUALS:
+        return operand1 == operand2;
+      case ui.ShowOnFunctionType.GREATER:
+        return operand1 > operand2;
+      case ui.ShowOnFunctionType.SMALLER:
+        return operand1 < operand2;
+      case ui.ShowOnFunctionType.GREATER_OR_EQUAL:
+        return operand1 >= operand2;
+      case ui.ShowOnFunctionType.SMALLER_OR_EQUAL:
+        return operand1 <= operand2;
+      case ui.ShowOnFunctionType.NOT_EQUALS:
+        return operand1 != operand2;
+      case null:
+        logger.warning('ShowOn condition has null operator - defaulting to false');
+        return false;
+    }
+  } catch (e, stackTrace) {
+    logger.severe('Error evaluating showOn condition: $operator($operand1, $operand2)', e, stackTrace);
+    return false;
   }
 }
 
@@ -143,6 +163,9 @@ class _RitaRuleWidget extends StatelessWidget {
   final dynamic Function(String) checkValueForShowOn;
   final Widget child;
 
+  // Static tracking of logged revisions to avoid duplicate evalData logging
+  static int _lastLoggedRevision = -1;
+
   const _RitaRuleWidget({
     required this.showOn,
     required this.ritaEvaluator,
@@ -153,6 +176,14 @@ class _RitaRuleWidget extends StatelessWidget {
     required this.checkValueForShowOn,
     required this.child,
   });
+
+  static bool _hasLoggedDataForRevision(int revision) {
+    return revision <= _lastLoggedRevision;
+  }
+
+  static void _markRevisionLogged(int revision) {
+    _lastLoggedRevision = revision;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -187,13 +218,24 @@ class _RitaRuleWidget extends StatelessWidget {
   }
 
   Future<bool> _evaluateRule(FormContext? formContext) async {
+    final logger = FormLogger.ritaEvaluator;
+
     try {
       final evalData = {
         r"$selfIndices": selfIndices ?? <String, int>{},
         ...getFullFormData(),
       };
 
+      // Log evalData only for the first rule in a batch (when revision changes)
+      final currentRevision = formContext?.ritaDependenciesRevision ?? 0;
+      if (!_hasLoggedDataForRevision(currentRevision)) {
+        logger.fine('Rita evaluation batch ${currentRevision} - evalData: ${jsonEncode(evalData)}');
+        _markRevisionLogged(currentRevision);
+      }
+
+      logger.finer('Evaluating Rita rule ${showOn.id}');
       final result = await ritaEvaluator.evaluate(showOn.id!, jsonEncode(evalData));
+      logger.finest('Rita rule ${showOn.id} result: $result');
 
       // Store the result in FormContext for later use during form submission
       if (formContext != null && showOn.id != null) {
@@ -201,7 +243,8 @@ class _RitaRuleWidget extends StatelessWidget {
       }
 
       return result;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      logger.severe('Rita rule evaluation failed for ${showOn.id}, falling back to traditional showOn', e, stackTrace);
       // Fall back to traditional showOn evaluation
       return isElementShown(
         parentIsShown: parentIsShown,

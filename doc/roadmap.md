@@ -10,8 +10,8 @@ Currently there are some smaller bugs which have to be addressed.
 - [x] Reordering elements breaks dependencies. Could be that rita dependencies have to be evaluated again here after reordering so that the correct elements are shown/hidden
 - [ ] showOn dependencies depending on other showOn dependencies have minor issues
 - [x] ritaDependencies are not working correctly for arrays within arrays resulting in the ui elements only updating when the user explicitly taps on the element
-- [ ] Render Form async and provide loading spinner: Currently for huge forms, the whole UI lags as heavy lifting is done synchronically so the main ui isolate hangs which is very bad practice. When this is adjusted, also provide the possibility for the user to provide an own loading widget.
-- [ ] Initial value in arrays not working as initalValue is still buggy, currently an extra method is used because initialValue is set with latest values. Investigate this
+- [x] Render Form async and provide loading spinner: Currently for huge forms, the whole UI lags as heavy lifting is done synchronically so the main ui isolate hangs which is very bad practice. When this is adjusted, also provide the possibility for the user to provide an own loading widget.
+- [ ] Initial value in arrays not working as initialValue is still buggy, currently an extra method is used because initialValue is set with latest values. Investigate this
 
 - Effort: 2.5 `Personenarbeitstage`
 
@@ -27,9 +27,12 @@ Most features of the UI schema work, but there was no systematical approach to i
 
 - Effort: 2.5 `Personenarbeitstage`
 
+## 3.5 Logging
+- add logging 
+
 ## 4. Polish demo application
 
-- improve demo application by creating a nice example json and ui schema nd also creating a theme as an exmaple
+- improve demo application by creating a nice example json and ui schema and also creating a theme as an exmaple
 
 - Effort: 0.5 `Personenarbeitstage`
 

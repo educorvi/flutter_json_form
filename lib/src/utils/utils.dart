@@ -125,7 +125,7 @@ Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties,
       if (value == "\$now") {
         return DateTime.now();
       }
-      // TODO: could throw exception if invalid format. If so, print error in UI
+      // TODO logging if invalid
       return DateTime.tryParse(value);
     }
     return value;
@@ -137,7 +137,6 @@ Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties,
   for (final entry in properties.entries) {
     final String key = entry.key;
     final JsonSchema jsonSchema = entry.value;
-    // set default values for fields. If a form data is provided, use this
     SchemaType? schemaType;
     try {
       schemaType = jsonSchema.type;
