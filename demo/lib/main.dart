@@ -23,14 +23,14 @@ void _setupCustomLogging() {
     final logger =
         record.loggerName.length > 30 ? '...${record.loggerName.substring(record.loggerName.length - 27)}' : record.loggerName.padRight(30);
 
-    print('[$time] $level $logger: ${record.message}');
+    debugPrint('[$time] $level $logger: ${record.message}');
 
     if (record.error != null) {
-      print('  ↳ Error: ${record.error}');
+      debugPrint('  ↳ Error: ${record.error}');
     }
 
     if (record.stackTrace != null && record.level >= Level.SEVERE) {
-      print('  ↳ Stack: ${record.stackTrace}');
+      debugPrint('  ↳ Stack: ${record.stackTrace}');
     }
   });
 }

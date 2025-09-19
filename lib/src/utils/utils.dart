@@ -55,18 +55,35 @@ dynamic toEncodable(dynamic value) {
   return value;
 }
 
-/// takes a [path] and transforms it to one which has properties at the beginning and between each part
+/// Converts a JSON pointer path to a properties-prefixed path for schema traversal.
+///
+/// This function transforms a path like `foo/bar/baz` into `/properties/foo/properties/bar/properties/baz`.
+/// If the path starts with `#`, it is removed. If the path is empty or already starts with `/properties`, it is returned unchanged.
+///
+/// Useful for converting flat JSON pointer paths to the format expected by schema libraries.
+///
+/// Examples:
+/// ```dart
+/// getPathWithProperties('foo/bar') // => '/properties/foo/properties/bar'
+/// getPathWithProperties('#/foo/bar') // => '/properties/foo/properties/bar'
+/// getPathWithProperties('') // => ''
+/// getPathWithProperties('/properties/foo') // => '/properties/foo'
+/// ```
 String getPathWithProperties(String path) {
   if (path.startsWith("#")) {
     path = path.substring(1);
   }
-  if (path == "" || path.startsWith("/properties")) {
+  // Only treat initial /properties/ prefix as special
+  if (path == "" || path.startsWith("/properties/")) {
     return path;
   }
+  path = path.replaceFirst(RegExp(r'^/+'), ''); // Remove leading slashes
   List<String> pathParts = path.split('/');
   String newPath = "";
-  for (int i = 0; i < pathParts.length; i++) {
-    newPath += "/properties/${pathParts[i]}";
+  for (final part in pathParts) {
+    if (part.isNotEmpty) {
+      newPath += "/properties/$part";
+    }
   }
   return newPath;
 }
@@ -91,6 +108,7 @@ JsonSchema? getObjectFromJson(
 }
 
 /// get List of property keys from json pointer
+/// Invalid paths should throw error
 List<String> getPropertyKeysFromPath(String path) {
   List<String> keys = [];
   path = getPathWithoutPrefix(path);
@@ -117,8 +135,34 @@ String getPathWithoutPrefix(String path) {
   return path;
 }
 
-/// initialize _showDependencies with the default values
-/// this function gets called recursively for objects in the jsonSchema which are nested into each other
+/// Initializes showOn dependencies for a given JSON schema and optional form data.
+///
+/// This function recursively traverses the provided [properties] (from a [JsonSchema]) and builds a map of default values
+/// for each property, suitable for use in conditional visibility logic (showOn). Array properties are initialized with
+/// a list of nulls if [minItems] is specified, or an empty list otherwise. Object properties are recursively processed.
+/// If [formData] is provided, its values are used as initial values for matching keys. If a property has a default value
+/// in the schema, it is used. For date/time formats, the string `"\$now"` is replaced with the current [DateTime].
+///
+/// Returns a map of property paths (e.g. `/properties/foo`) to their initialized values.
+///
+/// Example:
+/// ```dart
+/// final schema = await JsonSchema.create({
+///   'type': 'object',
+///   'properties': {
+///     'arr': {'type': 'array', 'minItems': 2},
+///     'bar': {
+///       'type': 'object',
+///       'properties': {
+///         'baz': {'type': 'integer'},
+///       },
+///     },
+///   },
+/// });
+/// final deps = initShowOnDependencies(schema.properties, null);
+/// // deps['/properties/arr'] == [null, null]
+/// // deps['/properties/bar/properties/baz'] == null
+/// ```
 Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties, Map<String, dynamic>? formData) {
   dynamic formatInput(dynamic value, JsonSchema schema) {
     if (schema.format == "date-time" || schema.format == "date" || schema.format == "time") {
@@ -149,6 +193,8 @@ Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties,
       } else if (jsonSchema.defaultValue != null) {
         dependencies["/properties/$key"] = jsonSchema.defaultValue;
       } else if (jsonSchema.minItems != null) {
+        // final minItems = safeParseInt(jsonSchema.minItems);
+        // dependencies["/properties/$key"] = List.generate(minItems, (_) => null, growable: true);
         dependencies["/properties/$key"] = List.filled(
           safeParseInt(jsonSchema.minItems),
           null,

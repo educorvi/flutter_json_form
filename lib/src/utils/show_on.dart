@@ -119,7 +119,12 @@ Widget handleShowOn({
   );
 }
 
-/// Collects all Rita rules from descendant control overrides.
+/// Recursively collects all Rita rules from a map of descendant control overrides.
+///
+/// Traverses the [overrides] map, collecting every [ShowOnProperty] with a non-null `id`.
+/// If nested descendant overrides are present, collects rules from those as well.
+///
+/// Returns a flat list of all found Rita rules.
 List<ui.ShowOnProperty> collectDescendantRitaRules(Map<String, ui.DescendantControlOverrides> overrides) {
   final List<ui.ShowOnProperty> rules = [];
   for (var entry in overrides.entries) {
@@ -134,7 +139,12 @@ List<ui.ShowOnProperty> collectDescendantRitaRules(Map<String, ui.DescendantCont
   return rules;
 }
 
-/// Collects all Rita rules from a list of layout elements.
+/// Recursively collects all Rita rules from a list of layout elements.
+///
+/// Traverses [elements], collecting every [ShowOnProperty] with a non-null `id`.
+/// Also collects rules from nested elements and descendant control overrides.
+///
+/// Returns a flat list of all found Rita rules.
 List<ui.ShowOnProperty> collectRitaRules(List<ui.LayoutElement> elements) {
   final List<ui.ShowOnProperty> rules = [];
   for (var element in elements) {
@@ -229,7 +239,7 @@ class _RitaRuleWidget extends StatelessWidget {
       // Log evalData only for the first rule in a batch (when revision changes)
       final currentRevision = formContext?.ritaDependenciesRevision ?? 0;
       if (!_hasLoggedDataForRevision(currentRevision)) {
-        logger.fine('Rita evaluation batch ${currentRevision} - evalData: ${jsonEncode(evalData)}');
+        logger.fine('Rita evaluation batch $currentRevision - evalData: ${jsonEncode(evalData)}');
         _markRevisionLogged(currentRevision);
       }
 

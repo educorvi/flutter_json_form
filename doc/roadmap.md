@@ -28,7 +28,8 @@ Most features of the UI schema work, but there was no systematical approach to i
 - Effort: 2.5 `Personenarbeitstage`
 
 ## 3.5 Logging
-- add logging 
+
+- add logging
 
 ## 4. Polish demo application
 

@@ -253,7 +253,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     // Initialize Rita rules bundle and evaluate
     await ritaRuleEvaluator.initializeWithBundle();
 
-    final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies))));
+    final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValues(_showOnDependencies))));
 
     if (mounted) {
       setState(() {
@@ -341,7 +341,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
 
   /// Returns the saved value only (populated after saveAndValidate is called)
   Map<String, dynamic> get value {
-    return processFormValuesEllaV2(_formSubmitValues);
+    return processFormValues(_formSubmitValues);
   }
 
   /// Returns the current form values (regardless of validation state)
@@ -354,7 +354,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     _logger.config('Getting instant form values');
     final currentValues = _formKey.currentState?.instantValue ?? {};
     _logger.finer('Instant form values: $currentValues');
-    final processedValues = processFormValuesEllaV2(currentValues);
+    final processedValues = processFormValues(currentValues);
     _logger.finer('Processed instant form values: $processedValues');
     return processedValues;
   }
@@ -466,7 +466,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
         setValueForShowOn: setValueForShowOn,
         checkValueForShowOn: checkValueForShowOn,
         isRequired: (path) => _isRequired(jsonSchemaModel, path),
-        getFullFormData: () => processFormValuesEllaV2(_showOnDependencies),
+        getFullFormData: () => processFormValues(_showOnDependencies),
         onFormValueSaved: _onFormValueSaved,
         onFormValueChanged: _onFormValueChanged,
         saveAndValidate: ({bool focusOnInvalid = true, bool autoScrollWhenFocusOnInvalid = false}) =>
@@ -524,7 +524,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
 
     // Evaluate Rita rules with the updated dependencies
     _logger.finer('Evaluating Rita rules for updated dependencies');
-    final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValuesEllaV2(_showOnDependencies))));
+    final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValues(_showOnDependencies))));
 
     // Update UI
     if (mounted) {
