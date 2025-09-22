@@ -4,7 +4,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'data/base.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:skeletonizer/skeletonizer.dart';
+// import 'package:skeletonizer/skeletonizer.dart';
 
 /// Helper to check if a Finder is visible (painted and non-zero size)
 
@@ -52,7 +52,7 @@ bool isTextFieldRequired(WidgetTester tester, String labelText) {
   return semanticsFinder.evaluate().isNotEmpty && asteriskFinder.evaluate().isNotEmpty;
 }
 
-Future<void> pumpForm(WidgetTester tester, {dynamic jsonSchema, dynamic? uiSchema}) async {
+Future<void> pumpForm(WidgetTester tester, {dynamic jsonSchema, dynamic uiSchema}) async {
   await tester.pumpWidget(MaterialApp(
     home: Scaffold(
       appBar: AppBar(
