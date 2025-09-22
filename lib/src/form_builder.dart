@@ -64,7 +64,7 @@ class FlutterJsonForm extends StatefulWidget {
     super.key,
     required this.jsonSchema,
     this.uiSchema,
-    this.validate = true,
+    this.validate = false,
     this.parseJson = false,
     this.formData,
     this.onFormSubmitCallback,
@@ -120,7 +120,16 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
 
   /// return true if the widget is in the loading state (the validation is not finished yet
   bool get isLoading {
-    return _isInitializing || ((_jsonSchemaValidationErrors == null || _uiSchemaValidationErrors == null) && !_ritaInitialized);
+    // If still initializing, we're loading
+    if (_isInitializing) return true;
+
+    // If validation is enabled and validation errors haven't been set yet, we're loading
+    if (widget.validate && (_jsonSchemaValidationErrors == null || _uiSchemaValidationErrors == null)) return true;
+
+    // If Rita hasn't been initialized yet, we're loading
+    if (!_ritaInitialized) return true;
+
+    return false;
   }
 
   /// Flag to track if initial setup is in progress
@@ -128,12 +137,16 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
 
   /// return true if the JSON schema is valid
   bool get validJsonSchema {
-    return !isLoading && _jsonSchemaValidationErrors!.isEmpty;
+    if (isLoading) return false;
+    if (!widget.validate) return true; // Always valid when validation is disabled
+    return _jsonSchemaValidationErrors?.isEmpty ?? false;
   }
 
   /// return true if the UI schema is valid
   bool get validUISchema {
-    return !isLoading && _uiSchemaValidationErrors!.isEmpty;
+    if (isLoading) return false;
+    if (!widget.validate) return true; // Always valid when validation is disabled
+    return _uiSchemaValidationErrors?.isEmpty ?? false;
   }
 
   /// return true if the widget has errors in the JSON or UI schema (only if the validation was turned on and is finished)
@@ -480,6 +493,38 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     );
   }
 
+  /// Builds the form header (title and description) if present
+  Widget? _buildFormHeader() {
+    final String? title = jsonSchemaModel.schemaMap?['title'] as String?;
+    final String? description = jsonSchemaModel.schemaMap?['description'] as String?;
+    List<Widget> header = [];
+    if (title != null && title.isNotEmpty) {
+      header.add(Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+      ));
+    }
+    if (description != null && description.isNotEmpty) {
+      header.add(Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: Text(
+          description,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ));
+    }
+    if (header.isNotEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: header,
+      );
+    }
+    return null;
+  }
+
   /// Generates the form fields based on the elements of the UI schema
   Widget _generateLayout() {
     const nestingLevel = 0;
@@ -501,7 +546,22 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
         child = FormGroup(layout: layout, nestingLevel: nestingLevel);
     }
 
-    return applyCss(context, child, cssClass: layout.options?.cssClass);
+    final Widget? header = _buildFormHeader();
+    if (header != null) {
+      return applyCss(
+        context,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            header,
+            child,
+          ],
+        ),
+        cssClass: layout.options?.cssClass,
+      );
+    } else {
+      return applyCss(context, child, cssClass: layout.options?.cssClass);
+    }
   }
 
   void _onFormValueSaved(String scope, dynamic value) {

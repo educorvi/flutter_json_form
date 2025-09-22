@@ -29,14 +29,23 @@ class FormFieldWrapper extends StatelessWidget {
       columnChildren.add(CustomHtmlWidget(htmlData: preHtml));
     }
 
-    final labelText = FormFieldUtils.getLabel(context, getLabel: UIConstants.labelSeparateText);
+    final labelText = FormFieldUtils.getLabel(context,
+        getLabel: UIConstants.labelSeparateText, showRequiredMark: false, uiSchemaLabel: context.options?.formattingOptions?.label);
 
     if (context.showLabel && showLabel && labelText != null) {
       columnChildren.add(
         Row(
           children: [
             Expanded(
-              child: Text(labelText),
+              child: (!context.required)
+                  ? Text(labelText)
+                  : Row(children: [
+                      Text(labelText),
+                      Semantics(
+                        label: 'required',
+                        child: const Text('*', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ]),
             ),
             if (context.options?.formattingOptions?.help != null)
               AnimatedTooltip(

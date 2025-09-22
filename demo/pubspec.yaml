@@ -57,6 +57,10 @@ dev_dependencies:
   integration_test:
     sdk: flutter
 
+  # required for testing the package. Test should ideally be moved to package lib but there ui integration tests wont work
+  flutter_form_builder: ^10.1.0
+  skeletonizer: ^2.1.0
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

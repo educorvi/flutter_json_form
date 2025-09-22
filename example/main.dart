@@ -10,7 +10,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Minimal valid JSON schema for testing
     final jsonSchema = {
       "type": "object",
       "properties": {

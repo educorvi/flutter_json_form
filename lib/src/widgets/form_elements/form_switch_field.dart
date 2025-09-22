@@ -37,7 +37,8 @@ class FormSwitchField extends StatelessWidget {
           formFieldContext,
           additionalValidators: formFieldContext.required ? [FormBuilderValidators.equal(true)] : null,
         ),
-        title: Text(FormFieldUtils.getLabel(formFieldContext, getLabel: true) ?? ""),
+        title:
+            Text(FormFieldUtils.getLabel(formFieldContext, getLabel: true, uiSchemaLabel: formFieldContext.options?.formattingOptions?.label) ?? ""),
         contentPadding: const EdgeInsets.all(0),
         decoration: const InputDecoration(border: InputBorder.none),
         subtitle: formFieldContext.description != null ? Text(formFieldContext.description!) : null,
