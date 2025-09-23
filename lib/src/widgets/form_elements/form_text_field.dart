@@ -46,6 +46,7 @@ class _FormTextFieldState extends State<FormTextField> {
     return FormFieldWrapper(
       context: fieldContext,
       child: FormBuilderTextField(
+        key: Key(fieldContext.scope),
         textAlign: _getTextAlign(),
         name: fieldContext.id,
         onSubmitted: (value) => _handleValueChange(value),

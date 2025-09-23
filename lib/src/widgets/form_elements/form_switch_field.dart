@@ -28,6 +28,7 @@ class FormSwitchField extends StatelessWidget {
       context: formFieldContext,
       showLabel: false,
       child: FormBuilderSwitch(
+        key: Key(formFieldContext.scope),
         initialValue: initialValue,
         name: formFieldContext.id,
         onChanged: formFieldContext.onChanged,

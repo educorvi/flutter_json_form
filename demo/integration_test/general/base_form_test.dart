@@ -1,95 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_json_forms/src/form_builder.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'data/base.dart';
+import 'data/base_data.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-// import 'package:skeletonizer/skeletonizer.dart';
-
-/// Helper to check if a Finder is visible (painted and non-zero size)
-
-bool isWidgetCrossFadeVisible(WidgetTester tester, Finder finder) {
-  final animatedCrossFade = tester.widget<AnimatedCrossFade>(
-    find.ancestor(of: finder, matching: find.byType(AnimatedCrossFade)).first,
-  );
-  return animatedCrossFade.crossFadeState == CrossFadeState.showFirst;
-}
-
-bool isWidgetCrossFadeHidden(WidgetTester tester, Finder finder) {
-  final animatedCrossFade = tester.widget<AnimatedCrossFade>(
-    find.ancestor(of: finder, matching: find.byType(AnimatedCrossFade)).first,
-  );
-  return animatedCrossFade.crossFadeState == CrossFadeState.showSecond;
-}
-
-/// Checks if a given text field label is rendered as required
-bool isTextFieldRequired(WidgetTester tester, String labelText) {
-  final labelFinder = find.text(labelText);
-  final rowElements = find.ancestor(of: labelFinder, matching: find.byType(Row)).evaluate();
-  if (rowElements.isEmpty) return false;
-  final outerRow = rowElements.last;
-
-  final childRowFinder = find.descendant(
-    of: find.byWidget(outerRow.widget),
-    matching: find.byType(Row),
-  );
-  final childRowElements = childRowFinder.evaluate();
-  if (childRowElements.isEmpty) return false;
-  final innerRow = childRowElements.first;
-
-  // Check for Semantics widget
-  final semanticsFinder = find.descendant(
-    of: find.byWidget(innerRow.widget),
-    matching: find.byType(Semantics),
-  );
-
-  // Check for the asterisk text (it's inside the Semantics widget)
-  final asteriskFinder = find.descendant(
-    of: find.byWidget(innerRow.widget),
-    matching: find.text('*'),
-  );
-
-  return semanticsFinder.evaluate().isNotEmpty && asteriskFinder.evaluate().isNotEmpty;
-}
-
-Future<void> pumpForm(WidgetTester tester, {dynamic jsonSchema, dynamic uiSchema}) async {
-  await tester.pumpWidget(MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(
-        title: Text('Flutter JSON Forms Integration Tests'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: FlutterJsonForm(jsonSchema: jsonSchema, uiSchema: uiSchema),
-      ),
-    ),
-  ));
-
-  await tester.pumpAndSettle();
-
-  // // Wait for initial pump
-  // await tester.pump();
-
-  // // Wait for async initialization to complete by checking if skeleton/loading is gone
-  // int attempts = 0;
-  // const maxAttempts = 50; // 5 seconds timeout
-
-  // while (attempts < maxAttempts) {
-  //   await tester.pump(const Duration(milliseconds: 100));
-
-  //   // Check if form is loaded by ensuring no Skeletonizer is in the widget tree
-  //   final hasSkeletonizer = find.byType(Skeletonizer).evaluate().isNotEmpty;
-
-  //   if (!hasSkeletonizer) {
-  //     break;
-  //   }
-
-  //   attempts++;
-  // }
-
-  // // Final settle to ensure everything is ready
-  // await tester.pumpAndSettle();
-}
+import '../test_utils.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -217,7 +130,7 @@ void main() {
         await init(tester);
 
         /// THEN
-        expect(isWidgetCrossFadeVisible(tester, find.text('email')), isTrue); // hidden
+        expect(isWidgetCrossFadeVisible(tester, find.text('email')), isTrue); // shown
 
         /// WHEN
         final switchFinder = find.byType(FormBuilderSwitch);
@@ -226,7 +139,7 @@ void main() {
         await tester.pumpAndSettle();
 
         /// THEN
-        expect(isWidgetCrossFadeHidden(tester, find.text('email')), isTrue); // email is now hidden
+        expect(isWidgetCrossFadeVisible(tester, find.text('email')), isFalse); // email is now hidden
       });
     });
   });
