@@ -35,6 +35,37 @@ void main() {
       expect(find.text('lastName'), findsOneWidget);
     });
 
+    // testWidgets('individual default values are rendered correctly', (tester) async {
+    //   // GIVEN: default values in schema
+    //   await pumpForm(tester, jsonSchema: ObjectData.jsonSchemaWithIndividualDefaults);
+
+    //   // THEN: fields should have default values
+    //   expect(find.text('John Doe'), findsOneWidget);
+    //   expect(find.text('John'), findsOneWidget);
+    //   expect(find.text('Doe'), findsOneWidget);
+    // });
+
+    // testWidgets('Object default values are rendered correctly', (tester) async {
+    //   // GIVEN: default values in schema
+    //   await pumpForm(tester, jsonSchema: ObjectData.jsonSchemaWithObjectDefaults);
+
+    //   // THEN: fields should have default values
+    //   expect(find.text('John Doe'), findsOneWidget);
+    //   expect(find.text('John'), findsOneWidget);
+    //   expect(find.text('Doe'), findsOneWidget);
+    // });
+
+    // testWidgets('Object default values with mixed individual and object defaults are rendered correctly', (tester) async {
+    //   // GIVEN: default values in schema
+    //   await pumpForm(tester, jsonSchema: ObjectData.jsonSchemaWithMixedDefaults);
+
+    //   // THEN: fields should have default values
+    //   expect(find.text('Inner John Doe'), findsOneWidget);
+    //   expect(find.text('John'), findsOneWidget);
+    //   expect(find.text('Doe InnerInner'), findsOneWidget);
+    //   expect(find.text('Inner Third Name'), findsOneWidget);
+    // });
+
     testWidgets('Dynamic dependency: outer to object', (tester) async {
       // GIVEN
       await pumpForm(tester, jsonSchema: ObjectData.jsonSchema, uiSchema: ObjectData.uiSchemaDynamicOuterToObject);
@@ -92,14 +123,23 @@ void main() {
 
   group('Nested Object Form Tests', () {
     testWidgets('Nested object is rendered correctly when no ui schema is provided', (tester) async {
-      // GIVEN
-      await pumpForm(tester, jsonSchema: NestedObjectData.jsonSchema);
+      // GIVEN: default values in nested schema
+      await pumpForm(tester, jsonSchema: NestedObjectData.nestedSchemaWithDefaults);
 
-      // THEN: should render fields for address.street, address.city, address.country.name, address.country.code
-      expect(find.text('street'), findsOneWidget);
-      expect(find.text('city'), findsOneWidget);
-      expect(find.text('name'), findsOneWidget);
-      expect(find.text('code'), findsOneWidget);
+      // THEN: fields should have default values
+      expect(find.text('Outer'), findsOneWidget);
+      expect(find.text('Main St'), findsOneWidget);
+      expect(find.text('Metropolis'), findsOneWidget);
+      expect(find.text('Freedonia'), findsOneWidget);
+      expect(find.text('FR'), findsOneWidget);
+      // Check switches
+      final switchOuter = find.byKey(ValueKey('/properties/switchOuter'));
+      final switchObject = find.byKey(ValueKey('/properties/address/properties/switchObject'));
+      final switchNestedObject = find.byKey(ValueKey('/properties/address/properties/country/properties/switchNestedObject'));
+      expect(switchOuter, findsOneWidget);
+      expect(switchObject, findsOneWidget);
+      expect(switchNestedObject, findsOneWidget);
+      // Optionally, check their initial value if possible
     });
 
     testWidgets('Nested object is rendered correctly when ui schema references whole object', (tester) async {

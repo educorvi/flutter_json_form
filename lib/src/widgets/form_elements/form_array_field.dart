@@ -169,6 +169,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
           padding: const EdgeInsets.only(top: 10.0),
           width: double.infinity,
           child: FilledButton.tonal(
+            key: Key('${widget.formFieldContext.id}/add'),
             onPressed: maxItems == null || items.length < maxItems ? _addItem : null,
             child: const Icon(Icons.add),
           ),
@@ -264,7 +265,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
       widgetBuilder: (item, index) => _buildArrayItemWidget(item, index, formContext, minItems),
       isVisibleChecker: (item, index) => true, // Array items are typically always visible
       spacingWidgetBuilder: (item, index) => Container(
-        key: Key('spacing_${item.id}'),
+        key: Key('${item.id}_spacing'),
         height: 8.0,
       ),
     );
@@ -321,6 +322,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
       child: Row(
         children: [
           ReorderableDragStartListener(
+            key: Key('${widget.formFieldContext.id}/${item.id}/drag'),
             index: widgetIndex, // Use the actual widget index, not the item index
             child: GestureDetector(
               onTapDown: (_) => FocusScope.of(context).unfocus(),
@@ -329,6 +331,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
           ),
           Expanded(child: FormElementFactory.createFormElement(childContext)),
           IconButton(
+            key: Key('${widget.formFieldContext.id}/${item.id}/remove'),
             disabledColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
             icon: const Icon(Icons.close),
             color: Theme.of(context).colorScheme.error,
