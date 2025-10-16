@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 
 class AnimatedTooltip extends StatelessWidget {
   final String content;
@@ -24,7 +25,7 @@ class AnimatedTooltip extends StatelessWidget {
         child: CircleAvatar(
           radius: 14,
           backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-          child: Text(
+          child: FormFieldText(
             label,
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,

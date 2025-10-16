@@ -13,8 +13,8 @@ void main() {
       await pumpForm(tester, jsonSchema: ObjectData.jsonSchema);
 
       // THEN: should render fields for person.firstName and person.lastName
-      expect(find.text('firstName'), findsOneWidget);
-      expect(find.text('lastName'), findsOneWidget);
+      expect(find.formFieldText('firstName'), findsOneWidget);
+      expect(find.formFieldText('lastName'), findsOneWidget);
     });
 
     testWidgets('Object is rendered correctly when ui schema references whole object', (tester) async {
@@ -22,8 +22,8 @@ void main() {
       await pumpForm(tester, jsonSchema: ObjectData.jsonSchema, uiSchema: ObjectData.uiSchemaWholeObject);
 
       // THEN: should render fields for person.firstName and person.lastName
-      expect(find.text('firstName'), findsOneWidget);
-      expect(find.text('lastName'), findsOneWidget);
+      expect(find.formFieldText('firstName'), findsOneWidget);
+      expect(find.formFieldText('lastName'), findsOneWidget);
     });
 
     testWidgets('Object is rendered correctly when ui schema references single elements', (tester) async {
@@ -31,8 +31,8 @@ void main() {
       await pumpForm(tester, jsonSchema: ObjectData.jsonSchema, uiSchema: ObjectData.uiSchemaObjectElements);
 
       // THEN: should render fields for person.firstName and person.lastName
-      expect(find.text('firstName'), findsOneWidget);
-      expect(find.text('lastName'), findsOneWidget);
+      expect(find.formFieldText('firstName'), findsOneWidget);
+      expect(find.formFieldText('lastName'), findsOneWidget);
     });
 
     // testWidgets('individual default values are rendered correctly', (tester) async {
@@ -40,9 +40,9 @@ void main() {
     //   await pumpForm(tester, jsonSchema: ObjectData.jsonSchemaWithIndividualDefaults);
 
     //   // THEN: fields should have default values
-    //   expect(find.text('John Doe'), findsOneWidget);
-    //   expect(find.text('John'), findsOneWidget);
-    //   expect(find.text('Doe'), findsOneWidget);
+    //   expect(find.formFieldText('John Doe'), findsOneWidget);
+    //   expect(find.formFieldText('John'), findsOneWidget);
+    //   expect(find.formFieldText('Doe'), findsOneWidget);
     // });
 
     // testWidgets('Object default values are rendered correctly', (tester) async {
@@ -50,9 +50,9 @@ void main() {
     //   await pumpForm(tester, jsonSchema: ObjectData.jsonSchemaWithObjectDefaults);
 
     //   // THEN: fields should have default values
-    //   expect(find.text('John Doe'), findsOneWidget);
-    //   expect(find.text('John'), findsOneWidget);
-    //   expect(find.text('Doe'), findsOneWidget);
+    //   expect(find.formFieldText('John Doe'), findsOneWidget);
+    //   expect(find.formFieldText('John'), findsOneWidget);
+    //   expect(find.formFieldText('Doe'), findsOneWidget);
     // });
 
     // testWidgets('Object default values with mixed individual and object defaults are rendered correctly', (tester) async {
@@ -60,10 +60,10 @@ void main() {
     //   await pumpForm(tester, jsonSchema: ObjectData.jsonSchemaWithMixedDefaults);
 
     //   // THEN: fields should have default values
-    //   expect(find.text('Inner John Doe'), findsOneWidget);
-    //   expect(find.text('John'), findsOneWidget);
-    //   expect(find.text('Doe InnerInner'), findsOneWidget);
-    //   expect(find.text('Inner Third Name'), findsOneWidget);
+    //   expect(find.formFieldText('Inner John Doe'), findsOneWidget);
+    //   expect(find.formFieldText('John'), findsOneWidget);
+    //   expect(find.formFieldText('Doe InnerInner'), findsOneWidget);
+    //   expect(find.formFieldText('Inner Third Name'), findsOneWidget);
     // });
 
     testWidgets('Dynamic dependency: outer to object', (tester) async {
@@ -71,8 +71,8 @@ void main() {
       await pumpForm(tester, jsonSchema: ObjectData.jsonSchema, uiSchema: ObjectData.uiSchemaDynamicOuterToObject);
 
       // THEN: Initially only switchOuter is visible
-      expect(find.text('switchOuter'), findsOneWidget);
-      expect(isWidgetCrossFadeVisible(tester, find.text('firstName')), isFalse); // firstName is hidden
+      expect(find.formFieldText('switchOuter'), findsOneWidget);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('firstName')), isFalse); // firstName is hidden
 
       // WHEN: Set switchOuter to true
       final outerSwitch = find.byKey(ValueKey('/properties/switchOuter'));
@@ -81,7 +81,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // THEN: firstName should now be visible
-      expect(isWidgetCrossFadeVisible(tester, find.text('firstName')), isTrue); // firstName is visible
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('firstName')), isTrue); // firstName is visible
     });
 
     testWidgets('Dynamic dependency: object to object', (tester) async {
@@ -89,8 +89,8 @@ void main() {
       await pumpForm(tester, jsonSchema: ObjectData.jsonSchema, uiSchema: ObjectData.uiSchemaDynamicObjectToObject);
 
       // THEN: Initially only switchObject is visible
-      expect(find.text('switchObject'), findsOneWidget);
-      expect(isWidgetCrossFadeVisible(tester, find.text('lastName')), isFalse);
+      expect(find.formFieldText('switchObject'), findsOneWidget);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('lastName')), isFalse);
 
       // WHEN: Set switchObject to true
       final objectSwitch = find.byKey(ValueKey('/properties/person/properties/switchObject'));
@@ -99,7 +99,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // THEN: lastName should now be visible
-      expect(isWidgetCrossFadeVisible(tester, find.text('lastName')), isTrue);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('lastName')), isTrue);
     });
 
     testWidgets('Dynamic dependency: object to outer', (tester) async {
@@ -107,8 +107,8 @@ void main() {
       await pumpForm(tester, jsonSchema: ObjectData.jsonSchema, uiSchema: ObjectData.uiSchemaDynamicObjectToOuter);
 
       // THEN: Initially only switchObject is visible
-      expect(find.text('switchObject'), findsOneWidget);
-      expect(isWidgetCrossFadeVisible(tester, find.text('name')), isFalse);
+      expect(find.formFieldText('switchObject'), findsOneWidget);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('name')), isFalse);
 
       // WHEN: Set switchObject to true (simulate value 'show' if needed)
       final objectSwitch = find.byKey(ValueKey('/properties/person/properties/switchObject'));
@@ -117,12 +117,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // THEN: name should now be visible
-      expect(isWidgetCrossFadeVisible(tester, find.text('name')), isTrue);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('name')), isTrue);
     });
   });
 
   group('Nested Object Form Tests', () {
-    testWidgets('Nested object is rendered correctly when no ui schema is provided', (tester) async {
+    testWidgets('Nested object with defaults is rendered correctly when no ui schema is provided', (tester) async {
       // GIVEN: default values in nested schema
       await pumpForm(tester, jsonSchema: NestedObjectData.nestedSchemaWithDefaults);
 
@@ -147,10 +147,10 @@ void main() {
       await pumpForm(tester, jsonSchema: NestedObjectData.jsonSchema, uiSchema: NestedObjectData.uiSchemaWholeObject);
 
       // THEN: should render fields for address.street, address.city, address.country.name, address.country.code
-      expect(find.text('street'), findsOneWidget);
-      expect(find.text('city'), findsOneWidget);
-      expect(find.text('name'), findsOneWidget);
-      expect(find.text('code'), findsOneWidget);
+      expect(find.formFieldText('street'), findsOneWidget);
+      expect(find.formFieldText('city'), findsOneWidget);
+      expect(find.formFieldText('name'), findsOneWidget);
+      expect(find.formFieldText('code'), findsOneWidget);
     });
 
     testWidgets('Nested object is rendered correctly when ui schema references whole nested object', (tester) async {
@@ -158,8 +158,8 @@ void main() {
       await pumpForm(tester, jsonSchema: NestedObjectData.jsonSchema, uiSchema: NestedObjectData.uiSchemaWholeNestedObject);
 
       // THEN: should render fields for address.street, address.city, address.country.name, address.country.code
-      expect(find.text('name'), findsOneWidget);
-      expect(find.text('code'), findsOneWidget);
+      expect(find.formFieldText('name'), findsOneWidget);
+      expect(find.formFieldText('code'), findsOneWidget);
     });
 
     testWidgets('Nested object is rendered correctly when ui schema references single elements', (tester) async {
@@ -167,10 +167,10 @@ void main() {
       await pumpForm(tester, jsonSchema: NestedObjectData.jsonSchema, uiSchema: NestedObjectData.uiSchemaObjectElements);
 
       // THEN: should render fields for address.street, address.city, address.country.name, address.country.code
-      expect(find.text('street'), findsOneWidget);
-      expect(find.text('city'), findsOneWidget);
-      expect(find.text('name'), findsOneWidget);
-      expect(find.text('code'), findsOneWidget);
+      expect(find.formFieldText('street'), findsOneWidget);
+      expect(find.formFieldText('city'), findsOneWidget);
+      expect(find.formFieldText('name'), findsOneWidget);
+      expect(find.formFieldText('code'), findsOneWidget);
     });
 
     testWidgets('Dynamic dependency: outer to nested object', (tester) async {
@@ -178,8 +178,8 @@ void main() {
       await pumpForm(tester, jsonSchema: NestedObjectData.jsonSchema, uiSchema: NestedObjectData.uiSchemaDynamicOuterToNestedObject);
 
       // THEN: Initially only switchOuter is visible, street is hidden
-      expect(find.text('switchOuter'), findsOneWidget);
-      expect(isWidgetCrossFadeVisible(tester, find.text('name')), isFalse);
+      expect(find.formFieldText('switchOuter'), findsOneWidget);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('name')), isFalse);
 
       // WHEN: Set switchOuter to true
       final outerSwitch = find.byKey(ValueKey('/properties/switchOuter'));
@@ -188,7 +188,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // THEN: street should now be visible
-      expect(isWidgetCrossFadeVisible(tester, find.text('name')), isTrue);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('name')), isTrue);
     });
 
     testWidgets('Dynamic dependency: object to nested object', (tester) async {
@@ -196,8 +196,8 @@ void main() {
       await pumpForm(tester, jsonSchema: NestedObjectData.jsonSchema, uiSchema: NestedObjectData.uiSchemaDynamicObjectToNestedObject);
 
       // THEN: Initially only switchObject is visible, country.name is hidden
-      expect(find.text('switchObject'), findsOneWidget);
-      expect(isWidgetCrossFadeVisible(tester, find.text('name')), isFalse);
+      expect(find.formFieldText('switchObject'), findsOneWidget);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('name')), isFalse);
 
       // WHEN: Set switchObject to true
       final objectSwitch = find.byKey(ValueKey('/properties/address/properties/switchObject'));
@@ -206,7 +206,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // THEN: country.name should now be visible
-      expect(isWidgetCrossFadeVisible(tester, find.text('name')), isTrue);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('name')), isTrue);
     });
 
     testWidgets('Dynamic dependency: nested object to nestedElement', (tester) async {
@@ -214,8 +214,8 @@ void main() {
       await pumpForm(tester, jsonSchema: NestedObjectData.jsonSchema, uiSchema: NestedObjectData.uiSchemaDynamicNestedObjectToElement);
 
       // THEN: Initially only switchNestedObject is visible, country.code is hidden
-      expect(find.text('switchNestedObject'), findsOneWidget);
-      expect(isWidgetCrossFadeVisible(tester, find.text('code')), isFalse);
+      expect(find.formFieldText('switchNestedObject'), findsOneWidget);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('code')), isFalse);
 
       // WHEN: Set switchNestedObject to true
       final nestedSwitch = find.byKey(ValueKey('/properties/address/properties/country/properties/switchNestedObject'));
@@ -224,7 +224,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // THEN: country.code should now be visible
-      expect(isWidgetCrossFadeVisible(tester, find.text('code')), isTrue);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('code')), isTrue);
     });
 
     testWidgets('Dynamic dependency: nested object to outerElement', (tester) async {
@@ -232,8 +232,8 @@ void main() {
       await pumpForm(tester, jsonSchema: NestedObjectData.jsonSchema, uiSchema: NestedObjectData.uiSchemaDynamicNestedObjectToOuter);
 
       // THEN: Initially only switchNestedObject is visible, country.code is hidden
-      expect(find.text('switchNestedObject'), findsOneWidget);
-      expect(isWidgetCrossFadeVisible(tester, find.text('outerName')), isFalse);
+      expect(find.formFieldText('switchNestedObject'), findsOneWidget);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('outerName')), isFalse);
 
       // WHEN: Set switchNestedObject to true
       final nestedSwitch = find.byKey(ValueKey('/properties/address/properties/country/properties/switchNestedObject'));
@@ -242,7 +242,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // THEN: country.code should now be visible
-      expect(isWidgetCrossFadeVisible(tester, find.text('outerName')), isTrue);
+      expect(isWidgetCrossFadeVisible(tester, find.formFieldText('outerName')), isTrue);
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_color_picker_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_date_time_picker_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_dropdown_fields.dart';
@@ -24,7 +25,7 @@ class PrimitiveFieldFactory {
       case SchemaType.boolean:
         return _createBooleanField(context);
       default:
-        return Text("Unsupported primitive type: ${context.type}");
+        return FormFieldText("Unsupported primitive type: ${context.type}");
     }
   }
 

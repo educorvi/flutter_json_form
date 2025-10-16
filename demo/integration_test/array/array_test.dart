@@ -11,7 +11,7 @@ void main() {
   group('Array Form Tests', () {
     testWidgets('Simple array is rendered and default value is present', (tester) async {
       await pumpForm(tester, jsonSchema: ArrayData.jsonSchemaSimpleArray, uiSchema: ArrayData.uiSchemaSimpleArray);
-      expect(find.text('tags'), findsOneWidget);
+      expect(find.formFieldText('tags'), findsOneWidget);
       expect(find.text('defaultTag'), findsOneWidget);
     });
 
@@ -41,7 +41,7 @@ void main() {
 
     testWidgets('Array of objects: default value, add, reorder, delete', (tester) async {
       await pumpForm(tester, jsonSchema: ArrayData.jsonSchemaArrayOfObjects, uiSchema: ArrayData.uiSchemaArrayOfObjects);
-      expect(find.text('people'), findsOneWidget);
+      expect(find.formFieldText('people'), findsOneWidget);
       expect(find.text('John'), findsOneWidget);
       expect(find.text('Doe'), findsOneWidget);
 
@@ -51,8 +51,8 @@ void main() {
       await tester.tap(addButton);
       await tester.pumpAndSettle();
       // Should have two person forms now
-      expect(find.text('firstName'), findsNWidgets(2));
-      expect(find.text('lastName'), findsNWidgets(2));
+      expect(find.formFieldText('firstName'), findsNWidgets(2));
+      expect(find.formFieldText('lastName'), findsNWidgets(2));
 
       // Delete
       final deleteButton = find.byKey(ValueKey('/properties/people/0/remove'));
@@ -60,13 +60,13 @@ void main() {
       await tester.tap(deleteButton);
       await tester.pumpAndSettle();
       // Should have one person form now
-      expect(find.text('firstName'), findsOneWidget);
-      expect(find.text('lastName'), findsOneWidget);
+      expect(find.formFieldText('firstName'), findsOneWidget);
+      expect(find.formFieldText('lastName'), findsOneWidget);
     });
 
     //   testWidgets('Array of arrays: default value, add, reorder, delete', (tester) async {
     //     await pumpForm(tester, jsonSchema: ArrayData.jsonSchemaArrayOfArrays, uiSchema: ArrayData.uiSchemaArrayOfArrays);
-    //     expect(find.text('matrix'), findsOneWidget);
+    //     expect(find.formFieldText('matrix'), findsOneWidget);
     //     // Should render two array rows
     //     expect(find.byType(FormBuilderTextField), findsNWidgets(4)); // 2x2 numbers
 
@@ -91,10 +91,10 @@ void main() {
     // group('Nested Array Form Tests', () {
     //   testWidgets('Nested array: default value, add, reorder, delete', (tester) async {
     //     await pumpForm(tester, jsonSchema: NestedArrayData.jsonSchemaNestedArray, uiSchema: NestedArrayData.uiSchemaNestedArray);
-    //     expect(find.text('groups'), findsOneWidget);
-    //     expect(find.text('GroupA'), findsOneWidget);
-    //     expect(find.text('Alice'), findsOneWidget);
-    //     expect(find.text('Bob'), findsOneWidget);
+    //     expect(find.formFieldText('groups'), findsOneWidget);
+    //     expect(find.formFieldText('GroupA'), findsOneWidget);
+    //     expect(find.formFieldText('Alice'), findsOneWidget);
+    //     expect(find.formFieldText('Bob'), findsOneWidget);
 
     //     // Add new group
     //     final addGroupButton = find.byKey(ValueKey('/properties/groups/add'));
@@ -102,7 +102,7 @@ void main() {
     //     await tester.tap(addGroupButton);
     //     await tester.pumpAndSettle();
     //     // Should have two group forms now
-    //     expect(find.text('name'), findsNWidgets(2));
+    //     expect(find.formFieldText('name'), findsNWidgets(2));
 
     //     // Add member to first group
     //     final addMemberButton = find.byKey(ValueKey('/properties/groups/0/properties/members/add'));

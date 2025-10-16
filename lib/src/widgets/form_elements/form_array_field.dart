@@ -3,6 +3,7 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_checkbox_group_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
@@ -131,7 +132,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
     // Handle tags
     if (widget.formFieldContext.options?.fieldSpecificOptions?.tags?.enabled == true) {
       // TODO: implement proper tags support
-      return Text("Tags not yet implemented");
+      return FormFieldText("Tags not yet implemented");
     }
 
     return _buildArrayWidget(effectiveFormContext);
@@ -151,7 +152,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
         if (labelString != null)
           SizedBox(
             width: double.infinity,
-            child: Text(
+            child: FormFieldText(
               labelString,
               style: Theme.of(context).textTheme.titleLarge,
             ),
@@ -177,7 +178,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
         if (widget.formFieldContext.description != null)
           Padding(
             padding: const EdgeInsets.only(top: 10.0),
-            child: Text(
+            child: FormFieldText(
               widget.formFieldContext.description!,
               style: Theme.of(context).textTheme.bodyMedium,
             ),

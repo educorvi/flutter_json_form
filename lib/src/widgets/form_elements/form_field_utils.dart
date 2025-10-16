@@ -31,8 +31,8 @@ class FormFieldUtils {
 
   /// Creates standardized label text for form fields
   static String? getLabel(FormFieldContext context,
-      {bool getLabel = !UIConstants.labelSeparateText, bool showRequiredMark = true, String? uiSchemaLabel}) {
-    if (!getLabel) {
+      {bool getLabel = !UIConstants.labelSeparateText, bool showRequiredMark = true, dynamic uiSchemaLabel}) {
+    if (!getLabel || uiSchemaLabel == false) {
       return null;
     }
 
@@ -41,7 +41,8 @@ class FormFieldUtils {
       return lastScopeElement != "items" ? lastScopeElement : null;
     }
 
-    final titleString = uiSchemaLabel ?? context.title ?? getScope();
+    final uiSchemaString = uiSchemaLabel is String ? uiSchemaLabel : null;
+    final titleString = uiSchemaString ?? context.title ?? getScope();
     if (!showRequiredMark) {
       return titleString;
     }

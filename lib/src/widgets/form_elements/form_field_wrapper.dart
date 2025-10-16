@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import '../../utils/show_on.dart';
 import '../custom_form_fields/html_widget.dart';
@@ -34,25 +35,9 @@ class FormFieldWrapper extends StatelessWidget {
 
     if (context.showLabel && showLabel && labelText != null) {
       columnChildren.add(
-        Row(
-          children: [
-            Expanded(
-              child: (!context.required)
-                  ? Text(labelText)
-                  : Row(children: [
-                      Text(labelText),
-                      Semantics(
-                        label: 'required',
-                        child: const Text('*', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                    ]),
-            ),
-            if (context.options?.formattingOptions?.help != null)
-              AnimatedTooltip(
-                content: context.options!.formattingOptions!.help!.text,
-                label: context.options!.formattingOptions!.help!.label ?? "?",
-              ),
-          ],
+        FormFieldText(
+          labelText,
+          required: context.required,
         ),
       );
     }

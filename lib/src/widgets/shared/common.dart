@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 
 Container getLineContainer({Widget? child}) {
   return Container(
@@ -20,7 +21,7 @@ Widget withLabel(BuildContext context, String? label, Widget child) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(
+      FormFieldText(
         label,
         style: Theme.of(context).textTheme.titleMedium,
       ),

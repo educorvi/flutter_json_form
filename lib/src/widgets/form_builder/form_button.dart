@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 import 'package:http/http.dart' as http;
 import '../../models/ui_schema.g.dart' as ui;
 
@@ -96,7 +97,7 @@ class FormButton extends StatelessWidget {
       context: context,
       variant: button.options?.variant,
       onPressed: onPressed,
-      child: Text(button.text),
+      child: FormFieldText(button.text),
     );
   }
 

@@ -31,8 +31,8 @@ void main() {
         await init(tester);
 
         /// THEN
-        expect(find.text('Registration'), findsOneWidget);
-        expect(find.text('A simple registration form example'), findsOneWidget);
+        expect(find.formFieldText('Registration'), findsOneWidget);
+        expect(find.formFieldText('A simple registration form example'), findsOneWidget);
       });
 
       testWidgets('Basic form fields load successfully', (tester) async {
@@ -41,10 +41,10 @@ void main() {
 
         /// THEN
         // field titles get generated from schema titles and property names
-        expect(find.text('Name'), findsOneWidget);
-        expect(find.text('Newsletter Json Title'), findsOneWidget);
-        expect(find.text('email'), findsOneWidget);
-        expect(find.text('timeMissingInUiSchema'), findsOneWidget);
+        expect(find.formFieldText('Name'), findsOneWidget);
+        expect(find.formFieldText('Newsletter Json Title'), findsOneWidget);
+        expect(find.formFieldText('email'), findsOneWidget);
+        expect(find.formFieldText('timeMissingInUiSchema'), findsOneWidget);
         // input fields get generated from schema types
         expect(find.byType(FormBuilderTextField), findsNWidgets(2));
         expect(find.byType(FormBuilderSwitch), findsOneWidget);
@@ -84,8 +84,8 @@ void main() {
         await init(tester);
 
         /// THEN
-        expect(find.text('Registration'), findsOneWidget);
-        expect(find.text('A simple registration form example'), findsOneWidget);
+        expect(find.formFieldText('Registration'), findsOneWidget);
+        expect(find.formFieldText('A simple registration form example'), findsOneWidget);
       });
 
       testWidgets('Basic form fields load successfully', (tester) async {
@@ -94,10 +94,10 @@ void main() {
 
         /// THEN
         // filed titles get generated from schema titles and property names
-        expect(find.text('Name'), findsOneWidget);
-        expect(find.text('Sign up for newsletter'), findsOneWidget);
-        expect(find.text('email'), findsOneWidget);
-        expect(find.text('elementMissingInUiSchema'), findsNothing); // element missing in ui schema is not shown
+        expect(find.formFieldText('Name'), findsOneWidget);
+        expect(find.formFieldText('Sign up for newsletter'), findsOneWidget);
+        expect(find.formFieldText('email'), findsOneWidget);
+        expect(find.formFieldText('elementMissingInUiSchema'), findsNothing); // element missing in ui schema is not shown
         // input fields get generated from schema types
         expect(find.byType(FormBuilderTextField), findsNWidgets(2));
         expect(find.byType(FormBuilderSwitch), findsOneWidget);
@@ -130,7 +130,7 @@ void main() {
         await init(tester);
 
         /// THEN
-        expect(isWidgetCrossFadeVisible(tester, find.text('email')), isTrue); // shown
+        expect(isWidgetCrossFadeVisible(tester, find.formFieldText('email')), isTrue); // shown
 
         /// WHEN
         final switchFinder = find.byType(FormBuilderSwitch);
@@ -139,7 +139,7 @@ void main() {
         await tester.pumpAndSettle();
 
         /// THEN
-        expect(isWidgetCrossFadeVisible(tester, find.text('email')), isFalse); // email is now hidden
+        expect(isWidgetCrossFadeVisible(tester, find.formFieldText('email')), isFalse); // email is now hidden
       });
     });
   });

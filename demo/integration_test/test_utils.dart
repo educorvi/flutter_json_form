@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 
 /// Common testing utilities for Flutter JSON Forms integration tests
 
@@ -62,30 +63,48 @@ bool isWidgetCrossFadeHidden(WidgetTester tester, Finder finder) {
 /// Checks if a given text field label is rendered as required
 /// Looks for both a Semantics widget and an asterisk (*) text in the same row
 bool isTextFieldRequired(WidgetTester tester, String labelText) {
-  final labelFinder = find.text(labelText);
-  final rowElements = find.ancestor(of: labelFinder, matching: find.byType(Row)).evaluate();
-  if (rowElements.isEmpty) return false;
-  final outerRow = rowElements.last;
+  // final labelFinder = findLabelText(labelText);
+  // final rowElements = find.ancestor(of: labelFinder, matching: find.byType(Row)).evaluate();
+  // if (rowElements.isEmpty) return false;
+  // final outerRow = rowElements.last;
 
-  final childRowFinder = find.descendant(
-    of: find.byWidget(outerRow.widget),
-    matching: find.byType(Row),
+  // final childRowFinder = find.descendant(
+  //   of: find.byWidget(outerRow.widget),
+  //   matching: find.byType(Row),
+  // );
+  // final childRowElements = childRowFinder.evaluate();
+  // if (childRowElements.isEmpty) return false;
+  // final innerRow = childRowElements.first;
+
+  // // Check for Semantics widget
+  // final semanticsFinder = find.descendant(
+  //   of: find.byWidget(innerRow.widget),
+  //   matching: find.byType(Semantics),
+  // );
+
+  // // Check for the asterisk text (it's inside the Semantics widget)
+  // final asteriskFinder = find.descendant(
+  //   of: find.byWidget(innerRow.widget),
+  //   matching: findLabelText('*'),
+  // );
+
+  // return semanticsFinder.evaluate().isNotEmpty && asteriskFinder.evaluate().isNotEmpty;
+  final text = find.byWidgetPredicate(
+    (widget) => (widget is FormFieldText && widget.label == labelText && widget.required == true),
   );
-  final childRowElements = childRowFinder.evaluate();
-  if (childRowElements.isEmpty) return false;
-  final innerRow = childRowElements.first;
-
-  // Check for Semantics widget
-  final semanticsFinder = find.descendant(
-    of: find.byWidget(innerRow.widget),
-    matching: find.byType(Semantics),
-  );
-
-  // Check for the asterisk text (it's inside the Semantics widget)
-  final asteriskFinder = find.descendant(
-    of: find.byWidget(innerRow.widget),
-    matching: find.text('*'),
-  );
-
-  return semanticsFinder.evaluate().isNotEmpty && asteriskFinder.evaluate().isNotEmpty;
+  return text.evaluate().isNotEmpty;
 }
+
+extension FinderFormTextExtension on CommonFinders {
+  Finder formFieldText(String label) {
+    return byWidgetPredicate(
+      (widget) => widget is FormFieldText && widget.label == label,
+    );
+  }
+}
+
+// Finder findLabelText(String text) {
+//   return find.byWidgetPredicate(
+//     (widget) => (widget is FormFieldText && widget.label == text),
+//   );
+// }

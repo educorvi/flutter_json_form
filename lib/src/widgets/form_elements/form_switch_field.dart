@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_wrapper.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -38,11 +39,12 @@ class FormSwitchField extends StatelessWidget {
           formFieldContext,
           additionalValidators: formFieldContext.required ? [FormBuilderValidators.equal(true)] : null,
         ),
-        title:
-            Text(FormFieldUtils.getLabel(formFieldContext, getLabel: true, uiSchemaLabel: formFieldContext.options?.formattingOptions?.label) ?? ""),
+        title: FormFieldText(
+            FormFieldUtils.getLabel(formFieldContext, getLabel: true, uiSchemaLabel: formFieldContext.options?.formattingOptions?.label) ?? "",
+            required: formFieldContext.required),
         contentPadding: const EdgeInsets.all(0),
         decoration: const InputDecoration(border: InputBorder.none),
-        subtitle: formFieldContext.description != null ? Text(formFieldContext.description!) : null,
+        subtitle: formFieldContext.description != null ? FormFieldText(formFieldContext.description!) : null,
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 
 class FormNotImplemented extends StatelessWidget {
   final String type;
@@ -7,7 +8,7 @@ class FormNotImplemented extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
+    return FormFieldText(
       "TODO implement $type",
       style: const TextStyle(color: Colors.red),
     );

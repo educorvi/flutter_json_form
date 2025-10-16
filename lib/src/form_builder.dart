@@ -4,6 +4,7 @@ import 'package:flutter_json_forms/src/process_form_values.dart';
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
+import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_group.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_layout.dart';
 import 'package:flutter_json_forms/src/widgets/shared/css.dart';
@@ -435,21 +436,21 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
       } else if (hasErrors) {
         return Column(children: [
           if (_jsonSchemaValidationErrors!.isNotEmpty) ...[
-            const Text(
+            const FormFieldText(
               "There were errors in the JSON schema:",
               style: TextStyle(color: Colors.red),
             ),
             ..._jsonSchemaValidationErrors!.map((error) => Text(error.toString())),
           ],
           if (_uiSchemaValidationErrors!.isNotEmpty) ...[
-            const Text(
+            const FormFieldText(
               "There were errors in the UI schema:",
               style: TextStyle(color: Colors.red),
             ),
             ..._uiSchemaValidationErrors!.map((error) => Text(error.toString())),
           ],
           if (_initializationError != null) ...[
-            Text(
+            FormFieldText(
               "There was an error during initialization: ${_initializationError.toString()}",
               style: TextStyle(color: Colors.red),
             )
@@ -501,7 +502,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     if (title != null && title.isNotEmpty) {
       header.add(Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
-        child: Text(
+        child: FormFieldText(
           title,
           style: Theme.of(context).textTheme.headlineMedium,
         ),
@@ -510,7 +511,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     if (description != null && description.isNotEmpty) {
       header.add(Padding(
         padding: const EdgeInsets.only(bottom: 16.0),
-        child: Text(
+        child: FormFieldText(
           description,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
