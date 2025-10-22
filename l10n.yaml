@@ -1,0 +1,3 @@
+arb-dir: lib/l10n
+template-arb-file: form_en.arb
+output-localization-file: form_localizations.dart

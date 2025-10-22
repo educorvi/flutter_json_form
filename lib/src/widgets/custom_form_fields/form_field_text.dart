@@ -15,12 +15,12 @@ class FormFieldText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final defaultStyle = style ?? DefaultTextStyle.of(context).style;
     return Row(
       children: [
         Expanded(
-          child: RichText(
-            text: TextSpan(
-              style: style ?? DefaultTextStyle.of(context).style,
+          child: Text.rich(
+            TextSpan(
               children: [
                 TextSpan(text: label),
                 if (required)
@@ -29,9 +29,9 @@ class FormFieldText extends StatelessWidget {
                     baseline: TextBaseline.alphabetic,
                     child: Semantics(
                       label: 'required',
-                      child: const Text(
-                        ' *',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      child: Text(
+                        '*',
+                        style: defaultStyle.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),

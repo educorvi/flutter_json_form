@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_array_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_object_field.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_primitive_field_selector.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_primitive_field_selector.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_not_implemented.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
 import 'package:json_schema/json_schema.dart';

@@ -1,5 +1,9 @@
 
 # Priority
+- [ ] Array options (addButtonText)
+- [ ] FieldUploadOptions (maxfilesize, displayAsSingleUploadfield, acceptedfiletype)
+
+
 - [ ] Async creation or check why it takes so long until widget is rendered initially
 
 - [ ] don't render * for required but other image

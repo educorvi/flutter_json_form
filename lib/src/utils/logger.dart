@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 /// Centralized logging utility for Flutter JSON Forms
 class FormLogger {
   static final Map<String, Logger> _loggers = {};
+  static final Logger defaultLogger = Logger('fjf');
   // static bool _initialized = false;
 
   /// Initialize logging for the package
@@ -37,6 +38,7 @@ class FormLogger {
   static Logger get ritaEvaluator => getLogger('RitaEvaluator');
   static Logger get validator => getLogger('Validator');
   static Logger get fieldFactory => getLogger('FieldFactory');
+  static Logger get generic => defaultLogger;
 }
 
 /// Extension to add convenient logging methods

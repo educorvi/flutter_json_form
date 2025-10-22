@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_wrapper.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_field_utils.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_field_wrapper.dart';
 import 'package:intl/intl.dart';
 
 class FormDateTimePickerField extends StatelessWidget {

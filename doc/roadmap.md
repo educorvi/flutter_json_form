@@ -52,7 +52,6 @@ The final step for the project is to create more documentation on how to use the
 - Effort: 1 `Personenarbeitstag`
 
 
-Total: ~ 10 Personenarbeitstage Effort until a first version of flutter json forms can be released
 
 ## 7. Allow more theming capabilities
 
@@ -60,6 +59,7 @@ Most of the UI can be themed as native Flutter widgets are used and a theme inhe
 
 - Effort: 1 `Personenarbeitstag`
 
+Total: ~ 10 Personenarbeitstage Effort until a first version of flutter json forms can be released
 
 ## Future features
 

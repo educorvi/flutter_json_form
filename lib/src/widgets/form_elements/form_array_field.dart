@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_json_forms/l10n/form_fallbackLocalizations.dart';
+import 'package:flutter_json_forms/l10n/form_localizations.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_checkbox_group_field.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_array_add_button.dart';
+import 'package:flutter_json_forms/src/widgets/form_input_elements/form_checkbox_group_field.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_field_utils.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_error.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_element_loading.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
@@ -158,22 +161,19 @@ class _FormArrayFieldState extends State<FormArrayField> {
             ),
           ),
         if (items.isNotEmpty) ...[
-          ReorderableListView(
-            buildDefaultDragHandles: false,
-            shrinkWrap: true,
-            physics: const ClampingScrollPhysics(),
-            onReorder: _moveItem,
-            children: _buildArrayItemsWithSpacing(formContext, arrayIsShown, minItems),
+          SelectionArea(
+            child: ReorderableListView(
+              buildDefaultDragHandles: false,
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              onReorder: _moveItem,
+              children: _buildArrayItemsWithSpacing(formContext, arrayIsShown, minItems),
+            ),
           ),
         ],
-        Container(
-          padding: const EdgeInsets.only(top: 10.0),
-          width: double.infinity,
-          child: FilledButton.tonal(
-            key: Key('${widget.formFieldContext.id}/add'),
-            onPressed: maxItems == null || items.length < maxItems ? _addItem : null,
-            child: const Icon(Icons.add),
-          ),
+        FormArrayAddButton(
+          testKey: Key('${widget.formFieldContext.id}/add'),
+          onPressed: maxItems == null || items.length < maxItems ? _addItem : null,
         ),
         if (widget.formFieldContext.description != null)
           Padding(
@@ -322,22 +322,28 @@ class _FormArrayFieldState extends State<FormArrayField> {
       key: Key('${item.id}'),
       child: Row(
         children: [
+          // TODO make it externally customizable by providing a callback
           ReorderableDragStartListener(
             key: Key('${widget.formFieldContext.id}/${item.id}/drag'),
             index: widgetIndex, // Use the actual widget index, not the item index
             child: GestureDetector(
               onTapDown: (_) => FocusScope.of(context).unfocus(),
-              child: const Icon(Icons.drag_handle),
+              child: Tooltip(
+                message: context.localize((l) => l.buttonDragHandle),
+                child: const Icon(Icons.drag_handle),
+              ),
             ),
           ),
+          // TODO make it externally customizable by providing a callback
           Expanded(child: FormElementFactory.createFormElement(childContext)),
+          // TODO make it externally customizable by providing a callback
           IconButton(
-            key: Key('${widget.formFieldContext.id}/${item.id}/remove'),
-            disabledColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
-            icon: const Icon(Icons.close),
-            color: Theme.of(context).colorScheme.error,
-            onPressed: items.length > minItems ? () => _removeItem(index) : null,
-          ),
+              key: Key('${widget.formFieldContext.id}/${item.id}/remove'),
+              disabledColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
+              icon: const Icon(Icons.close),
+              color: Theme.of(context).colorScheme.error,
+              tooltip: context.localize((l) => l.buttonRemove),
+              onPressed: items.length > minItems ? () => _removeItem(index) : null),
         ],
       ),
     );

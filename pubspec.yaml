@@ -22,7 +22,7 @@ dependencies:
   flutter_js: ^0.8.5
   http: ^1.5.0
   web: ^1.1.1
-  intl: ^0.20.2
+  intl: any
   skeletonizer: ^2.1.0
   logging: ^1.3.0
 #  wrapfit: ^0.1.0+1
@@ -46,6 +46,7 @@ flutter:
     - assets/js/rita-core.js
   #     - lib/src/schemas/examples/
   uses-material-design: true
+  generate: true
 #
 # For details regarding assets in packages, see
 # https://flutter.dev/assets-and-images/#from-packages

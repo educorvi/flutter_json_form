@@ -217,3 +217,9 @@ An Devcontainer configuration will be provided in the future to make it easier t
 
 - appearance of form renderer elements like arrays objects and single elements can be easily themed by providing a custom Theme object
 - logic of the renderer can be further customized by providing callback functions
+
+
+## TODO
+
+- Accessability Section
+- Customization: completely provide own widgets for the elements

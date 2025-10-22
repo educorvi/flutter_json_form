@@ -4,6 +4,7 @@ import 'package:flutter_json_forms_demo/constants/constants.dart';
 import 'package:flutter_json_forms_demo/widgets/form_file/form_file_base.dart';
 import 'package:flutter_json_forms_demo/widgets/form_selector.dart';
 import 'package:logging/logging.dart';
+import 'package:accessibility_tools/accessibility_tools.dart';
 
 void main() {
   // Initialize logging for the Flutter JSON Forms package
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: (context, child) => AccessibilityTools(child: child),
       localizationsDelegates: const [FormBuilderLocalizations.delegate],
       title: 'Flutter Json Forms Demo',
       theme: appConstants.theme.getThemeData(Brightness.light),

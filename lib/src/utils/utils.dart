@@ -266,3 +266,12 @@ void resetShowOnDependencies(Map<String, dynamic> dependencies) {
     }
   });
 }
+
+/// Mixin to provide a safe setState method that checks if the widget is still mounted
+mixin SafeSetStateMixin<T extends StatefulWidget> on State<T> {
+  void safeSetState(VoidCallback fn) {
+    if (mounted) {
+      setState(fn);
+    }
+  }
+}

@@ -72,6 +72,13 @@ void main() {
         expect(isTextFieldRequired(tester, 'email'), isTrue); // required
         expect(isTextFieldRequired(tester, 'timeMissingInUiSchema'), isFalse); // not required
       });
+
+      testWidgets('Follows a11y guidelines', (tester) async {
+        await checkAccessibilityGuidelines(
+          tester,
+          (tester) => pumpForm(tester, jsonSchema: BaseData.jsonSchema),
+        );
+      });
     });
 
     group('Ui Schema Test', () {
@@ -141,6 +148,42 @@ void main() {
         /// THEN
         expect(isWidgetCrossFadeVisible(tester, find.formFieldText('email')), isFalse); // email is now hidden
       });
+
+      testWidgets('Follows a11y guidelines', (tester) async {
+        /// GIVEN
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await init(tester);
+
+        // Checks that tappable nodes have a minimum size of 48 by 48 pixels
+        // for Android.
+        await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+
+        // Checks that tappable nodes have a minimum size of 44 by 44 pixels
+        // for iOS.
+        await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+
+        // Checks that touch targets with a tap or long press action are labeled.
+        await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+
+        // Checks whether semantic nodes meet the minimum text contrast levels.
+        // The recommended text contrast is 3:1 for larger text
+        // (18 point and above regular).
+        // await expectLater(tester, meetsGuideline(textContrastGuideline));
+        handle.dispose();
+      });
     });
+
+    testWidgets('Follows a11y guidelines', (tester) async {
+      await checkAccessibilityGuidelines(
+        tester,
+        (tester) => pumpForm(
+          tester,
+          jsonSchema: BaseData.jsonSchema,
+          uiSchema: BaseData.uiSchema,
+        ),
+      );
+    });
+
+    // TODO add testing for dynamic data as well and check commented out contrast. Also create reusable function. Maybe it isn`t good to just use these ui and json schemas for accessabilty as they were created for another puprose. Dont knpow yet if they are sufficient Or: use these test and also add dedicated accessibilty tests
   });
 }

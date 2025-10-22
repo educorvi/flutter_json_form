@@ -9,11 +9,13 @@ Future<void> pumpForm(WidgetTester tester, {dynamic jsonSchema, dynamic uiSchema
   await tester.pumpWidget(MaterialApp(
     home: Scaffold(
       appBar: AppBar(
-        title: Text('Flutter JSON Forms Integration Tests'),
+        title: const Text('Flutter JSON Forms Integration Tests'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: FlutterJsonForm(jsonSchema: jsonSchema, uiSchema: uiSchema),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: FlutterJsonForm(jsonSchema: jsonSchema, uiSchema: uiSchema),
+        ),
       ),
     ),
   ));
@@ -63,32 +65,6 @@ bool isWidgetCrossFadeHidden(WidgetTester tester, Finder finder) {
 /// Checks if a given text field label is rendered as required
 /// Looks for both a Semantics widget and an asterisk (*) text in the same row
 bool isTextFieldRequired(WidgetTester tester, String labelText) {
-  // final labelFinder = findLabelText(labelText);
-  // final rowElements = find.ancestor(of: labelFinder, matching: find.byType(Row)).evaluate();
-  // if (rowElements.isEmpty) return false;
-  // final outerRow = rowElements.last;
-
-  // final childRowFinder = find.descendant(
-  //   of: find.byWidget(outerRow.widget),
-  //   matching: find.byType(Row),
-  // );
-  // final childRowElements = childRowFinder.evaluate();
-  // if (childRowElements.isEmpty) return false;
-  // final innerRow = childRowElements.first;
-
-  // // Check for Semantics widget
-  // final semanticsFinder = find.descendant(
-  //   of: find.byWidget(innerRow.widget),
-  //   matching: find.byType(Semantics),
-  // );
-
-  // // Check for the asterisk text (it's inside the Semantics widget)
-  // final asteriskFinder = find.descendant(
-  //   of: find.byWidget(innerRow.widget),
-  //   matching: findLabelText('*'),
-  // );
-
-  // return semanticsFinder.evaluate().isNotEmpty && asteriskFinder.evaluate().isNotEmpty;
   final text = find.byWidgetPredicate(
     (widget) => (widget is FormFieldText && widget.label == labelText && widget.required == true),
   );
@@ -108,3 +84,26 @@ extension FinderFormTextExtension on CommonFinders {
 //     (widget) => (widget is FormFieldText && widget.label == text),
 //   );
 // }
+
+/// Runs standard accessibility guidelines checks
+Future<void> checkAccessibilityGuidelines(WidgetTester tester, Future<void> Function(WidgetTester) setupForm) async {
+  /// GIVEN
+  final SemanticsHandle handle = tester.ensureSemantics();
+  await setupForm(tester);
+
+  // Checks that tappable nodes have a minimum size of 48 by 48 pixels
+  // for Android.
+  await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+
+  // Checks that tappable nodes have a minimum size of 44 by 44 pixels
+  // for iOS.
+  await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+
+  // Checks that touch targets with a tap or long press action are labeled.
+  await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+
+  // Optionally check text contrast (3:1 for larger text, 18pt and above)
+  // await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+  handle.dispose();
+}

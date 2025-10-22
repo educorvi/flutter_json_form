@@ -119,6 +119,16 @@ void main() {
       // THEN: name should now be visible
       expect(isWidgetCrossFadeVisible(tester, find.formFieldText('name')), isTrue);
     });
+
+    testWidgets('Follows a11y guidelines', (tester) async {
+      await checkAccessibilityGuidelines(
+        tester,
+        (tester) => pumpForm(
+          tester,
+          jsonSchema: ObjectData.jsonSchema,
+        ),
+      );
+    });
   });
 
   group('Nested Object Form Tests', () {
@@ -140,6 +150,7 @@ void main() {
       expect(switchObject, findsOneWidget);
       expect(switchNestedObject, findsOneWidget);
       // Optionally, check their initial value if possible
+      await Future.delayed(const Duration(seconds: 500));
     });
 
     testWidgets('Nested object is rendered correctly when ui schema references whole object', (tester) async {
@@ -243,6 +254,16 @@ void main() {
 
       // THEN: country.code should now be visible
       expect(isWidgetCrossFadeVisible(tester, find.formFieldText('outerName')), isTrue);
+    });
+
+    testWidgets('Follows a11y guidelines', (tester) async {
+      await checkAccessibilityGuidelines(
+        tester,
+        (tester) => pumpForm(
+          tester,
+          jsonSchema: NestedObjectData.jsonSchema,
+        ),
+      );
     });
   });
 }

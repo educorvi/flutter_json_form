@@ -4,8 +4,8 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/parse.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_wrapper.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_field_utils.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_field_wrapper.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 class FormTextField extends StatefulWidget {

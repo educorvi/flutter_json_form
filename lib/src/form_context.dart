@@ -6,7 +6,8 @@ import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:json_schema/json_schema.dart';
 
 class FormContext extends InheritedWidget {
-  final void Function(Map<String, dynamic>?)? onFormSubmitCallback;
+  final void Function(Map<String, dynamic>?)? onFormSubmitSaveCallback;
+  final void Function(Map<String, dynamic>?, ui.Request?)? onFormRequestCallback;
   final Map<String, dynamic> showOnDependencies;
   final Map<String, bool> ritaDependencies;
   final int ritaDependenciesRevision;
@@ -27,7 +28,8 @@ class FormContext extends InheritedWidget {
 
   const FormContext({
     super.key,
-    this.onFormSubmitCallback,
+    this.onFormSubmitSaveCallback,
+    this.onFormRequestCallback,
     required this.showOnDependencies,
     required this.ritaDependencies,
     required this.ritaDependenciesRevision,

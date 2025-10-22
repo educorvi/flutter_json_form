@@ -10,6 +10,7 @@ class FormBuilderSegmentedButton<T> extends FormBuilderFieldDecoration<T> {
   final ButtonStyle? style;
   final bool showSelectedIcon;
   final Widget? selectedIcon;
+  final bool? stacked;
 
   FormBuilderSegmentedButton({
     super.autovalidateMode = AutovalidateMode.disabled,
@@ -33,21 +34,47 @@ class FormBuilderSegmentedButton<T> extends FormBuilderFieldDecoration<T> {
     super.valueTransformer,
     super.onReset,
     super.restorationId,
+    this.stacked = false,
   })  : assert(selected == null && onSelectionChanged == null || selected != null && onSelectionChanged != null),
         super(
           builder: (FormFieldState<T?> field) {
             final state = field as _FormBuilderFieldDecorationState<T>;
             T currentValue = initialValue ?? segments.first.value;
 
-            return InputDecorator(
-              decoration: state.decoration,
-              child: SegmentedButton<T>(
+            Widget buttonWidget;
+            if (stacked == true) {
+              buttonWidget = Column(
+                children: segments.map((segment) {
+                  final isSelected = (selected ?? <T>{state.value ?? currentValue}).contains(segment.value);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: OutlinedButton(
+                      style: style,
+                      onPressed: enabled
+                          ? () {
+                              state.didChange(segment.value);
+                              onSelectionChanged?.call({segment.value});
+                            }
+                          : null,
+                      child: Row(
+                        children: [
+                          segment.label ?? const SizedBox.shrink(),
+                          if (showSelectedIcon && isSelected && selectedIcon != null) ...[
+                            const SizedBox(width: 8),
+                            selectedIcon,
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              );
+            } else {
+              buttonWidget = SegmentedButton<T>(
                 segments: segments,
                 selected: selected ?? <T>{state.value ?? currentValue},
                 onSelectionChanged: onSelectionChanged ??
                     (value) {
-                      // set current value to the first selected value
-                      // currentValue = value.first;
                       state.didChange(value.first);
                     },
                 multiSelectionEnabled: multiSelectionEnabled,
@@ -55,7 +82,12 @@ class FormBuilderSegmentedButton<T> extends FormBuilderFieldDecoration<T> {
                 style: style,
                 showSelectedIcon: showSelectedIcon,
                 selectedIcon: selectedIcon,
-              ),
+              );
+            }
+
+            return InputDecorator(
+              decoration: state.decoration,
+              child: buttonWidget,
             );
           },
         );

@@ -30,8 +30,7 @@ class FormFieldUtils {
   }
 
   /// Creates standardized label text for form fields
-  static String? getLabel(FormFieldContext context,
-      {bool getLabel = !UIConstants.labelSeparateText, bool showRequiredMark = true, dynamic uiSchemaLabel}) {
+  static String? getLabel(FormFieldContext context, {bool getLabel = !UIConstants.labelSeparateText, dynamic uiSchemaLabel}) {
     if (!getLabel || uiSchemaLabel == false) {
       return null;
     }
@@ -43,10 +42,7 @@ class FormFieldUtils {
 
     final uiSchemaString = uiSchemaLabel is String ? uiSchemaLabel : null;
     final titleString = uiSchemaString ?? context.title ?? getScope();
-    if (!showRequiredMark) {
-      return titleString;
-    }
-    return context.required && titleString != null ? ('$titleString*') : titleString;
+    return titleString;
   }
 
   /// Creates standardized validator that respects visibility

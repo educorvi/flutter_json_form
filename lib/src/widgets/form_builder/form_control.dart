@@ -34,19 +34,6 @@ class FormControl extends StatelessWidget {
     final format = control.options?.fieldSpecificOptions?.format;
     final bool parentIsShown = isShownFromParent ?? true;
 
-    // bool isShown() => isElementShown(
-    //       parentIsShown: parentIsShown,
-    //       showOn: control.showOn,
-    //       ritaDependencies: formContext.ritaDependencies,
-    //       checkValueForShowOn: formContext.checkValueForShowOn,
-    //     );
-
-    // bool isShown = formContext.elementShown(
-    //   scope: scope,
-    //   showOn: control.showOn,
-    //   parentIsShown: parentIsShown,
-    // );
-
     return FormElementFactory.createFormElement(FormFieldContext.fromFormContext(
       context: context,
       scope: scope,
@@ -72,25 +59,5 @@ class FormControl extends StatelessWidget {
             : null,
       },
     ));
-    // return FormElementFormControl(
-    //   options: options,
-    //   format: format,
-    //   scope: scope,
-    //   id: scope,
-    //   nestingLevel: nestingLevel + 1,
-    //   required: formContext.isRequired(scope),
-    //   jsonSchema: jsonSchemaFromScope,
-    //   initialValue: formContext.checkValueForShowOn(scope),
-    //   isShownCallback: isShown,
-    //   onChanged: (value) => formContext.onFormValueChanged(scope, value),
-    //   onSavedCallback: (value) => formContext.onFormValueSaved(scope, value),
-    //   parentIsShown: parentIsShown,
-    //   ritaDependencies: formContext.ritaDependencies,
-    //   checkValueForShowOn: formContext.checkValueForShowOn,
-    //   showOn: control.showOn,
-    //   ritaEvaluator: formContext.ritaEvaluator,
-    //   getFullFormData: formContext.getFullFormData,
-    //   selfIndices: const {},
-    // );
   }
 }

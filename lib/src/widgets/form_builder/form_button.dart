@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
-import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
+import 'package:flutter_json_forms/src/utils/logger.dart';
 import 'package:http/http.dart' as http;
 import '../../models/ui_schema.g.dart' as ui;
 
@@ -12,6 +12,8 @@ class FormButton extends StatelessWidget {
     super.key,
     required this.button,
   });
+
+  static final _logger = FormLogger.generic;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +45,14 @@ class FormButton extends StatelessWidget {
 
       switch (action) {
         case 'request':
+          if (formContext.onFormRequestCallback != null) {
+            _logger.info('Submitting form data to onFormRequestCallback: ${jsonEncode(formContext.getFormValues())}');
+            formContext.onFormRequestCallback!(formContext.getFormValues(), submitOptions?.request);
+            return;
+          }
           final request = submitOptions?.request;
+          _logger.info('Submitting form data to request ${request?.toString()}: ${jsonEncode(formContext.getFormValues())}');
+
           if (request != null) {
             final url = Uri.parse(request.url);
             final method = getMethod(request.method);
@@ -71,8 +80,9 @@ class FormButton extends StatelessWidget {
           }
           break;
         case 'save':
-          if (formContext.onFormSubmitCallback != null) {
-            formContext.onFormSubmitCallback!(formContext.getFormValues());
+          if (formContext.onFormSubmitSaveCallback != null) {
+            _logger.info('Submitting form data to onFormSubmitCallback: ${jsonEncode(formContext.getFormValues())}');
+            formContext.onFormSubmitSaveCallback!(formContext.getFormValues());
           }
           break;
         case 'print':
@@ -97,7 +107,7 @@ class FormButton extends StatelessWidget {
       context: context,
       variant: button.options?.variant,
       onPressed: onPressed,
-      child: FormFieldText(button.text),
+      child: Text(button.text),
     );
   }
 

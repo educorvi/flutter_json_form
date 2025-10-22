@@ -7,6 +7,7 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_group.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_layout.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_loader.dart';
 import 'package:flutter_json_forms/src/widgets/shared/css.dart';
 import 'package:flutter_json_forms/src/utils/utils.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
@@ -15,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:flutter_json_forms/src/json_validator.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 /// A dynamic form which generates form fields based on a JSON schema and a UI schema
 class FlutterJsonForm extends StatefulWidget {
@@ -44,10 +44,13 @@ class FlutterJsonForm extends StatefulWidget {
   /// Defaults to false
   final bool parseJson;
 
-  /// [onFormSubmitCallback] is a callback function which gets called when the form is submitted
+  /// [onFormSubmitSaveCallback] is a callback function which gets called when the form is submitted and the save action is defined. See more within the ui Schema specification for a button
   ///
   /// The function gets called with the form values as a `Map<String, dynamic>` as a parameter
-  final void Function(Map<String, dynamic>?)? onFormSubmitCallback;
+  final void Function(Map<String, dynamic>?)? onFormSubmitSaveCallback;
+
+  /// [onFormRequestCallback] is a callback function which gets called when the form is requested to be submitted via a request action. See more within the ui Schema specification for a button
+  final void Function(Map<String, dynamic>?, ui.Request?)? onFormRequestCallback;
 
   /// [OnFormSubmitFormat] specifies the format of the form data when the form is submitted
   // final OnFormSubmitFormat onFormSubmitFormat;
@@ -68,7 +71,8 @@ class FlutterJsonForm extends StatefulWidget {
     this.validate = false,
     this.parseJson = false,
     this.formData,
-    this.onFormSubmitCallback,
+    this.onFormSubmitSaveCallback,
+    this.onFormRequestCallback,
     this.showLoadingWidget = true,
     this.loadingWidget,
   });
@@ -77,7 +81,7 @@ class FlutterJsonForm extends StatefulWidget {
   State<FlutterJsonForm> createState() => FlutterJsonFormState();
 }
 
-class FlutterJsonFormState extends State<FlutterJsonForm> {
+class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin {
   final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
   static final _logger = FormLogger.formBuilder;
 
@@ -179,20 +183,17 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
       _logger.finer('Initializing form data and rules');
       await _initializeFormAsync();
 
-      if (mounted) {
-        setState(() {
-          _isInitializing = false;
-        });
-        _logger.config('Form initialization completed successfully');
-      }
+      safeSetState(() {
+        _isInitializing = false;
+      });
+      _logger.config('Form initialization completed successfully');
     } catch (e, stackTrace) {
       _logger.severe('Form initialization failed', e, stackTrace);
-      if (mounted) {
-        setState(() {
-          _isInitializing = false;
-          _initializationError = e;
-        });
-      }
+
+      safeSetState(() {
+        _isInitializing = false;
+        _initializationError = e;
+      });
     }
   }
 
@@ -269,14 +270,12 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
 
     final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValues(_showOnDependencies))));
 
-    if (mounted) {
-      setState(() {
-        _ritaDependencies.clear();
-        _ritaDependencies.addAll(ritaDependencies);
-        _ritaDependenciesRevision++;
-        _ritaInitialized = true;
-      });
-    }
+    safeSetState(() {
+      _ritaDependencies.clear();
+      _ritaDependencies.addAll(ritaDependencies);
+      _ritaDependenciesRevision++;
+      _ritaInitialized = true;
+    });
   }
 
   /// Save form values and validate all fields of form
@@ -305,7 +304,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
   /// Reset form to `initialValue` set on FormBuilder or on each field.
   /// if initial formData was provided and [resetFormData] is true (default), the provided formData gets also reset and only default values from the jsonSchema are present in the form after reset
   void reset({bool resetFormData = true}) {
-    void customResetPatch() {
+    void resetPatch() {
       final formKeyState = _formKey.currentState?.instantValue ?? {};
       final patchState = Map<String, dynamic>.from(_showOnDependencies);
       formKeyState.forEach((key, value) {
@@ -349,7 +348,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
       // } else {
       //   _formKey.currentState?.reset();
       // }
-      customResetPatch();
+      resetPatch();
     });
   }
 
@@ -432,30 +431,41 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
         if (!widget.showLoadingWidget) {
           return Container();
         }
-        return widget.loadingWidget ?? buildSkeletonForm();
+        return widget.loadingWidget ?? FormLoader();
       } else if (hasErrors) {
-        return Column(children: [
-          if (_jsonSchemaValidationErrors!.isNotEmpty) ...[
+        late List<Widget> errorWidgets = [];
+
+        if (_jsonSchemaValidationErrors!.isNotEmpty) {
+          _logger.warning('JSON Schema validation errors: $_jsonSchemaValidationErrors');
+          errorWidgets.addAll([
             const FormFieldText(
               "There were errors in the JSON schema:",
               style: TextStyle(color: Colors.red),
             ),
             ..._jsonSchemaValidationErrors!.map((error) => Text(error.toString())),
-          ],
-          if (_uiSchemaValidationErrors!.isNotEmpty) ...[
+          ]);
+        }
+
+        if (_uiSchemaValidationErrors!.isNotEmpty) {
+          _logger.warning('UI Schema validation errors: $_uiSchemaValidationErrors');
+          errorWidgets.addAll([
             const FormFieldText(
               "There were errors in the UI schema:",
               style: TextStyle(color: Colors.red),
             ),
             ..._uiSchemaValidationErrors!.map((error) => Text(error.toString())),
-          ],
-          if (_initializationError != null) ...[
+          ]);
+        }
+
+        if (_initializationError != null) {
+          _logger.severe('Initialization error: $_initializationError');
+          errorWidgets.add(
             FormFieldText(
               "There was an error during initialization: ${_initializationError.toString()}",
-              style: TextStyle(color: Colors.red),
-            )
-          ],
-        ]);
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
+        }
       }
     }
 
@@ -470,7 +480,8 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     return FormBuilder(
       key: _formKey,
       child: FormContext(
-        onFormSubmitCallback: widget.onFormSubmitCallback,
+        onFormSubmitSaveCallback: widget.onFormSubmitSaveCallback,
+        onFormRequestCallback: widget.onFormRequestCallback,
         showOnDependencies: _showOnDependencies,
         ritaDependencies: _ritaDependencies,
         ritaDependenciesRevision: _ritaDependenciesRevision,
@@ -588,14 +599,12 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
     final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValues(_showOnDependencies))));
 
     // Update UI
-    if (mounted) {
-      setState(() {
-        _ritaDependencies.clear();
-        _ritaDependencies.addAll(ritaDependencies);
-        _ritaDependenciesRevision++;
-      });
-      _logger.finer('Updated ${ritaDependencies.length} Rita dependencies');
-    }
+    safeSetState(() {
+      _ritaDependencies.clear();
+      _ritaDependencies.addAll(ritaDependencies);
+      _ritaDependenciesRevision++;
+    });
+    _logger.finer('Updated ${ritaDependencies.length} Rita dependencies');
   }
 
   /// gets a value for a showOn condition
@@ -685,34 +694,4 @@ class FlutterJsonFormState extends State<FlutterJsonForm> {
       checkValueForShowOn: checkValueForShowOn,
     );
   }
-}
-
-/// Creates a skeleton form while loading
-Widget buildSkeletonForm() {
-  return Skeletonizer(
-    enabled: true,
-    child: SingleChildScrollView(
-      // padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Small loading indicator at top
-          const Bone.text(words: 2, fontSize: 24),
-          const SizedBox(height: 24),
-
-          // Form title skeleton
-          for (int i = 0; i < 10; i++) ...[
-            const Bone.text(words: 1, fontSize: 18),
-            const SizedBox(height: 16),
-            const Bone.text(words: 4, fontSize: 14),
-            const SizedBox(height: 24),
-          ],
-
-          // Button skeleton
-          const Bone.button(width: 120, height: 48),
-          const SizedBox(height: 20), // Extra space at bottom
-        ],
-      ),
-    ),
-  );
 }

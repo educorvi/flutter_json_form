@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_json_forms/src/widgets/data/list_item.dart';
 
 /// Specify the format of the form data when the form is submitted
@@ -82,6 +84,8 @@ dynamic extractListItemValue(dynamic value) {
     return value.map((k, v) => MapEntry(k, extractListItemValue(v)));
   } else if (value is DateTime) {
     return value.toIso8601String();
+  } else if (value is Color?) {
+    return value?.toARGB32().toString();
   }
   return value;
 }

@@ -14,6 +14,7 @@ class FormSelector extends StatefulWidget {
       : formFiles = [
           ExampleFormFile(name: "Registration", filename: "registration", formData: getRegistration()),
           ExampleFormFile(name: "Showcase", filename: "showcase"),
+          ExampleFormFile(name: "Specification", filename: "specification"),
           ExampleFormFile(name: "Druckvorlage", filename: "druckvorlage"),
           ExampleFormFile(name: "Reproduce", filename: "reproduce"),
           ExampleFormFile(name: "Json Schema", filename: "jsonSchema"),
@@ -51,7 +52,9 @@ class FormSelectorState extends State<FormSelector> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        DropdownMenu<FormFile>(
+        MergeSemantics(
+            child: DropdownMenu<FormFile>(
+          label: const Text('Select Form'),
           initialSelection: widget.formFiles[widget.initialSelectionIndex],
           width: 1000,
           dropdownMenuEntries: widget.formFiles
@@ -67,127 +70,132 @@ class FormSelectorState extends State<FormSelector> {
               });
             }
           },
-        ),
+        )),
         const SizedBox(height: 8),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  'Upload custom form file',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    FilledButton.tonal(
-                      onPressed: () async {
-                        final jsonSchemaFile = await FilePicker.platform.pickFiles(allowedExtensions: ['json'], type: FileType.custom);
-                        if (jsonSchemaFile != null) {
-                          widget.uploadFormFile.setJsonSchemaFile(jsonSchemaFile.files.single.path!);
-                          setState(() {
-                            file1ready = true;
-                          });
-                          if (file2ready) {
-                            if (!addedCustomFile) {
-                              widget.formFiles.add(widget.uploadFormFile);
-                              addedCustomFile = true;
-                            }
-                            if (context.mounted) {
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: const Text('Custom Form File'),
-                                    content: const Text('Custom form file added successfully.'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            }
-                          }
-                        }
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('JSON Schema'),
-                          const SizedBox(width: 8),
-                          if (file1ready) const Icon(Icons.check, color: Colors.green) else const Icon(Icons.upload),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    FilledButton.tonal(
-                      onPressed: () async {
-                        final uiSchemaFile = await FilePicker.platform.pickFiles(allowedExtensions: ['json'], type: FileType.custom);
-                        if (uiSchemaFile != null) {
-                          widget.uploadFormFile.setUiSchemaFile(uiSchemaFile.files.single.path!);
-                          setState(() {
-                            file2ready = true;
-                          });
-                          if (file1ready) {
-                            if (!addedCustomFile) {
-                              widget.formFiles.add(widget.uploadFormFile);
-                              addedCustomFile = true;
-                            }
-                            if (context.mounted) {
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: const Text('Custom Form File'),
-                                    content: const Text('Custom form file added successfully.'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
+        SizedBox(
+          width: double.infinity,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Upload custom form file',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    runSpacing: 8,
+                    alignment: WrapAlignment.start,
+                    spacing: 16,
+                    children: [
+                      FilledButton.tonal(
+                        onPressed: () async {
+                          final jsonSchemaFile = await FilePicker.platform.pickFiles(allowedExtensions: ['json'], type: FileType.custom);
+                          if (jsonSchemaFile != null) {
+                            widget.uploadFormFile.setJsonSchemaFile(jsonSchemaFile.files.single.path!);
+                            setState(() {
+                              file1ready = true;
+                            });
+                            if (file2ready) {
+                              if (!addedCustomFile) {
+                                widget.formFiles.add(widget.uploadFormFile);
+                                addedCustomFile = true;
+                              }
+                              if (context.mounted) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text('Custom Form File'),
+                                      content: const Text('Custom form file added successfully.'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
                             }
                           }
-                        }
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('UI Schema'),
-                          const SizedBox(width: 8),
-                          if (file2ready) const Icon(Icons.check, color: Colors.green) else const Icon(Icons.upload),
-                        ],
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('JSON Schema'),
+                            const SizedBox(width: 8),
+                            if (file1ready) const Icon(Icons.check, color: Colors.green) else const Icon(Icons.upload),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                // SizedBox(
-                //   height: 16,
-                // ),
-                // // load custom form file. If file1 and 2 are both not ready, the button is greyed out
-                // FilledButton.tonal(
-                //   onPressed: (file1ready && file2ready)
-                //       ? () {
-                //           setState(() {
-                //             widget.formFiles.add(widget.uploadFormFile);
-                //           });
-                //         }
-                //       : null,
-                //   child: const Text('Add Custom Form'),
-                // ),
-              ],
+                      FilledButton.tonal(
+                        onPressed: () async {
+                          final uiSchemaFile = await FilePicker.platform.pickFiles(allowedExtensions: ['json'], type: FileType.custom);
+                          if (uiSchemaFile != null) {
+                            widget.uploadFormFile.setUiSchemaFile(uiSchemaFile.files.single.path!);
+                            setState(() {
+                              file2ready = true;
+                            });
+                            if (file1ready) {
+                              if (!addedCustomFile) {
+                                widget.formFiles.add(widget.uploadFormFile);
+                                addedCustomFile = true;
+                              }
+                              if (context.mounted) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text('Custom Form File'),
+                                      content: const Text('Custom form file added successfully.'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                            }
+                          }
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('UI Schema'),
+                            const SizedBox(width: 8),
+                            if (file2ready) const Icon(Icons.check, color: Colors.green) else const Icon(Icons.upload),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  // SizedBox(
+                  //   height: 16,
+                  // ),
+                  // // load custom form file. If file1 and 2 are both not ready, the button is greyed out
+                  // FilledButton.tonal(
+                  //   onPressed: (file1ready && file2ready)
+                  //       ? () {
+                  //           setState(() {
+                  //             widget.formFiles.add(widget.uploadFormFile);
+                  //           });
+                  //         }
+                  //       : null,
+                  //   child: const Text('Add Custom Form'),
+                  // ),
+                ],
+              ),
             ),
           ),
         ),

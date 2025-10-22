@@ -6,6 +6,7 @@ import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_visibility.dart';
 
 bool isElementShown({
   bool? parentIsShown,
@@ -110,13 +111,7 @@ Widget handleShowOn({
   // Fallback to existing logic (legacy showOn or precomputed Rita without indices)
   final bool isVisible =
       isElementShown(parentIsShown: parentIsShown, showOn: showOn, ritaDependencies: ritaDependencies, checkValueForShowOn: checkValueForShowOn);
-  return AnimatedCrossFade(
-    duration: const Duration(milliseconds: 400),
-    sizeCurve: Curves.easeInOut,
-    firstChild: child,
-    secondChild: Container(),
-    crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-  );
+  return buildAnimatedVisibility(child: child, isVisible: isVisible);
 }
 
 /// Recursively collects all Rita rules from a map of descendant control overrides.
@@ -216,13 +211,7 @@ class _RitaRuleWidget extends StatelessWidget {
                     checkValueForShowOn: checkValueForShowOn,
                   ));
 
-        return AnimatedCrossFade(
-          duration: const Duration(milliseconds: 400),
-          sizeCurve: Curves.easeInOut,
-          firstChild: child,
-          secondChild: Container(),
-          crossFadeState: isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-        );
+        return buildAnimatedVisibility(child: child, isVisible: isVisible);
       },
     );
   }

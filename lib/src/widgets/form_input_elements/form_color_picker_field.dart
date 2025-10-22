@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_wrapper.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_field_wrapper.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_field_utils.dart';
 import 'package:form_builder_extra_fields/form_builder_extra_fields.dart';
 
 class FormColorPickerField extends StatelessWidget {

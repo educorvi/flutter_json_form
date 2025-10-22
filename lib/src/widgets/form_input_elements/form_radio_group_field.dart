@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_wrapper.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_field_utils.dart';
+import 'package:flutter_json_forms/src/utils/enum_utils.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_field_wrapper.dart';
 
 class FormRadioGroupField extends StatelessWidget {
   final FormFieldContext formFieldContext;
@@ -16,6 +17,8 @@ class FormRadioGroupField extends StatelessWidget {
 
   @override
   Widget build(BuildContext buildContext) {
+    final enumTitles = formFieldContext.options?.fieldSpecificOptions?.enumTitles;
+    final mapped = mapEnumValuesToTitles(values, enumTitles);
     return FormFieldWrapper(
       context: formFieldContext,
       child: FormBuilderRadioGroup(
@@ -26,7 +29,7 @@ class FormRadioGroupField extends StatelessWidget {
         enabled: formFieldContext.enabled,
         validator: FormFieldUtils.createBaseValidator(formFieldContext),
         decoration: FormFieldUtils.getInputDecoration(formFieldContext, buildContext, border: false),
-        options: values.map((value) => FormBuilderFieldOption(value: value)).toList(growable: false),
+        options: mapped.map((entry) => FormBuilderFieldOption(value: entry.key, child: Text(entry.value))).toList(growable: false),
         orientation: _getOptionsOrientation(),
       ),
     );

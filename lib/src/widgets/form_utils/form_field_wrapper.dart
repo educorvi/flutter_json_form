@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_utils.dart';
+import 'package:flutter_json_forms/src/widgets/form_utils/form_field_utils.dart';
 import '../../utils/show_on.dart';
 import '../custom_form_fields/html_widget.dart';
-import '../custom_form_fields/animated_tooltip.dart';
 
 class FormFieldWrapper extends StatelessWidget {
   final FormFieldContext context;
@@ -30,8 +29,8 @@ class FormFieldWrapper extends StatelessWidget {
       columnChildren.add(CustomHtmlWidget(htmlData: preHtml));
     }
 
-    final labelText = FormFieldUtils.getLabel(context,
-        getLabel: UIConstants.labelSeparateText, showRequiredMark: false, uiSchemaLabel: context.options?.formattingOptions?.label);
+    final labelText =
+        FormFieldUtils.getLabel(context, getLabel: UIConstants.labelSeparateText, uiSchemaLabel: context.options?.formattingOptions?.label);
 
     if (context.showLabel && showLabel && labelText != null) {
       columnChildren.add(
@@ -49,12 +48,14 @@ class FormFieldWrapper extends StatelessWidget {
     }
 
     return handleShowOn(
-      child: columnChildren.length == 1
-          ? columnChildren.first
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: columnChildren,
-            ),
+      child: MergeSemantics(
+        child: columnChildren.length == 1
+            ? columnChildren.first
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: columnChildren,
+              ),
+      ),
       parentIsShown: context.parentIsShown ?? true,
       showOn: context.showOn,
       ritaDependencies: context.ritaDependencies,
