@@ -7,28 +7,34 @@ import 'package:flutter_json_forms/src/utils/enum_utils.dart';
 
 class FormSegmentedControlField extends StatelessWidget {
   final FormFieldContext formFieldContext;
-  final List<String> values;
+  final List<dynamic> values;
+  final Widget Function(dynamic value, String label)? segmentBuilder;
 
   const FormSegmentedControlField({
     super.key,
     required this.formFieldContext,
     required this.values,
+    this.segmentBuilder,
   });
 
   @override
   Widget build(BuildContext buildContext) {
     final enumTitles = formFieldContext.options?.fieldSpecificOptions?.enumTitles;
     final mapped = mapEnumValuesToTitles(values, enumTitles);
+
     return FormFieldWrapper(
       context: formFieldContext,
-      child: FormBuilderSegmentedButton<String>(
+      child: FormBuilderSegmentedButton<dynamic>(
         name: formFieldContext.id,
         onChanged: formFieldContext.onChanged,
         onSaved: formFieldContext.onSavedCallback,
         initialValue: formFieldContext.initialValue,
         enabled: formFieldContext.enabled,
         decoration: FormFieldUtils.getInputDecoration(formFieldContext, buildContext, border: false),
-        segments: mapped.map((entry) => ButtonSegment(value: entry.key, label: Text(entry.value))).toList(growable: false),
+        segments: mapped.map((entry) {
+          final label = segmentBuilder != null ? segmentBuilder!(entry.key, entry.value) : Text(entry.value);
+          return ButtonSegment(value: entry.key, label: label);
+        }).toList(growable: false),
         showSelectedIcon: true,
         selectedIcon: const Icon(Icons.check),
         stacked: formFieldContext.options?.fieldSpecificOptions?.stacked,

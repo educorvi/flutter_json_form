@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_json_forms/l10n/form_fallbackLocalizations.dart';
+import 'package:flutter_json_forms/l10n/form_fallback_localizations.dart';
 
 class FormArrayAddButton extends StatelessWidget {
   final VoidCallback? onPressed;

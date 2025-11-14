@@ -8,18 +8,21 @@ import 'package:flutter_json_forms/src/utils/enum_utils.dart';
 
 class FormDropdownField extends StatelessWidget {
   final FormFieldContext formFieldContext;
-  final List<String> values;
+  final List<dynamic> values;
+  final Widget Function(dynamic value, String label)? itemBuilder;
 
   const FormDropdownField({
     super.key,
     required this.formFieldContext,
     required this.values,
+    this.itemBuilder,
   });
 
   @override
   Widget build(BuildContext context) {
     final enumTitles = formFieldContext.options?.fieldSpecificOptions?.enumTitles;
     final mapped = mapEnumValuesToTitles(values, enumTitles);
+
     return FormFieldWrapper(
       context: formFieldContext,
       child: FormBuilderDropdown(
@@ -30,7 +33,10 @@ class FormDropdownField extends StatelessWidget {
         validator: FormFieldUtils.createBaseValidator(formFieldContext),
         decoration: FormFieldUtils.getInputDecoration(formFieldContext, context),
         initialValue: formFieldContext.initialValue,
-        items: mapped.map((entry) => DropdownMenuItem(value: entry.key, child: FormFieldText(entry.value))).toList(growable: false),
+        items: mapped.map((entry) {
+          final child = itemBuilder != null ? itemBuilder!(entry.key, entry.value) : FormFieldText(entry.value);
+          return DropdownMenuItem(value: entry.key, child: child);
+        }).toList(growable: false),
       ),
     );
   }

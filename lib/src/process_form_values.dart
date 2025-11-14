@@ -1,6 +1,10 @@
+// import 'dart:convert';
+// import 'dart:io';
 import 'dart:ui';
 
+// import 'package:flutter_json_forms/src/utils/logger.dart';
 import 'package:flutter_json_forms/src/widgets/data/list_item.dart';
+// import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 
 /// Specify the format of the form data when the form is submitted
 enum OnFormSubmitFormat { formBuilder, ellaV1, ellaV2 }
@@ -75,7 +79,7 @@ enum OnFormSubmitFormat { formBuilder, ellaV1, ellaV2 }
 ///
 /// This helper is used to convert form field values into JSON-serializable output,
 /// flattening ListItem wrappers and handling nested structures.
-dynamic extractListItemValue(dynamic value) {
+dynamic extractListItemValue(dynamic value, {bool skipFiles = true}) {
   if (value is ListItem) {
     return extractListItemValue(value.value);
   } else if (value is List) {
@@ -86,9 +90,22 @@ dynamic extractListItemValue(dynamic value) {
     return value.toIso8601String();
   } else if (value is Color?) {
     return value?.toARGB32().toString();
-  }
+  } // else if (value is PlatformFile) {
+  //   return await readPlatformFileBytes(value);
+  // }
   return value;
 }
+
+// Future<String> readPlatformFileBytes(PlatformFile file) async {
+//   if (file.bytes != null) {
+//     return base64Encode(file.bytes!);
+//   } else if (file.path != null) {
+//     return base64Encode(await File(file.path!).readAsBytes());
+//   } else {
+//     FormLogger.generic.warning('PlatformFile has no bytes');
+//     return Future.value('');
+//   }
+// }
 
 /// Converts flat form value map with JSON pointer-like keys into a nested JSON structure.
 ///
@@ -111,7 +128,7 @@ dynamic extractListItemValue(dynamic value) {
 ///     "person": {"name": "Alice", "age": 30},
 ///     "tags": ["tag1", "tag2"]
 ///   }
-Map<String, dynamic> processFormValues(Map<String, dynamic> formValues) {
+Map<String, dynamic> processFormValues(Map<String, dynamic> formValues, {bool skipFiles = true}) {
   Map<String, dynamic> processedFormValues = {};
   formValues.forEach((key, value) {
     if (value != null) {

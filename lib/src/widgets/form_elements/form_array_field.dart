@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_json_forms/l10n/form_fallbackLocalizations.dart';
-import 'package:flutter_json_forms/l10n/form_localizations.dart';
+import 'package:flutter_json_forms/l10n/form_fallback_localizations.dart';
+// import 'package:flutter_json_forms/l10n/form_localizations.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';

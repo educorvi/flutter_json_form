@@ -589,7 +589,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   }
 
   void _onFormValueChanged(String scope, dynamic value) async {
-    _logger.fine('Form value changed: $scope = $value');
+    _logger.info('Form value changed: $scope = $value');
 
     // Update the showOn dependencies
     setValueForShowOn(scope, value);
@@ -604,7 +604,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
       _ritaDependencies.addAll(ritaDependencies);
       _ritaDependenciesRevision++;
     });
-    _logger.finer('Updated ${ritaDependencies.length} Rita dependencies');
+    _logger.info('Updated ${ritaDependencies.length} Rita dependencies');
   }
 
   /// gets a value for a showOn condition

@@ -7,18 +7,21 @@ import 'package:flutter_json_forms/src/widgets/form_utils/form_field_wrapper.dar
 
 class FormRadioGroupField extends StatelessWidget {
   final FormFieldContext formFieldContext;
-  final List<String> values;
+  final List<dynamic> values;
+  final Widget Function(dynamic value, String label)? optionBuilder;
 
   const FormRadioGroupField({
     super.key,
     required this.formFieldContext,
     required this.values,
+    this.optionBuilder,
   });
 
   @override
   Widget build(BuildContext buildContext) {
     final enumTitles = formFieldContext.options?.fieldSpecificOptions?.enumTitles;
     final mapped = mapEnumValuesToTitles(values, enumTitles);
+
     return FormFieldWrapper(
       context: formFieldContext,
       child: FormBuilderRadioGroup(
@@ -29,7 +32,10 @@ class FormRadioGroupField extends StatelessWidget {
         enabled: formFieldContext.enabled,
         validator: FormFieldUtils.createBaseValidator(formFieldContext),
         decoration: FormFieldUtils.getInputDecoration(formFieldContext, buildContext, border: false),
-        options: mapped.map((entry) => FormBuilderFieldOption(value: entry.key, child: Text(entry.value))).toList(growable: false),
+        options: mapped.map((entry) {
+          final child = optionBuilder != null ? optionBuilder!(entry.key, entry.value) : Text(entry.value);
+          return FormBuilderFieldOption(value: entry.key, child: child);
+        }).toList(growable: false),
         orientation: _getOptionsOrientation(),
       ),
     );
