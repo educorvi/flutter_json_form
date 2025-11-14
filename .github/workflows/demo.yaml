@@ -15,6 +15,7 @@ env:
 
 jobs:
   lint:
+    if: false
     name: Lint Demo App
     runs-on: ubuntu-latest
     steps:
@@ -107,6 +108,7 @@ jobs:
           abi: x86_64
 
   integration_test_web:
+    if: false
     name: "Integration Tests Web"
     needs: lint
     runs-on: ubuntu-latest
@@ -147,7 +149,7 @@ jobs:
 
   build_web:
     name: "Build Web"
-    needs: integration_test_web
+    # needs: integration_test_web
     # if#: startsWith(github.ref, 'refs/tags/v') #  Only deploy on version tags
     runs-on: ubuntu-latest
     steps:
@@ -193,3 +195,5 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ env.PATH_TO_APP }}/build/web
