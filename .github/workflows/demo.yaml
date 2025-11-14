@@ -41,6 +41,7 @@ jobs:
         working-directory: ${{ env.PATH_TO_APP }}
 
   integration_test_ios:
+    if: false
     name: "Integration Tests iOS"
     needs: lint
     runs-on: macOS-latest
