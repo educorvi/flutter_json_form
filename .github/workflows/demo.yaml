@@ -175,6 +175,10 @@ jobs:
         run: flutter build web --base-href "${{ steps.pages.outputs.base_path }}/"
         working-directory: ${{ env.PATH_TO_APP }}
 
+      - name: Add .nojekyll file
+        run: touch build/web/.nojekyll
+        working-directory: ${{ env.PATH_TO_APP }}
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -195,5 +199,3 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: ${{ env.PATH_TO_APP }}/build/web
