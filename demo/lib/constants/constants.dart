@@ -8,7 +8,35 @@ import 'package:flutter_json_forms_demo/theme.dart';
 import 'appIcon/app_icon.dart';
 import 'appIcon/google_material_icon.dart';
 
-final appConstants = AppConstants(designSystem: DesignSystem.uvCooperativeDesign);
+final appConstants = AppConstants(designSystem: DesignSystem.googleMaterial);
+
+/// Layout and spacing constants
+class LayoutConstants {
+  // Page widths
+  static const double maxPageWidth = 1000.0;
+
+  // Spacing
+  static const double spacingXs = 4.0;
+  static const double spacingS = 8.0;
+  static const double spacingM = 16.0;
+  static const double spacingL = 24.0;
+  static const double spacingXl = 32.0;
+
+  // Padding
+  static const EdgeInsets paddingAll = EdgeInsets.all(spacingM);
+  static const EdgeInsets paddingAllS = EdgeInsets.all(spacingS);
+  static const EdgeInsets paddingCard = EdgeInsets.all(spacingM);
+  static const EdgeInsets paddingHorizontal = EdgeInsets.symmetric(horizontal: spacingM);
+  static const EdgeInsets paddingVertical = EdgeInsets.symmetric(vertical: spacingM);
+  static const EdgeInsets paddingButtonBar = EdgeInsets.symmetric(horizontal: spacingM, vertical: spacingS);
+
+  // Gaps (for use with SizedBox)
+  static const SizedBox gapXs = SizedBox(height: spacingXs, width: spacingXs);
+  static const SizedBox gapS = SizedBox(height: spacingS, width: spacingS);
+  static const SizedBox gapM = SizedBox(height: spacingM, width: spacingM);
+  static const SizedBox gapL = SizedBox(height: spacingL, width: spacingL);
+  static const SizedBox gapXl = SizedBox(height: spacingXl, width: spacingXl);
+}
 
 enum DesignSystem {
   googleMaterial,
@@ -21,13 +49,14 @@ enum IconSet {
 }
 
 class AppConstants {
+  final DesignSystem designSystem;
   final NetworkConstants network;
   final NavigationBarConstants navigationBar;
   late final UiConstants ui;
   final IconConstants icons;
   late final AppTheme theme;
 
-  AppConstants({required DesignSystem designSystem})
+  AppConstants({required this.designSystem})
       : network = NetworkConstants(),
         navigationBar = NavigationBarConstants(iconSet: _getIconSystem(designSystem)),
         icons = IconConstants(iconSet: _getIconSystem(designSystem)) {

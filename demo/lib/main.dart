@@ -1,17 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 import 'package:flutter_json_forms_demo/constants/constants.dart';
-import 'package:flutter_json_forms_demo/widgets/form_file/form_file_base.dart';
-import 'package:flutter_json_forms_demo/widgets/form_selector.dart';
+import 'package:flutter_json_forms_demo/pages/custom_form_page.dart';
+import 'package:flutter_json_forms_demo/pages/example_forms_page.dart';
+import 'package:flutter_json_forms_demo/pages/settings_page.dart';
+import 'package:flutter_json_forms_demo/widgets/adaptive_navigation.dart';
 import 'package:flutter_json_forms_demo/widgets/theme_mode_switcher.dart';
 import 'package:logging/logging.dart';
-import 'package:accessibility_tools/accessibility_tools.dart';
+// import 'package:accessibility_tools/accessibility_tools.dart';
 
 final themeModeNotifier = ThemeModeNotifier();
+final formThemeNotifier = FormThemeNotifier();
 
 void main() {
   // Initialize logging for the Flutter JSON Forms package
-  Logger.root.level = Level.FINE;
+  Logger.root.level = kDebugMode ? Level.FINE : Level.WARNING;
 
   _setupCustomLogging();
 
@@ -45,14 +49,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: themeModeNotifier,
+      listenable: Listenable.merge([themeModeNotifier, formThemeNotifier]),
       builder: (context, child) {
+        final currentAppConstants = AppConstants(designSystem: formThemeNotifier.designSystem);
         return MaterialApp(
           //builder: (context, child) => AccessibilityTools(child: child),
           localizationsDelegates: const [FormBuilderLocalizations.delegate],
           title: 'Flutter Json Forms Demo',
-          theme: appConstants.theme.getThemeData(Brightness.light),
-          darkTheme: appConstants.theme.getThemeData(Brightness.dark),
+          theme: currentAppConstants.theme.getThemeData(Brightness.light),
+          darkTheme: currentAppConstants.theme.getThemeData(Brightness.dark),
           themeMode: themeModeNotifier.themeMode,
           home: const FlutterFormDemo(),
         );
@@ -69,35 +74,42 @@ class FlutterFormDemo extends StatefulWidget {
 }
 
 class _FlutterFormDemoState extends State<FlutterFormDemo> {
-  late final FormSelector formSelector;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  FormFile? selectedFormFile;
-
   @override
   Widget build(BuildContext context) {
-    return SelectionArea(
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: const Text("Flutter Json Forms Demo"),
-          actions: [
-            ThemeModeSwitcher(notifier: themeModeNotifier),
-            const SizedBox(width: 8),
-          ],
-        ),
-        body: ListView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.all(8),
-          children: [
-            Center(child: SizedBox(width: 1000, child: SelectionArea(child: FormSelector()))),
-          ],
-        ),
-      ),
+    return ListenableBuilder(
+      listenable: formThemeNotifier,
+      builder: (context, child) {
+        final currentAppConstants = AppConstants(designSystem: formThemeNotifier.designSystem);
+        return SelectionArea(
+          child: AdaptiveNavigation(
+            appBarTitle: const Text("Flutter Json Forms Demo"),
+            appBarActions: [
+              ThemeModeSwitcher(notifier: themeModeNotifier),
+              const SizedBox(width: LayoutConstants.spacingS),
+            ],
+            items: [
+              NavigationItem(
+                label: 'Examples',
+                selectedIcon: currentAppConstants.navigationBar.homePageIconSelected,
+                unselectedIcon: currentAppConstants.navigationBar.homePageIconUnselected,
+                page: const ExampleFormsPage(),
+              ),
+              NavigationItem(
+                label: 'Custom Form',
+                selectedIcon: currentAppConstants.navigationBar.databasePageIconSelected,
+                unselectedIcon: currentAppConstants.navigationBar.databasePageIconUnselected,
+                page: const CustomFormPage(),
+              ),
+              NavigationItem(
+                label: 'Settings',
+                selectedIcon: currentAppConstants.navigationBar.settingsPageIconSelected,
+                unselectedIcon: currentAppConstants.navigationBar.settingsPageIconUnselected,
+                page: SettingsPage(themeNotifier: formThemeNotifier),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

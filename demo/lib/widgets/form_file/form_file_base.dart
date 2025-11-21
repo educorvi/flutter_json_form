@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 
-import '../json_dialog.dart';
+import '../form_display.dart';
 
 abstract class FormFile {
   final String name;
@@ -26,65 +26,11 @@ abstract class FormFile {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error loading schemas: ${snapshot.error}'));
         } else {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: Wrap(
-                  runSpacing: 8,
-                  spacing: 16,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    FilledButton.tonal(
-                      onPressed: () => showJsonDialog(context, 'JSON Schema', jsonSchema),
-                      child: const Text('Show JSON Schema'),
-                    ),
-                    FilledButton.tonal(
-                      onPressed: () => showJsonDialog(context, 'UI Schema', uiSchema),
-                      child: const Text('Show UI Schema'),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(),
-              FlutterJsonForm(
-                key: formKey,
-                validate: false,
-                jsonSchema: jsonSchema,
-                uiSchema: uiSchema,
-                formData: formData,
-                onFormSubmitSaveCallback: (formValues) {
-                  showJsonDialog(context, 'Form Submitted', formValues);
-                },
-              ),
-              const Divider(),
-              SizedBox(
-                width: double.infinity,
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 8,
-                  runSpacing: 16,
-                  children: [
-                    FilledButton(
-                      onPressed: () {
-                        if (formKey.currentState!.saveAndValidate()) {
-                          final formData = formKey.currentState!.value;
-                          showJsonDialog(context, 'Form Data', formData);
-                        }
-                      },
-                      child: const Text('Show Form Data'),
-                    ),
-                    FilledButton.tonal(
-                      onPressed: () {
-                        formKey.currentState?.reset();
-                      },
-                      child: const Text('Reset Form'),
-                    ),
-                  ],
-                ),
-              )
-            ],
+          return FormDisplay(
+            formKey: formKey,
+            jsonSchema: jsonSchema,
+            uiSchema: uiSchema,
+            formData: formData,
           );
         }
       },

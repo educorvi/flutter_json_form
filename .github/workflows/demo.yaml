@@ -149,7 +149,7 @@ jobs:
     name: "Build Web"
     needs: integration_test_web
     # Only deploy on version tags
-    if: startsWith(github.ref, 'refs/tags/v')
+    # if:startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -183,7 +183,7 @@ jobs:
     name: Deploy Demo App to GitHub Pages
     needs: build_web
     # Only deploy on version tags
-    if: startsWith(github.ref, 'refs/tags/v')
+    # if:startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       pages: write
