@@ -3,12 +3,15 @@ import 'package:flutter_json_forms/flutter_json_forms.dart';
 import 'package:flutter_json_forms_demo/constants/constants.dart';
 import 'package:flutter_json_forms_demo/widgets/form_file/form_file_base.dart';
 import 'package:flutter_json_forms_demo/widgets/form_selector.dart';
+import 'package:flutter_json_forms_demo/widgets/theme_mode_switcher.dart';
 import 'package:logging/logging.dart';
 import 'package:accessibility_tools/accessibility_tools.dart';
 
+final themeModeNotifier = ThemeModeNotifier();
+
 void main() {
   // Initialize logging for the Flutter JSON Forms package
-  Logger.root.level = Level.ALL;
+  Logger.root.level = Level.FINE;
 
   _setupCustomLogging();
 
@@ -41,13 +44,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      builder: (context, child) => AccessibilityTools(child: child),
-      localizationsDelegates: const [FormBuilderLocalizations.delegate],
-      title: 'Flutter Json Forms Demo',
-      theme: appConstants.theme.getThemeData(Brightness.light),
-      darkTheme: appConstants.theme.getThemeData(Brightness.dark),
-      home: const FlutterFormDemo(),
+    return ListenableBuilder(
+      listenable: themeModeNotifier,
+      builder: (context, child) {
+        return MaterialApp(
+          //builder: (context, child) => AccessibilityTools(child: child),
+          localizationsDelegates: const [FormBuilderLocalizations.delegate],
+          title: 'Flutter Json Forms Demo',
+          theme: appConstants.theme.getThemeData(Brightness.light),
+          darkTheme: appConstants.theme.getThemeData(Brightness.dark),
+          themeMode: themeModeNotifier.themeMode,
+          home: const FlutterFormDemo(),
+        );
+      },
     );
   }
 }
@@ -76,6 +85,10 @@ class _FlutterFormDemoState extends State<FlutterFormDemo> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: const Text("Flutter Json Forms Demo"),
+          actions: [
+            ThemeModeSwitcher(notifier: themeModeNotifier),
+            const SizedBox(width: 8),
+          ],
         ),
         body: ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
