@@ -3,7 +3,6 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
-// import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
 import 'package:flutter_json_forms/src/widgets/form_utils/form_field_utils.dart';
 import '../../models/ui_schema.g.dart' as ui;
 import '../../utils/show_on.dart';
@@ -31,12 +30,12 @@ class _FormObjectFieldState extends State<FormObjectField> {
   Widget build(BuildContext context) {
     final formContext = FormContext.of(context);
 
+    // TODO: sometimes formContext is not available which leads to errors. Therefore cache it
     // Cache the FormContext when it's available
     if (formContext != null) {
       _cachedFormContext = formContext;
     }
-
-    // If FormContext is not available and we don't have a cached one, show a placeholder
+    // If FormContext is not available and there is no cached one, show a placeholder
     if (formContext == null && _cachedFormContext == null) {
       return const FormElementLoading();
     }
@@ -149,7 +148,6 @@ class _FormObjectFieldState extends State<FormObjectField> {
     final childShowOn = descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn;
 
     return formContext.elementShown(
-      scope: childScope,
       showOn: childShowOn,
       parentIsShown: true,
       selfIndices: computedSelfIndices ?? widget.formFieldContext.selfIndices,

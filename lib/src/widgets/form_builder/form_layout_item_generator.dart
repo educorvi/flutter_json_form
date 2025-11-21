@@ -17,7 +17,8 @@ class FormLayoutItemGenerator {
   static Widget generateItem(
     ui.LayoutElement item,
     int nestingLevel, {
-    bool? isShownFromParent,
+    required bool
+        isShownFromParent, // TODO why optional, should be required. If no showOn is specified or shoOn evaluated to true, element is shown. If not shown, just set to not shown and child element doent have to evaluate if the are shown since their parent is not shown
     LayoutDirection? layoutDirection,
   }) {
     Widget child;
@@ -39,11 +40,13 @@ class FormLayoutItemGenerator {
         child = FormGroup(
           layout: ui.Layout.fromJson(item.toJson()),
           nestingLevel: nestingLevel + 1,
+          isShownFromParent: isShownFromParent,
         );
       case ui.LayoutElementType.HORIZONTAL_LAYOUT:
         child = FormLayout.horizontal(
           layout: ui.Layout.fromJson(item.toJson()),
           nestingLevel: nestingLevel + 1,
+          isShownFromParent: isShownFromParent,
         );
       case ui.LayoutElementType.HTML:
         child = FormHtml(htmlRenderer: ui.HtmlRenderer.fromJson(item.toJson()));
@@ -51,6 +54,7 @@ class FormLayoutItemGenerator {
         child = FormLayout.vertical(
           layout: ui.Layout.fromJson(item.toJson()),
           nestingLevel: nestingLevel + 1,
+          isShownFromParent: isShownFromParent,
         );
       case null:
         child = FormNotImplemented("No type defined for LayoutElementType $item");
@@ -61,14 +65,15 @@ class FormLayoutItemGenerator {
         final formContext = FormContext.of(context)!;
         return applyCss(
           context,
-          handleShowOn(
-            showOn: item.showOn,
-            child: child,
-            ritaDependencies: formContext.ritaDependencies,
-            ritaEvaluator: formContext.ritaEvaluator,
-            checkValueForShowOn: formContext.checkValueForShowOn,
-            layoutDirection: layoutDirection,
-          ),
+          child is FormControl
+              ? child
+              : handleShowOn(
+                  showOn: item.showOn,
+                  child: child,
+                  ritaDependencies: formContext.ritaDependencies,
+                  ritaEvaluator: formContext.ritaEvaluator,
+                  checkValueForShowOn: formContext.checkValueForShowOn,
+                ),
           // child,
           cssClass: item.options?.cssClass,
         );

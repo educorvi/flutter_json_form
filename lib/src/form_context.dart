@@ -63,7 +63,6 @@ class FormContext extends InheritedWidget {
   }
 
   bool elementShown({
-    required String scope,
     ui.ShowOnProperty? showOn,
     bool? parentIsShown,
     Map<String, int>? selfIndices,

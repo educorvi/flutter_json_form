@@ -10,17 +10,20 @@ class FormLayout extends StatelessWidget {
   final ui.Layout layout;
   final int nestingLevel;
   final LayoutDirection direction;
+  final bool isShownFromParent;
 
   const FormLayout.vertical({
     super.key,
     required this.layout,
     required this.nestingLevel,
+    required this.isShownFromParent,
   }) : direction = LayoutDirection.vertical;
 
   const FormLayout.horizontal({
     super.key,
     required this.layout,
     required this.nestingLevel,
+    required this.isShownFromParent,
   }) : direction = LayoutDirection.horizontal;
 
   @override
@@ -59,6 +62,10 @@ class FormLayout extends StatelessWidget {
       layoutDirection: layoutDirection,
       widgetBuilder: (element, index) {
         Widget widget = FormLayoutItemGenerator.generateItem(
+          isShownFromParent: formContext.elementShown(
+            showOn: element.showOn,
+            parentIsShown: true,
+          ),
           element,
           nestingLevel,
           layoutDirection: layoutDirection,
@@ -77,12 +84,9 @@ class FormLayout extends StatelessWidget {
         }
 
         // Check normal showOn visibility
-        final String elementScope = element.scope ?? '';
         return formContext.elementShown(
-          scope: elementScope,
           showOn: element.showOn,
           parentIsShown: true,
-          selfIndices: const {}, // Layouts don't have selfIndices
         );
       },
     );

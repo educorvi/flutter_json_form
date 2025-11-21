@@ -55,7 +55,7 @@ The final step for the project is to create more documentation on how to use the
 
 ## 7. Allow more theming capabilities
 
-Most of the UI can be themed as native Flutter widgets are used and a theme inherited Widget can be provided to adjust the looks. Other part sof the styling can be configured using the uiSchema. But there are other elements like the padding and widgets used for objects, arrays or groups, the padding for single elements, the alignment within columns and rows etc. Currently the customization options there are very limited and even tough not all options have to be available at the beginning, there should be provided substantially more options for the user
+Most of the UI can be themed as native Flutter widgets are used and a theme inherited Widget can be provided to adjust the looks. Other parts of the styling can be configured using the uiSchema. But there are other elements like the padding and widgets used for objects, arrays or groups, the padding for single elements, the alignment within columns and rows etc. Currently the customization options there are very limited and even tough not all options have to be available at the beginning, there should be provided substantially more options for the user
 
 - Effort: 1 `Personenarbeitstag`
 

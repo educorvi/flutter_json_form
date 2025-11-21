@@ -6,9 +6,9 @@ import 'package:flutter_json_forms/src/widgets/form_elements/form_object_field.d
 import 'package:json_schema/json_schema.dart';
 
 /// Builder for enum value widgets
-/// Handles rendering of complex enum values (objects, arrays) using existing form renderers
+/// Handles rendering of complex enum values (objects and arrays)
 class EnumValueBuilder {
-  /// Builds a widget to display an enum value - delegates to existing renderers for complex types
+  /// Builds a widget to display an enum value
   static Widget buildEnumValueWidget(
     dynamic value,
     String label,
@@ -19,12 +19,12 @@ class EnumValueBuilder {
       return Text(label);
     }
 
-    // For objects, use the existing FormObjectField renderer
+    // For objects, use the FormObjectField
     if (value is Map) {
       return _buildObjectEnumWidget(value, label, parentContext);
     }
 
-    // For arrays, use the existing FormArrayField renderer
+    // For arrays, use FormArrayField
     if (value is List) {
       return _buildArrayEnumWidget(value, label, parentContext);
     }
@@ -135,6 +135,7 @@ class EnumValueBuilder {
   }
 
   /// Fallback: Simple object preview without using FormObjectField
+  /// just displays key-value pairs and has no additional functionality
   static Widget _buildSimpleObjectPreview(
     Map<dynamic, dynamic> objectValue,
     String label,
@@ -164,6 +165,7 @@ class EnumValueBuilder {
   }
 
   /// Fallback: Simple array preview without using FormArrayField
+  /// just displays item count and first few items
   static Widget _buildSimpleArrayPreview(
     List<dynamic> arrayValue,
     String label,

@@ -280,41 +280,41 @@ void main() {
     });
   });
 
-  group('resetShowOnDependencies', () {
-    test('resets flat map values to null', () {
-      final Map<String, dynamic> deps = {'/properties/foo': 'bar', '/properties/baz': 42};
-      resetShowOnDependencies(deps);
-      expect(deps['/properties/foo'], isNull);
-      expect(deps['/properties/baz'], isNull);
-    });
+  // group('resetShowOnDependencies', () {
+  //   test('resets flat map values to null', () {
+  //     final Map<String, dynamic> deps = {'/properties/foo': 'bar', '/properties/baz': 42};
+  //     resetShowOnDependencies(deps);
+  //     expect(deps['/properties/foo'], isNull);
+  //     expect(deps['/properties/baz'], isNull);
+  //   });
 
-    test('recursively resets nested maps', () {
-      final Map<String, dynamic> deps = {
-        '/properties/foo': Map<String, dynamic>.from({'/properties/bar': 'baz'}),
-        '/properties/qux': 123,
-      };
-      resetShowOnDependencies(deps);
-      expect((deps['/properties/foo'] as Map<String, dynamic>)['/properties/bar'], isNull);
-      expect(deps['/properties/qux'], isNull);
-    });
+  //   test('recursively resets nested maps', () {
+  //     final Map<String, dynamic> deps = {
+  //       '/properties/foo': Map<String, dynamic>.from({'/properties/bar': 'baz'}),
+  //       '/properties/qux': 123,
+  //     };
+  //     resetShowOnDependencies(deps);
+  //     expect((deps['/properties/foo'] as Map<String, dynamic>)['/properties/bar'], isNull);
+  //     expect(deps['/properties/qux'], isNull);
+  //   });
 
-    test('resets ListItem values in lists', () {
-      final Map<String, dynamic> deps = {
-        '/properties/list': [ListItem(id: 0, value: 'a'), ListItem(id: 1, value: 'b')],
-      };
-      resetShowOnDependencies(deps);
-      expect((deps['/properties/list'] as List)[0].value, isNull);
-      expect((deps['/properties/list'] as List)[1].value, isNull);
-    });
+  //   test('resets ListItem values in lists', () {
+  //     final Map<String, dynamic> deps = {
+  //       '/properties/list': [ListItem(id: 0, value: 'a'), ListItem(id: 1, value: 'b')],
+  //     };
+  //     resetShowOnDependencies(deps);
+  //     expect((deps['/properties/list'] as List)[0].value, isNull);
+  //     expect((deps['/properties/list'] as List)[1].value, isNull);
+  //   });
 
-    test('recursively resets ListItem values in nested lists/maps', () {
-      final Map<String, dynamic> deps = {
-        '/properties/list': [
-          ListItem(id: 0, value: Map<String, dynamic>.from({'/properties/nested': 'val'}))
-        ],
-      };
-      resetShowOnDependencies(deps);
-      expect((((deps['/properties/list'] as List)[0] as ListItem).value as Map<String, dynamic>)['/properties/nested'], isNull);
-    });
-  });
+  //   test('recursively resets ListItem values in nested lists/maps', () {
+  //     final Map<String, dynamic> deps = {
+  //       '/properties/list': [
+  //         ListItem(id: 0, value: Map<String, dynamic>.from({'/properties/nested': 'val'}))
+  //       ],
+  //     };
+  //     resetShowOnDependencies(deps);
+  //     expect((((deps['/properties/list'] as List)[0] as ListItem).value as Map<String, dynamic>)['/properties/nested'], isNull);
+  //   });
+  // });
 }

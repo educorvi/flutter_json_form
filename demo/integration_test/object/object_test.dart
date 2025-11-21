@@ -144,13 +144,11 @@ void main() {
       expect(find.text('FR'), findsOneWidget);
       // Check switches
       final switchOuter = find.byKey(ValueKey('/properties/switchOuter'));
-      final switchObject = find.byKey(ValueKey('/properties/address/properties/switchObject'));
-      final switchNestedObject = find.byKey(ValueKey('/properties/address/properties/country/properties/switchNestedObject'));
       expect(switchOuter, findsOneWidget);
+      final switchObject = find.byKey(ValueKey('/properties/address/properties/switchObject'));
       expect(switchObject, findsOneWidget);
+      final switchNestedObject = find.byKey(ValueKey('/properties/address/properties/country/properties/switchNestedObject'));
       expect(switchNestedObject, findsOneWidget);
-      // Optionally, check their initial value if possible
-      await Future.delayed(const Duration(seconds: 500));
     });
 
     testWidgets('Nested object is rendered correctly when ui schema references whole object', (tester) async {

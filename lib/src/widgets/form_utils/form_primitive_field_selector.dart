@@ -14,7 +14,7 @@ import '../../models/ui_schema.g.dart' as ui;
 /// Factory for creating primitive (non-enum) field widgets
 class PrimitiveFieldFactory {
   static Widget createField(FormFieldContext context) {
-    // Type-specific logic for non-enum primitive fields
+    // Handle type-specific fields
     switch (context.type) {
       case SchemaType.string:
         return _createStringField(context);
@@ -48,7 +48,7 @@ class PrimitiveFieldFactory {
   }
 
   static Widget _createNumberField(FormFieldContext context, Type expectedType) {
-    // Check if it should be a slider
+    // Check for a slider
     if (context.options?.fieldSpecificOptions?.range == true) {
       return FormSliderField(formFieldContext: context);
     }

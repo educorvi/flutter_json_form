@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/parse.dart';
-import 'package:flutter_json_forms/src/widgets/data/list_item.dart';
 import 'package:json_schema/json_schema.dart';
 
-Color getAlternatingColor(BuildContext context, int nestingLevel) {
-  return nestingLevel % 2 == 1 ? Theme.of(context).colorScheme.surfaceContainerLow : Theme.of(context).colorScheme.surfaceContainerHigh;
-}
+// Color getAlternatingColor(BuildContext context, int nestingLevel) {
+//   return nestingLevel % 2 == 1 ? Theme.of(context).colorScheme.surfaceContainerLow : Theme.of(context).colorScheme.surfaceContainerHigh;
+// }
 
 /// Generates a default UI schema for a given [jsonSchema] JSON schema.
 ///
@@ -246,26 +245,26 @@ Map<String, dynamic> initShowOnDependencies(Map<String, JsonSchema>? properties,
 
 /// Recursively resets the provided dependencies map
 /// most likely no longer needed as all elements are reset when initShowOnDependencies is called
-void resetShowOnDependencies(Map<String, dynamic> dependencies) {
-  dependencies.forEach((key, value) {
-    if (value is Map<String, dynamic>) {
-      resetShowOnDependencies(value);
-    } else if (value is List) {
-      for (var item in value) {
-        if (item is ListItem) {
-          final value = item.value;
-          if (value is Map<String, dynamic>) {
-            resetShowOnDependencies(value);
-          } else {
-            item.value = null;
-          }
-        }
-      }
-    } else {
-      dependencies[key] = null;
-    }
-  });
-}
+// void resetShowOnDependencies(Map<String, dynamic> dependencies) {
+//   dependencies.forEach((key, value) {
+//     if (value is Map<String, dynamic>) {
+//       resetShowOnDependencies(value);
+//     } else if (value is List) {
+//       for (var item in value) {
+//         if (item is ListItem) {
+//           final value = item.value;
+//           if (value is Map<String, dynamic>) {
+//             resetShowOnDependencies(value);
+//           } else {
+//             item.value = null;
+//           }
+//         }
+//       }
+//     } else {
+//       dependencies[key] = null;
+//     }
+//   });
+// }
 
 /// Mixin to provide a safe setState method that checks if the widget is still mounted
 mixin SafeSetStateMixin<T extends StatefulWidget> on State<T> {

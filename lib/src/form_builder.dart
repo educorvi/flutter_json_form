@@ -170,9 +170,9 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
   /// Async initialization to avoid blocking the UI
   Future<void> _initializeAsync() async {
-    _logger.config('Starting form initialization');
+    _logger.info('Starting form initialization');
     try {
-      _logger.finer('Initializing JavaScript engine and rule set');
+      _logger.fine('Initializing JavaScript engine and rule set');
       await _initializeJsEngineAndRuleSetAsync();
 
       if (widget.validate) {
@@ -180,13 +180,13 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
         await _initializeSchemas();
       }
 
-      _logger.finer('Initializing form data and rules');
+      _logger.fine('Initializing form data and rules');
       await _initializeFormAsync();
 
       safeSetState(() {
         _isInitializing = false;
       });
-      _logger.config('Form initialization completed successfully');
+      _logger.info('Form initialization completed successfully');
     } catch (e, stackTrace) {
       _logger.severe('Form initialization failed', e, stackTrace);
 
@@ -338,7 +338,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
       _formKey.currentState?.patchValue(patchState);
     }
 
-    setState(() {
+    safeSetState(() {
       _showOnDependencies = initShowOnDependencies(jsonSchemaModel.properties, null);
       _ritaDependencies.clear();
       _ritaDependenciesRevision++;
@@ -402,7 +402,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   /// if the validation is successful, the jsonSchema is set
   bool _validateJsonSchema(Map<String, dynamic> jsonSchemaMap) {
     final result = jsonMetaSchema.validate(jsonSchemaMap);
-    setState(() {
+    safeSetState(() {
       _jsonSchemaValidationErrors = result.errors;
     });
     return result.errors.isEmpty;
@@ -413,7 +413,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   /// if the validation is successful, the uiSchema is set
   bool _validateUiSchema(Map<String, dynamic> uiSchemaMap) {
     final result = uiMetaSchema.validate(uiSchemaMap);
-    setState(() {
+    safeSetState(() {
       _uiSchemaValidationErrors = result.errors;
     });
     return result.errors.isEmpty;
@@ -548,14 +548,17 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
         child = FormLayout.vertical(
           layout: layout,
           nestingLevel: nestingLevel,
+          isShownFromParent: true, // Top Level Layout is always shown
         );
       case ui.LayoutType.HORIZONTAL_LAYOUT:
         child = FormLayout.horizontal(
           layout: layout,
           nestingLevel: nestingLevel,
+          isShownFromParent: true, // Top Level Layout is always shown
         );
       case ui.LayoutType.GROUP:
-        child = FormGroup(layout: layout, nestingLevel: nestingLevel);
+        child = FormGroup(layout: layout, nestingLevel: nestingLevel, isShownFromParent: true // Top Level Layout is always shown
+            );
     }
 
     final Widget? header = _buildFormHeader();
@@ -589,7 +592,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   }
 
   void _onFormValueChanged(String scope, dynamic value) async {
-    _logger.info('Form value changed: $scope = $value');
+    _logger.config('Form value changed: $scope = $value');
 
     // Update the showOn dependencies
     setValueForShowOn(scope, value);
@@ -604,7 +607,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
       _ritaDependencies.addAll(ritaDependencies);
       _ritaDependenciesRevision++;
     });
-    _logger.info('Updated ${ritaDependencies.length} Rita dependencies');
+    _logger.config('Updated ${ritaDependencies.length} Rita dependencies');
   }
 
   /// gets a value for a showOn condition

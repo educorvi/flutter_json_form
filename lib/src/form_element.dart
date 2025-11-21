@@ -15,7 +15,7 @@ class FormElementFactory {
   static Widget createFormElement(FormFieldContext context) {
     // Check for enums first - any type can be an enum
     if (context.jsonSchema.enumValues?.isNotEmpty ?? false) {
-      _logger.finer('Creating enum field for ${context.scope}');
+      _logger.finest('Creating enum field for ${context.scope}');
       return _createEnumField(context);
     }
 
@@ -26,29 +26,31 @@ class FormElementFactory {
       _logger.severe('Failed to determine schema type for ${context.scope}', e, stackTrace);
       type = null;
     }
-    _logger.finer('Creating form element for ${context.scope} with type $type');
+    _logger.finest('Creating form element for ${context.scope} with type $type');
 
+    /// Handle different schema types
     Widget child;
     switch (type) {
       case SchemaType.array:
-        _logger.finer('Creating array field for ${context.scope}');
+        _logger.finest('Creating array field for ${context.scope}');
         child = FormArrayField(formFieldContext: context);
       case SchemaType.object:
-        _logger.finer('Creating object field for ${context.scope}');
+        _logger.finest('Creating object field for ${context.scope}');
         child = FormObjectField(formFieldContext: context);
       case SchemaType.string:
       case SchemaType.integer:
       case SchemaType.number:
       case SchemaType.boolean:
-        _logger.finer('Creating primitive field for ${context.scope} (${type.toString()})');
+        _logger.finest('Creating primitive field for ${context.scope} (${type.toString()})');
         child = PrimitiveFieldFactory.createField(context);
       default:
         _logger.severe('Unsupported field type: $type for ${context.scope}');
         child = FormNotImplemented(type.toString());
     }
 
+    /// Handle fields marked as hidden
     if (context.options?.formattingOptions?.hidden == true) {
-      _logger.finer('Field ${context.scope} marked as hidden');
+      _logger.finest('Field ${context.scope} marked as hidden');
       return Visibility(
         maintainState: true,
         visible: false,

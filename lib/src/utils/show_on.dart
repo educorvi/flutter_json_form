@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
-import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_visibility.dart';
@@ -17,7 +16,7 @@ bool isElementShown({
   final logger = FormLogger.showOn;
 
   if (parentIsShown == false) {
-    logger.fine('Element hidden due to parent visibility');
+    logger.finer('Element hidden due to parent visibility');
     return false;
   }
   if (showOn == null) {
@@ -27,7 +26,7 @@ bool isElementShown({
   if (showOn.rule != null && showOn.id != null && ritaDependencies != null) {
     // Rita rule: use precomputed dependency
     final result = ritaDependencies[showOn.id!] == true;
-    logger.finest('Rita rule ${showOn.id}: $result');
+    logger.finer('Rita rule ${showOn.id}: $result');
     return result;
   }
   // Fallback: classic showOn
@@ -82,15 +81,7 @@ Widget handleShowOn({
   Map<String, int>? selfIndices,
   RitaRuleEvaluator? ritaEvaluator,
   Map<String, dynamic> Function()? getFullFormData,
-  LayoutDirection? layoutDirection = LayoutDirection.vertical,
 }) {
-  // Widget formattedChild = Padding(
-  //   padding: layoutDirection == LayoutDirection.horizontal // TODO: pass down if first or last element and whn not to render the padding
-  //       ? const EdgeInsets.symmetric(horizontal: UIConstants.elementPadding)
-  //       : const EdgeInsets.symmetric(vertical: UIConstants.elementPadding),
-  //   child: child,
-  // );
-
   if (showOn == null) {
     return child; // formattedChild;
   }

@@ -15,7 +15,6 @@ env:
 
 jobs:
   lint:
-    if: false
     name: Lint Package
     runs-on: ubuntu-latest
     steps:
@@ -43,7 +42,6 @@ jobs:
 
   test:
     name: Test Package
-    if: false
     needs: lint
     runs-on: ubuntu-latest
     steps:

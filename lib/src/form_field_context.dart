@@ -94,7 +94,6 @@ class FormFieldContext {
       required: required,
       onChanged: onChanged,
       isShownCallback: () => formContext.elementShown(
-        scope: scope,
         showOn: showOn,
         parentIsShown: parentIsShown,
         selfIndices: selfIndices,
@@ -114,7 +113,6 @@ class FormFieldContext {
           onSavedCallback(value);
         }
         if (formContext.elementShown(
-          scope: scope,
           showOn: showOn,
           parentIsShown: parentIsShown,
           selfIndices: computedSelfIndices ?? selfIndices,

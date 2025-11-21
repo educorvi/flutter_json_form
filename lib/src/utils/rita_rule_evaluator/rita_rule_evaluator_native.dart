@@ -70,7 +70,7 @@ class RitaRuleEvaluator {
       final rita = jsonEncode({"\$schema": "../../src/schema/schema.json", "rules": rulesCleaned});
       jsRuntime.evaluate('registerRitaRules($rita);');
 
-      _logger.config('Rita evaluator initialized with ${ritaRules.length} rules');
+      _logger.fine('Rita evaluator initialized with ${ritaRules.length} rules');
       _initialized = true;
     } catch (e, stackTrace) {
       _logger.severe('Failed to initialize Rita evaluator', e, stackTrace);

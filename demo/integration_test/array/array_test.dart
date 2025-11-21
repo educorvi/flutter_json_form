@@ -25,7 +25,7 @@ void main() {
       // Should have two tag fields now
       expect(find.byType(FormBuilderTextField), findsNWidgets(2));
 
-      // Reorder: simulate drag if supported (pseudo-code, adjust for your widget)
+      // Reorder: simulate drag if supported
       // final dragHandle = find.byKey(ValueKey('/properties/tags/0/drag'));
       // await tester.drag(dragHandle, Offset(0, 50));
       // await tester.pumpAndSettle();
@@ -39,6 +39,7 @@ void main() {
       expect(find.byType(FormBuilderTextField), findsNWidgets(1));
     });
 
+    /// TODO: check default values which are currently not set for additional new array elements
     testWidgets('Array of objects: default value, add, reorder, delete', (tester) async {
       await pumpForm(tester, jsonSchema: ArrayData.jsonSchemaArrayOfObjects, uiSchema: ArrayData.uiSchemaArrayOfObjects);
       expect(find.formFieldText('people'), findsOneWidget);
@@ -62,63 +63,71 @@ void main() {
       // Should have one person form now
       expect(find.formFieldText('firstName'), findsOneWidget);
       expect(find.formFieldText('lastName'), findsOneWidget);
+      expect(find.text('John'), findsNothing);
+      expect(find.text('Doe'), findsNothing);
     });
 
-    //   testWidgets('Array of arrays: default value, add, reorder, delete', (tester) async {
-    //     await pumpForm(tester, jsonSchema: ArrayData.jsonSchemaArrayOfArrays, uiSchema: ArrayData.uiSchemaArrayOfArrays);
-    //     expect(find.formFieldText('matrix'), findsOneWidget);
-    //     // Should render two array rows
-    //     expect(find.byType(FormBuilderTextField), findsNWidgets(4)); // 2x2 numbers
+    /// TODO: most likely it would be good if object with default values are set correctly here so the initial values are like the default of the array/object
+    testWidgets('Array of arrays: default value, add, reorder, delete', (tester) async {
+      await pumpForm(tester, jsonSchema: ArrayData.jsonSchemaArrayOfArrays, uiSchema: ArrayData.uiSchemaArrayOfArrays);
+      expect(find.formFieldText('matrix'), findsOneWidget);
+      // Should render two array rows
+      expect(find.byType(FormBuilderTextField), findsNWidgets(4)); // 2x2 numbers
 
-    //     // Add new row
-    //     final addButton = find.byKey(ValueKey('/properties/matrix/add'));
-    //     expect(addButton, findsOneWidget);
-    //     await tester.tap(addButton);
-    //     await tester.pumpAndSettle();
-    //     // Should have three rows now
-    //     expect(find.byType(TextFormField), findsNWidgets(6));
+      // Add new row
+      final addButton = find.byKey(ValueKey('/properties/matrix/add'));
+      expect(addButton, findsOneWidget);
+      await tester.tap(addButton);
+      await tester.pumpAndSettle();
+      final addNestedButton = find.byKey(ValueKey('/properties/matrix/items/3/add'));
+      expect(addNestedButton, findsOneWidget);
+      await tester.tap(addNestedButton);
+      await tester.pumpAndSettle();
+      // Should have three rows now
+      expect(find.byType(FormBuilderTextField), findsNWidgets(5));
 
-    //     // Delete
-    //     final deleteButton = find.byKey(ValueKey('/properties/matrix/0/delete'));
-    //     expect(deleteButton, findsOneWidget);
-    //     await tester.tap(deleteButton);
-    //     await tester.pumpAndSettle();
-    //     // Should have two rows now
-    //     expect(find.byType(FormBuilderTextField), findsNWidgets(4));
-    //   });
-    // });
+      // Delete
+      final deleteButton = find.byKey(ValueKey('/properties/matrix/0/remove'));
+      expect(deleteButton, findsOneWidget);
+      await tester.tap(deleteButton);
+      await tester.pumpAndSettle();
+      // Should have two rows now
+      expect(find.byType(FormBuilderTextField), findsNWidgets(3));
+    });
+  });
 
-    // group('Nested Array Form Tests', () {
-    //   testWidgets('Nested array: default value, add, reorder, delete', (tester) async {
-    //     await pumpForm(tester, jsonSchema: NestedArrayData.jsonSchemaNestedArray, uiSchema: NestedArrayData.uiSchemaNestedArray);
-    //     expect(find.formFieldText('groups'), findsOneWidget);
-    //     expect(find.formFieldText('GroupA'), findsOneWidget);
-    //     expect(find.formFieldText('Alice'), findsOneWidget);
-    //     expect(find.formFieldText('Bob'), findsOneWidget);
+  group('Nested Array Form Tests', () {
+    testWidgets('Nested array: default value, add, reorder, delete', (tester) async {
+      await pumpForm(tester, jsonSchema: NestedArrayData.jsonSchemaNestedArray, uiSchema: NestedArrayData.uiSchemaNestedArray);
+      expect(find.formFieldText('groups'), findsOneWidget);
+      expect(find.text('GroupA'), findsOneWidget);
+      expect(find.text('Alice'), findsOneWidget);
+      expect(find.text('Bob'), findsOneWidget);
 
-    //     // Add new group
-    //     final addGroupButton = find.byKey(ValueKey('/properties/groups/add'));
-    //     expect(addGroupButton, findsOneWidget);
-    //     await tester.tap(addGroupButton);
-    //     await tester.pumpAndSettle();
-    //     // Should have two group forms now
-    //     expect(find.formFieldText('name'), findsNWidgets(2));
+      // Add new group
+      final addGroupButton = find.byKey(ValueKey('/properties/groups/add'));
+      expect(addGroupButton, findsOneWidget);
+      await tester.tap(addGroupButton);
+      await tester.pumpAndSettle();
+      // Should have two group forms now
+      expect(find.formFieldText('name'), findsNWidgets(2));
 
-    //     // Add member to first group
-    //     final addMemberButton = find.byKey(ValueKey('/properties/groups/0/properties/members/add'));
-    //     expect(addMemberButton, findsOneWidget);
-    //     await tester.tap(addMemberButton);
-    //     await tester.pumpAndSettle();
-    //     // Should have three member fields in first group
-    //     expect(find.byType(FormBuilderTextField), findsNWidgets(5)); // 2 group names + 3 members
+      // Add member to first group
+      final addMemberButton = find.byKey(ValueKey('/properties/groups/items/0/properties/members/add'));
+      expect(addMemberButton, findsOneWidget);
+      await tester.tap(addMemberButton);
+      await tester.pumpAndSettle();
+      // Should have three member fields in first group
+      expect(find.byType(FormBuilderTextField), findsNWidgets(5)); // 2 group names + 3 members
 
-    //     // Delete member from first group
-    //     final deleteMemberButton = find.byKey(ValueKey('/properties/groups/0/properties/members/0/delete'));
-    //     expect(deleteMemberButton, findsOneWidget);
-    //     await tester.tap(deleteMemberButton);
-    //     await tester.pumpAndSettle();
-    //     // Should have two member fields in first group
-    //     expect(find.byType(FormBuilderTextField), findsNWidgets(4));
-    //   });
+      // Delete member from first group
+      final deleteMemberButton = find.byKey(ValueKey('/properties/groups/items/0/properties/members/0/remove'));
+      expect(deleteMemberButton, findsOneWidget);
+      await tester.tap(deleteMemberButton);
+      await tester.pumpAndSettle();
+      // Should have two member fields in first group
+      expect(find.byType(FormBuilderTextField), findsNWidgets(4));
+      expect(find.text('Alice'), findsNothing);
+    });
   });
 }

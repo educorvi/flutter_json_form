@@ -264,7 +264,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
     return SpacingUtils.buildArrayItemsWithSpacing<ListItem<dynamic>>(
       items: items,
       widgetBuilder: (item, index) => _buildArrayItemWidget(item, index, formContext, minItems),
-      isVisibleChecker: (item, index) => true, // Array items are typically always visible
+      isVisibleChecker: (item, index) => true, // TODO
       spacingWidgetBuilder: (item, index) => Container(
         key: Key('${item.id}_spacing'),
         height: 8.0,

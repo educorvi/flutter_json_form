@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
 
@@ -54,13 +55,13 @@ class SpacingUtils {
   /// Simplified version for layout elements (FormGroup/FormLayout)
   static List<Widget> buildLayoutElementsWithSpacing({
     required BuildContext context,
-    required List<dynamic> elements, // ui.LayoutElement
-    required Widget Function(dynamic element, int index) widgetBuilder,
-    required bool Function(dynamic element, int index) isVisibleChecker,
+    required List<ui.LayoutElement> elements,
+    required Widget Function(ui.LayoutElement element, int index) widgetBuilder,
+    required bool Function(ui.LayoutElement element, int index) isVisibleChecker,
     LayoutDirection layoutDirection = LayoutDirection.vertical,
     double spacing = UIConstants.elementSpacing,
   }) {
-    return buildWidgetsWithSpacing<dynamic>(
+    return buildWidgetsWithSpacing<ui.LayoutElement>(
       items: elements,
       widgetBuilder: widgetBuilder,
       isVisibleChecker: isVisibleChecker,

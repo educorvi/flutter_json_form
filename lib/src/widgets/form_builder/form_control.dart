@@ -10,13 +10,13 @@ import '../../utils/utils.dart';
 class FormControl extends StatelessWidget {
   final ui.Control control;
   final int nestingLevel;
-  final bool? isShownFromParent;
+  final bool isShownFromParent;
 
   const FormControl({
     super.key,
     required this.control,
     required this.nestingLevel,
-    this.isShownFromParent,
+    required this.isShownFromParent,
   });
 
   @override
@@ -32,7 +32,7 @@ class FormControl extends StatelessWidget {
     }
 
     final format = control.options?.fieldSpecificOptions?.format;
-    final bool parentIsShown = isShownFromParent ?? true;
+    final bool parentIsShown = isShownFromParent;
 
     return FormElementFactory.createFormElement(FormFieldContext.fromFormContext(
       context: context,
@@ -49,14 +49,7 @@ class FormControl extends StatelessWidget {
       selfIndices: const {},
       onChanged: (value) => formContext.onFormValueChanged(scope, value),
       onSavedCallback: (value) => {
-        formContext.elementShown(
-          scope: scope,
-          showOn: control.showOn,
-          parentIsShown: parentIsShown,
-          selfIndices: const {}, // Form controls don't have selfIndices
-        )
-            ? formContext.onFormValueSaved(scope, value)
-            : null,
+        formContext.elementShown(showOn: control.showOn, parentIsShown: parentIsShown) ? formContext.onFormValueSaved(scope, value) : null,
       },
     ));
   }

@@ -4,18 +4,19 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_item_generator.dart';
 import '../../models/ui_schema.g.dart' as ui;
 import '../shared/common.dart';
-import '../../utils/show_on.dart';
 import '../constants.dart';
 import '../shared/spacing_utils.dart';
 
 class FormGroup extends StatelessWidget {
   final ui.Layout layout;
   final int nestingLevel;
+  final bool isShownFromParent;
 
   const FormGroup({
     super.key,
     required this.layout,
     required this.nestingLevel,
+    required this.isShownFromParent,
   });
 
   @override
@@ -23,13 +24,18 @@ class FormGroup extends StatelessWidget {
     final formContext = FormContext.of(context)!;
     final elements = layout.elements;
     final label = layout.options?.label;
-    final showOn = layout.showOn;
+    // final showOn = layout.showOn;
 
-    bool? isShown = isElementShown(
-      showOn: showOn,
-      ritaDependencies: formContext.ritaDependencies,
-      checkValueForShowOn: formContext.checkValueForShowOn,
+    bool isShown = formContext.elementShown(
+      showOn: layout.showOn,
+      parentIsShown: isShownFromParent,
     );
+
+    // bool? isShown = isElementShown(
+    //   showOn: showOn,
+    //   ritaDependencies: formContext.ritaDependencies,
+    //   checkValueForShowOn: formContext.checkValueForShowOn,
+    // );
 
     Widget groupElement = getLineContainer(
       child: Padding(
@@ -45,7 +51,7 @@ class FormGroup extends StatelessWidget {
   }
 
   /// Builds a list of widgets with proper spacing using shared utility
-  List<Widget> _buildElementsWithSpacing(BuildContext context, List<ui.LayoutElement> elements, bool? parentIsShown) {
+  List<Widget> _buildElementsWithSpacing(BuildContext context, List<ui.LayoutElement> elements, bool parentIsShown) {
     final formContext = FormContext.of(context)!;
 
     return SpacingUtils.buildLayoutElementsWithSpacing(
@@ -62,12 +68,9 @@ class FormGroup extends StatelessWidget {
           return false;
         }
 
-        final String elementScope = element.scope ?? '';
         return formContext.elementShown(
-          scope: elementScope,
           showOn: element.showOn,
           parentIsShown: true,
-          selfIndices: const {},
         );
       },
     );
