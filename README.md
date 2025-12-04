@@ -221,5 +221,5 @@ An Devcontainer configuration will be provided in the future to make it easier t
 
 ## TODO
 
-- Accessability Section
+- Accessibility Section
 - Customization: completely provide own widgets for the elements

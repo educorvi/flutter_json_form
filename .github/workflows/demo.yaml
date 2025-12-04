@@ -12,6 +12,7 @@ on:
 
 env:
   PATH_TO_APP: demo
+  FLUTTER_VERSION: 3.38.3
 
 jobs:
   lint:
@@ -25,7 +26,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: "master"
-          flutter-version: "3.32.8"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
 
       - name: Install dependencies
@@ -53,7 +54,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: "master"
-          flutter-version: "3.32.8"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
       - name: Install dependencies
         run: flutter pub get
@@ -87,7 +88,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: "master"
-          flutter-version: "3.32.8"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
 
       - name: Install Android SDK
@@ -118,7 +119,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: "master"
-          flutter-version: "3.32.8"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
 
       - name: Install dependencies
@@ -159,7 +160,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: "master"
-          flutter-version: "3.32.8"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
 
       - name: Setup Pages
