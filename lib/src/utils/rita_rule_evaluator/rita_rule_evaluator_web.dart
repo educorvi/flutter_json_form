@@ -2,9 +2,10 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html' as html;
-import 'dart:js' as js;
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'package:flutter/services.dart';
+import 'package:web/web.dart' as web;
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 
 class RitaRuleEvaluator {
@@ -25,12 +26,12 @@ class RitaRuleEvaluator {
       final jsBundle = await rootBundle.loadString(jsBundlePath);
 
       // Create and inject the script
-      final scriptElement = html.ScriptElement();
+      final scriptElement = web.HTMLScriptElement();
       scriptElement.text = jsBundle;
-      html.document.head!.append(scriptElement);
+      web.document.head!.append(scriptElement);
 
       // Setup global functions
-      final setupScript = html.ScriptElement();
+      final setupScript = web.HTMLScriptElement();
       setupScript.text = '''
         var ritaEvaluators = {};
 
@@ -54,7 +55,7 @@ class RitaRuleEvaluator {
           return result;
         }
       ''';
-      html.document.head!.append(setupScript);
+      web.document.head!.append(setupScript);
 
       _jsLoaded = true;
     } catch (e) {
@@ -82,7 +83,8 @@ class RitaRuleEvaluator {
     final rita = jsonEncode({"\$schema": "../../src/schema/schema.json", "rules": rulesCleaned});
 
     try {
-      js.context.callMethod('registerRitaRules', [rita]);
+      // Use globalContext to access window's global functions
+      globalContext.callMethod('registerRitaRules'.toJS, rita.toJS);
       _initialized = true;
     } catch (e) {
       // print('Error initializing Rita rules: $e');
@@ -100,23 +102,12 @@ class RitaRuleEvaluator {
     if (!_initialized) return false;
 
     try {
-      final completer = Completer<bool>();
-      final jsPromise = js.context.callMethod('ritaEvalByIdAsync', [ruleId, dataJson]);
-
-      final jsPromiseWrapper = js.JsObject.fromBrowserObject(jsPromise);
-      jsPromiseWrapper.callMethod('then', [
-        js.allowInterop((result) {
-          final boolResult = result == true || result.toString().trim() == 'true' || result.toString().trim() == '1';
-          completer.complete(boolResult);
-        })
-      ]);
-      jsPromiseWrapper.callMethod('catch', [
-        js.allowInterop((error) {
-          completer.complete(false);
-        })
-      ]);
-
-      return await completer.future.timeout(Duration(seconds: 5), onTimeout: () => false);
+      final jsPromise = globalContext.callMethod('ritaEvalByIdAsync'.toJS, ruleId.toJS, dataJson.toJS);
+      final result = await (jsPromise! as JSPromise).toDart.timeout(Duration(seconds: 5));
+      // Convert JS result to Dart and check if it's truthy
+      final dartResult = result?.dartify();
+      final boolResult = dartResult == true || dartResult.toString().trim() == 'true' || dartResult.toString().trim() == '1';
+      return boolResult;
     } catch (e) {
       return false;
     }

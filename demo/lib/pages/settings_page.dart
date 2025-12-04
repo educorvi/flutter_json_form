@@ -55,31 +55,27 @@ class SettingsPage extends StatelessWidget {
                         ListenableBuilder(
                           listenable: themeNotifier,
                           builder: (context, child) {
-                            return Column(
-                              children: [
-                                RadioListTile<DesignSystem>(
-                                  title: const Text('Google Material Design'),
-                                  subtitle: const Text('Standard Material Design components'),
-                                  value: DesignSystem.googleMaterial,
-                                  groupValue: themeNotifier.designSystem,
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      themeNotifier.setDesignSystem(value);
-                                    }
-                                  },
-                                ),
-                                RadioListTile<DesignSystem>(
-                                  title: const Text('UV Cooperate Design'),
-                                  subtitle: const Text('Custom UV Cooperate design system'),
-                                  value: DesignSystem.uvCooperativeDesign,
-                                  groupValue: themeNotifier.designSystem,
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      themeNotifier.setDesignSystem(value);
-                                    }
-                                  },
-                                ),
-                              ],
+                            return RadioGroup<DesignSystem>(
+                              groupValue: themeNotifier.designSystem,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  themeNotifier.setDesignSystem(value);
+                                }
+                              },
+                              child: Column(
+                                children: [
+                                  RadioListTile<DesignSystem>(
+                                    title: const Text('Google Material Design'),
+                                    subtitle: const Text('Standard Material Design components'),
+                                    value: DesignSystem.googleMaterial,
+                                  ),
+                                  RadioListTile<DesignSystem>(
+                                    title: const Text('UV Cooperate Design'),
+                                    subtitle: const Text('Custom UV Cooperate design system'),
+                                    value: DesignSystem.uvCooperativeDesign,
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         ),

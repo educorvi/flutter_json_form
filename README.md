@@ -13,9 +13,9 @@ and the Flutter guide for
 
 # Flutter Json Form
 
-A form renderer which automatically creates highly customizable forms based purely on json input. An Json schema as of [Draft-07](https://json-schema.org/draft-07) has to be provided for the structure of the form and an optional [Ui Schema](https://educorvi.github.io/vue-json-form/ui-schema/) can be set to customize the appearance of the form. This allows defining dynamic dependencies like the visibility of fields depending on the value of other fields.
+A form renderer which automatically creates highly customizable forms based on json input. An Json schema as of [Draft-07](https://json-schema.org/draft-07) has to be provided for the structure of the form and an optional [Ui Schema](https://educorvi.github.io/vue-json-form/ui-schema/) can be set to customize the appearance of the form. This allows defining dynamic dependencies like the visibility of fields depending on the value of other fields.
 
-A [Demo](TODO) of the renderer exists to play around with the functionality of the renderer.
+A [Demo](https://educorvi.github.io/flutter_json_form/) of the renderer exists to play around with the functionality and debug own schemas.
 
 ## Features
 

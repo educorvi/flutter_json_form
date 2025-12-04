@@ -58,12 +58,20 @@
             ]
         },
         "enumRadioStacked": {
-            "type": "string",
+            "type": "object",
             "enum": [
-                "value1",
-                "value2",
-                "value3",
-                "value4"
+                {
+                    "key1": "value1"
+                },
+                {
+                    "key2": "value2"
+                },
+                {
+                    "key3": "value3"
+                },
+                {
+                    "key4": "value4"
+                }
             ]
         },
         "enumSwitches": {
@@ -76,12 +84,12 @@
             ]
         },
         "enumButtons": {
-            "type": "string",
+            "type": "integer",
             "enum": [
-                "value1",
-                "value2",
-                "value3",
-                "value4"
+                1,
+                2,
+                3,
+                4
             ]
         },
         "title": {
