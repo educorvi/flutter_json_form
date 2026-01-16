@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_array_field.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_array/form_array_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_object_field.dart';
 import 'package:json_schema/json_schema.dart';
 

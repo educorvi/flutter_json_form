@@ -22,7 +22,7 @@ class FormFieldText extends StatelessWidget {
           child: Text.rich(
             TextSpan(
               children: [
-                TextSpan(text: label),
+                TextSpan(text: label, style: defaultStyle),
                 if (required)
                   WidgetSpan(
                     alignment: PlaceholderAlignment.baseline,

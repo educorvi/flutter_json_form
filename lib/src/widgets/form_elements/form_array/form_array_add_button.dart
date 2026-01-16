@@ -13,20 +13,18 @@ class FormArrayAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(top: 10.0),
+    return SizedBox(
       width: double.infinity,
       child: Tooltip(
         message: context.localize((l) => l.buttonAdd),
         child: FilledButton.tonal(
           key: testKey,
           onPressed: onPressed,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.add),
-            ],
+          style: FilledButton.styleFrom(
+            minimumSize: Size(48, 48), // or Size.square(40)
+            padding: EdgeInsets.zero,
           ),
+          child: const Icon(Icons.add),
         ),
       ),
     );

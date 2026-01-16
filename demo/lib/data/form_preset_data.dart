@@ -41,7 +41,7 @@ Map<String, dynamic> getFormDataFiverules() {
     "person-in-der-rolle-des-anlagenverantwortlichen": "qe",
     "person-in-der-rolle-des-arbeitsverantwortlichen": "we",
     "arbeitsausfuhrende-person": "we",
-    "zusatzliche-personliche-schutzausrustung": ["gegen elektrischen Schlag"] as List<dynamic>,
+    "zusatzliche-personliche-schutzausrustung": "gegen elektrischen Schlag",
     "stehen-andere-anlagenteile-weiterhin-unter": "nein",
     "edi43ba285a6396493da82241d5ecec090d": "NH-Sicherungen",
     "edi812abac1f12d44d18d4415cb1ddb1984": "12",
@@ -54,7 +54,7 @@ Map<String, dynamic> getFormDataFiverules() {
     "edi594b8869f8884cb4b76d376d960c3b74": "qw",
     "ediec7dc4dfa3b646818f003c01c9f1709c": "in die NH-Sicherungsunterteile",
     "edi8eb283983de7413b9b8b9530fb227543": "teilweiser Berührungsschutz",
-    "edid11961ed04714161961a663f2e9cae09": ["isolierende Formteile", "isolierende Tücher"]
+    "edid11961ed04714161961a663f2e9cae09": "isolierende Formteile"
   };
 }
 

@@ -124,7 +124,7 @@ class _CustomFormPageState extends State<CustomFormPage> {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: LayoutConstants.paddingAll,
+      padding: LayoutConstants.paddingAllS,
       children: [
         Center(
           child: SizedBox(

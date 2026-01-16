@@ -34,16 +34,16 @@ class FormDisplay extends StatelessWidget {
             children: [
               FilledButton.tonal(
                 onPressed: () => showJsonDialog(context, 'JSON Schema', jsonSchema),
-                child: const Text('Show JSON Schema'),
+                child: const Text('JSON Schema'),
               ),
               FilledButton.tonal(
                 onPressed: () => showJsonDialog(context, 'UI Schema', uiSchema),
-                child: const Text('Show UI Schema'),
+                child: const Text('UI Schema'),
               ),
               if (hasPresetData)
                 FilledButton.tonal(
                   onPressed: () => showJsonDialog(context, 'Preset Form Data', formData),
-                  child: const Text('Show Preset Data'),
+                  child: const Text('Preset Data'),
                 ),
             ],
           ),

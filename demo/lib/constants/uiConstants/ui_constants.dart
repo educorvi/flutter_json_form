@@ -11,6 +11,8 @@ abstract class UiConstants {
 
   double get buttonBorderRadius;
 
+  double get dialogBorderRadius;
+
   double get inputBorderRadius;
 
   double? get cardElevation;

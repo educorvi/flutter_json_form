@@ -88,7 +88,7 @@ class SettingsPage extends StatelessWidget {
                   width: double.infinity,
                   child: Card(
                     child: Padding(
-                      padding: LayoutConstants.paddingAll,
+                      padding: LayoutConstants.paddingCard,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

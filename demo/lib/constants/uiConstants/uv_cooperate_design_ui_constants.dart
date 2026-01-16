@@ -10,6 +10,9 @@ class UvCooperativeDesignUiConstants extends UiConstants {
   double get buttonBorderRadius => 0.0;
 
   @override
+  double get dialogBorderRadius => 0.0;
+
+  @override
   double get inputBorderRadius => 0.0;
 
   @override

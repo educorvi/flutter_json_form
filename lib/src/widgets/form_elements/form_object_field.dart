@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/form_element.dart';
 import 'package:flutter_json_forms/src/form_field_context.dart';
-import 'package:flutter_json_forms/src/widgets/constants.dart';
 import 'package:flutter_json_forms/src/widgets/form_utils/form_field_utils.dart';
 import '../../models/ui_schema.g.dart' as ui;
 import '../../utils/show_on.dart';
@@ -30,7 +29,6 @@ class _FormObjectFieldState extends State<FormObjectField> {
   Widget build(BuildContext context) {
     final formContext = FormContext.of(context);
 
-    // TODO: sometimes formContext is not available which leads to errors. Therefore cache it
     // Cache the FormContext when it's available
     if (formContext != null) {
       _cachedFormContext = formContext;
@@ -45,15 +43,12 @@ class _FormObjectFieldState extends State<FormObjectField> {
 
     bool objectIsShown() => widget.formFieldContext.isShownCallback();
 
-    Widget objectElements = getLineContainer(
-      child: Padding(
-        padding: const EdgeInsets.only(left: UIConstants.groupIndentation),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _buildElementsWithSpacing(context, effectiveFormContext, objectIsShown),
-        ),
-      ),
+    final childColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: _buildElementsWithSpacing(context, effectiveFormContext, objectIsShown),
     );
+
+    final Widget objectElements = widget.formFieldContext.showObjectLeadingLine ? getLineContainer(child: childColumn) : childColumn;
 
     String? label = FormFieldUtils.getLabel(widget.formFieldContext, getLabel: true);
 

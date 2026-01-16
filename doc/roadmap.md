@@ -33,7 +33,7 @@ Most features of the UI schema work, but there was no systematical approach to i
 
 ## 4. Polish demo application
 
-- improve demo application by creating a nice example json and ui schema and also creating a theme as an exmaple
+- improve demo application by creating a nice example json and ui schema and also creating a theme as an example
 
 - Effort: 0.5 `Personenarbeitstage`
 

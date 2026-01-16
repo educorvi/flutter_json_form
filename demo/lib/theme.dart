@@ -25,6 +25,20 @@ final class AppTheme {
         // surface: UVColors.surface,
         // onSurface: UVColors.onSurface,
       ),
+      dialogTheme: DialogThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(uiConstants.dialogBorderRadius),
+        ),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(uiConstants.buttonBorderRadius),
+            ),
+          ),
+        ),
+      ),
       cardTheme: CardThemeData(
         elevation: uiConstants.cardElevation,
         shape: RoundedRectangleBorder(

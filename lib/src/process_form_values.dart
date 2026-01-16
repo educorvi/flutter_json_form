@@ -1,9 +1,12 @@
 // import 'dart:convert';
 // import 'dart:io';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 
 // import 'package:flutter_json_forms/src/utils/logger.dart';
 import 'package:flutter_json_forms/src/widgets/data/list_item.dart';
+import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 // import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 
 /// Specify the format of the form data when the form is submitted
@@ -81,18 +84,36 @@ enum OnFormSubmitFormat { formBuilder, ellaV1, ellaV2 }
 /// flattening ListItem wrappers and handling nested structures.
 dynamic extractListItemValue(dynamic value, {bool skipFiles = true}) {
   if (value is ListItem) {
-    return extractListItemValue(value.value);
+    return extractListItemValue(value.value, skipFiles: skipFiles);
   } else if (value is List) {
-    return value.map(extractListItemValue).toList();
+    return value.map((v) => extractListItemValue(v, skipFiles: skipFiles)).toList();
   } else if (value is Map) {
-    return value.map((k, v) => MapEntry(k, extractListItemValue(v)));
+    return value.map((k, v) => MapEntry(k, extractListItemValue(v, skipFiles: skipFiles)));
   } else if (value is DateTime) {
     return value.toIso8601String();
   } else if (value is Color?) {
     return value?.toARGB32().toString();
-  } // else if (value is PlatformFile) {
-  //   return await readPlatformFileBytes(value);
-  // }
+  } else if (value is PlatformFile) {
+    if (skipFiles) {
+      return '[file-upload-skipped]';
+    }
+    // Try to encode file content as base64
+    try {
+      if (value.bytes != null) {
+        // import 'dart:convert'; at top of file
+        return base64Encode(value.bytes!);
+      } else if (value.path != null) {
+        // import 'dart:io'; at top of file
+        final file = File(value.path!);
+        if (file.existsSync()) {
+          return base64Encode(file.readAsBytesSync());
+        }
+      }
+    } catch (e) {
+      // ignore errors, fall through to placeholder
+    }
+    return '[file-upload-unavailable]';
+  }
   return value;
 }
 
@@ -151,9 +172,9 @@ Map<String, dynamic> processFormValues(Map<String, dynamic> formValues, {bool sk
             if (index >= list.length) {
               list.length = index + 1;
             }
-            list[index] = extractListItemValue(value);
+            list[index] = extractListItemValue(value, skipFiles: skipFiles);
           } else {
-            currentMap[part] = extractListItemValue(value);
+            currentMap[part] = extractListItemValue(value, skipFiles: skipFiles);
           }
         } else {
           currentMap = currentMap.putIfAbsent(part, () => <String, dynamic>{});

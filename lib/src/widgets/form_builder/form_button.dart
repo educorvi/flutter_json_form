@@ -101,6 +101,9 @@ class FormButton extends StatelessWidget {
       case ui.TheButtonsType.SUBMIT:
         onPressed = handleSubmit;
         break;
+      // TODO: wizard
+      // case ui.TheButtonsType.NEXTWIZARDPAGE:
+      // case ui.TheButtonsType.PREVIOUSWIZARDPAGE:
     }
 
     return _renderStyledButton(

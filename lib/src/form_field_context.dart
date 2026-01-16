@@ -25,6 +25,7 @@ class FormFieldContext {
   final Map<String, dynamic> Function()? getFullFormData;
   final bool showLabel;
   final void Function(dynamic, {Map<String, int>? computedSelfIndices})? onSavedCallback;
+  final bool showObjectLeadingLine;
 
   // Computed properties
   late final String? title;
@@ -53,6 +54,7 @@ class FormFieldContext {
     required this.getFullFormData,
     required this.showLabel,
     required this.onSavedCallback,
+    required this.showObjectLeadingLine,
   }) {
     title = jsonSchema.title;
     description = jsonSchema.description;
@@ -78,6 +80,7 @@ class FormFieldContext {
     ui.ShowOnProperty? showOn,
     dynamic initialValue,
     bool showLabel = true,
+    bool showObjectLeadingLine = true,
     bool? parentIsShown,
     Map<String, int>? selfIndices,
     void Function(dynamic)? onChanged,
@@ -120,6 +123,7 @@ class FormFieldContext {
           formContext.onFormValueSaved(scope, value);
         }
       },
+      showObjectLeadingLine: showObjectLeadingLine,
     );
   }
 
@@ -136,6 +140,7 @@ class FormFieldContext {
     Map<String, int>? childSelfIndices,
     void Function(dynamic)? childOnChanged,
     void Function(dynamic, {Map<String, int>? computedSelfIndices})? childOnSavedCallback,
+    bool? childShowObjectLeadingLine,
   }) {
     return FormFieldContext(
       options: childOptions ?? options,
@@ -173,6 +178,7 @@ class FormFieldContext {
       getFullFormData: getFullFormData,
       showLabel: childShowLabel,
       onSavedCallback: childOnSavedCallback,
+      showObjectLeadingLine: childShowObjectLeadingLine ?? showObjectLeadingLine,
     );
   }
 }

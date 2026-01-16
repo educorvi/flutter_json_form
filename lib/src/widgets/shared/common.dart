@@ -4,6 +4,7 @@ import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_tex
 
 Container getLineContainer({Widget? child}) {
   return Container(
+    padding: const EdgeInsets.only(left: UIConstants.groupIndentation),
     decoration: const BoxDecoration(
       border: Border(
         left: BorderSide(
@@ -23,7 +24,7 @@ Widget withLabel(BuildContext context, String? label, Widget child) {
     children: [
       FormFieldText(
         label,
-        style: Theme.of(context).textTheme.titleMedium,
+        style: Theme.of(context).textTheme.titleLarge,
       ),
       const SizedBox(height: UIConstants.objectTitlePadding),
       child,

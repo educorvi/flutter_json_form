@@ -1,17 +1,18 @@
 # Generate Dart Classes:
 
-To generate dart typing classes it would be ideally to directly use `quicktype` on the ui Schema, but this doesn't work as expected. The transcompiler has a problem with dart when `anyOff` and `allOf` are nested within each other. This results in all definitions below this to not be present in the resulting file. But when using the `vue-json-form-schemas.d.ts` file and trnascompiling `TypeScript` to `Dart`, all classes were present. The only problem is that the recursive definition of Rita results in the compiler running indefinitely. Since the rita rules are not needed in dart currently as the evaluator is written in typescript, this step is skipped for now.
+To generate dart typing classes it would be ideally to directly use `quicktype` on the ui Schema, but this doesn't work as expected. The transcompiler has a problem with dart when `anyOf` and `allOf` are nested within each other. This results in all definitions below this to not be present in the resulting file. But when using the `vue-json-form-schemas.d.ts` file and transcompiling `TypeScript` to `Dart`, all classes were present. The only problem is that the recursive definition of Rita results in the compiler running indefinitely. Since the rita rules are not needed in dart currently as the evaluator is written in typescript, this step is skipped for now.
 
-## Steps t reproduce dart typings:
+## Steps to reproduce dart typings:
 
 1. clone [vue-json-forms](https://github.com/educorvi/vue-json-form) repository
-2. navigate to `schemas` and run `yarn run install` and `yarn run build` --> in the `dist` folder multiple file should be generated where we will use `vue.json-form-schemas.d.ts`
-4. rename the file to `vue.json-form-schemas.ts` as quicktype wont generate any classes for `.d.ts` files
-5. remove everything concerning `rita` in the file (otherwise quicktype will run indefinitely)
-6. install `quicktype` (`v23.2.6` used for reference)
-7. run `quicktype vue-json-form-schemas.ts -o UiSchema.dart` (`--debug all` flag can be passed for debugging)
-8. an bug exists where an extremely long class `KStringUnknownIdStringUndefinedSchema...` gets generated. To prevent this do:
-```dart
+2. ~~navigate to `schemas` and run `yarn run install` and `yarn run build` --> in the `dist` folder multiple file should be generated where we will use `vue-json-form-schemas.d.ts`~~
+2. run `yarn install` and then `yarn run build:schemas` in the root folder of the repository --> within `packages/schemas/dist` multiple file should be generated where we will use `vue-json-form-schemas.d.ts`
+3. rename the file to `vue.json-form-schemas.ts` as quicktype wont generate any classes for `.d.ts` files
+4. remove everything concerning `rita` in the file (otherwise quicktype will run indefinitely)
+5. install `quicktype` (`v23.2.6` used for reference)
+6. run `quicktype vue-json-form-schemas.ts -o UiSchema.dart` (`--debug all` flag can be passed for debugging)
+7. an bug exists where an extremely long class `KStringUnknownIdStringUndefinedSchema...` gets generated. To prevent this do:
+```typescript
 // remove:
 export declare type CoreSchemaMetaSchema = CoreSchemaMetaSchema1 & CoreSchemaMetaSchema2;
 

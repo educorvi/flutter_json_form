@@ -4,7 +4,6 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_item_generator.dart';
 import '../../models/ui_schema.g.dart' as ui;
 import '../shared/common.dart';
-import '../constants.dart';
 import '../shared/spacing_utils.dart';
 
 class FormGroup extends StatelessWidget {
@@ -24,6 +23,7 @@ class FormGroup extends StatelessWidget {
     final formContext = FormContext.of(context)!;
     final elements = layout.elements;
     final label = layout.options?.label;
+    // final description = layout.options?.description; // TODO: description
     // final showOn = layout.showOn;
 
     bool isShown = formContext.elementShown(
@@ -38,12 +38,9 @@ class FormGroup extends StatelessWidget {
     // );
 
     Widget groupElement = getLineContainer(
-      child: Padding(
-        padding: const EdgeInsets.only(left: UIConstants.groupIndentation),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _buildElementsWithSpacing(context, elements, isShown),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _buildElementsWithSpacing(context, elements, isShown),
       ),
     );
 

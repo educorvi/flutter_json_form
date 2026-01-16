@@ -10,7 +10,10 @@ final class GoogleMaterialUiConstants extends UiConstants {
   double get buttonBorderRadius => 32.0;
 
   @override
-  double get inputBorderRadius => 12;
+  double get inputBorderRadius => 12.0;
+
+  @override
+  double get dialogBorderRadius => 32.0;
 
   @override
   double? get cardElevation => null; // use default Google Material elevation
