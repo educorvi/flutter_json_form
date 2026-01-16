@@ -28,8 +28,8 @@ ui.UiSchema generateDefaultUISchema(Map<String, dynamic> jsonSchema) {
       //     options: ui.LayoutElementOptions(label: element['title'] ?? key),
       //   ));
       // } else {
-      elements.add(ui.LayoutElement(
-        type: ui.LayoutElementType.CONTROL,
+      elements.add(ui.Control(
+        type: ui.ControlType.CONTROL,
         scope: "$path/$key",
       ));
       // }

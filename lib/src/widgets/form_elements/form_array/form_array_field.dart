@@ -155,7 +155,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
     }
 
     // Handle tags
-    if (widget.formFieldContext.options?.fieldSpecificOptions?.tags?.enabled == true) {
+    if (widget.formFieldContext.options?.tagOptions?.tags?.enabled == true) {
       // TODO: implement proper tags support
       return FormFieldText("Tags not yet implemented");
     }
@@ -302,7 +302,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
   }) {
     final FormFieldContext parentContext = widget.formFieldContext;
     final ui.DescendantControlOverrides? overrides = parentContext.options?.formattingOptions?.descendantControlOverrides?[parentContext.scope];
-    final ui.ControlOptions? childOptions = overrides?.options ?? parentContext.options;
+    final ui.Options? childOptions = overrides?.options ?? parentContext.options;
     final ui.ShowOnProperty? childShowOn = overrides?.showOn;
     final JsonSchema childSchema = parentContext.jsonSchema.items!;
     final bool childIsObjectType = _schemaRepresentsObject(childSchema);

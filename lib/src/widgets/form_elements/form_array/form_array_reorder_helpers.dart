@@ -92,7 +92,7 @@ class _ArrayReorderDelegate {
   }) {
     final FormFieldContext parentContext = _getFormFieldContext();
     final ui.DescendantControlOverrides? overrides = parentContext.options?.formattingOptions?.descendantControlOverrides?[parentContext.scope];
-    final ui.ControlOptions? childOptions = overrides?.options ?? parentContext.options;
+    final ui.Options? childOptions = overrides?.options ?? parentContext.options;
     final ui.ShowOnProperty? childShowOn = overrides?.showOn;
     final JsonSchema childSchema = parentContext.jsonSchema.items!;
     final bool childIsObjectType = _schemaRepresentsObject(childSchema);

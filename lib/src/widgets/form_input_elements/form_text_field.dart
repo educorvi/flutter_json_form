@@ -107,8 +107,8 @@ class _FormTextFieldState extends State<FormTextField> {
   }
 
   int _getMaxLines() {
-    if (widget.formFieldContext.options?.fieldSpecificOptions?.multi != null) {
-      dynamic multi = widget.formFieldContext.options!.fieldSpecificOptions!.multi;
+    if (widget.formFieldContext.options?.inputOptions?.multi != null) {
+      dynamic multi = widget.formFieldContext.options!.inputOptions!.multi;
       if (multi is bool) {
         return multi ? 2 : 1;
       } else if (multi is int) {
@@ -150,7 +150,7 @@ class _FormTextFieldState extends State<FormTextField> {
   }
 
   TextAlign _getTextAlign() {
-    return switch (widget.formFieldContext.options?.fieldSpecificOptions?.textAlign) {
+    return switch (widget.formFieldContext.options?.inputOptions?.textAlign) {
       ui.TextAlign.START => TextAlign.start,
       ui.TextAlign.END => TextAlign.end,
       ui.TextAlign.CENTER => TextAlign.center,
@@ -196,8 +196,8 @@ class _FormTextFieldState extends State<FormTextField> {
   }
 
   Iterable<String>? _getAutocompleteValues() {
-    if (widget.formFieldContext.options?.fieldSpecificOptions?.autocomplete != null) {
-      switch (widget.formFieldContext.options!.fieldSpecificOptions!.autocomplete!) {
+    if (widget.formFieldContext.options?.inputOptions?.autocomplete != null) {
+      switch (widget.formFieldContext.options!.inputOptions!.autocomplete!) {
         case ui.Autocomplete.OFF:
           return null; // don't autofill
         case ui.Autocomplete.ON:

@@ -1,29 +1,27 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "ui.schema.json",
     "title": "UI Schema",
     "description": "Schema for the UI Schema",
     "type": "object",
     "properties": {
-        "$schema": {
-            "type": "string",
-            "description": "The Metaschema of the UI Schema"
-        },
         "version": {
             "type": "string",
-            "examples": [
-                "2.1"
-            ],
+            "examples": ["2.1"],
             "pattern": "^\\d+\\.\\d+$",
             "description": "Version of the UI Schema. Changes in a major version are backwards compatible. So a parser for version z.x must be compatible with all versions z.y where y is <=x."
         },
         "layout": {
-            "$ref": "layout.schema.json"
+          "anyOf": [
+            {
+              "$ref": "layout.schema.json"
+            },
+            {
+              "$ref": "wizard.schema.json"
+            }
+          ]
         }
     },
-    "required": [
-        "version",
-        "layout"
-    ],
-    "additionalProperties": false
+    "required": ["version", "layout"],
+    "additionalProperties": true
 }

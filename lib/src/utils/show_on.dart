@@ -5,6 +5,7 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
+import 'package:flutter_json_forms/src/widgets/data/ui_schema_extensions.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_visibility.dart';
 
 bool isElementShown({
@@ -134,13 +135,13 @@ List<ui.ShowOnProperty> collectDescendantRitaRules(Map<String, ui.DescendantCont
 List<ui.ShowOnProperty> collectRitaRules(List<ui.LayoutElement> elements) {
   final List<ui.ShowOnProperty> rules = [];
   for (var element in elements) {
-    if (element.elements != null) {
-      rules.addAll(collectRitaRules(element.elements!));
+    if (element.asElements != null) {
+      rules.addAll(collectRitaRules(element.asElements!));
     }
     if (element.showOn?.id != null) {
       rules.add(element.showOn!);
     }
-    final overrides = element.options?.formattingOptions?.descendantControlOverrides;
+    final overrides = element.asControlOptions?.formattingOptions?.descendantControlOverrides;
     if (overrides != null) {
       rules.addAll(collectDescendantRitaRules(overrides));
     }

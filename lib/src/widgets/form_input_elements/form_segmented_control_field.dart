@@ -19,7 +19,7 @@ class FormSegmentedControlField extends StatelessWidget {
 
   @override
   Widget build(BuildContext buildContext) {
-    final enumTitles = formFieldContext.options?.fieldSpecificOptions?.enumTitles;
+    final enumTitles = formFieldContext.options?.enumOptions?.enumTitles;
     final mapped = mapEnumValuesToTitles(values, enumTitles);
 
     return FormFieldWrapper(
@@ -37,7 +37,7 @@ class FormSegmentedControlField extends StatelessWidget {
         }).toList(growable: false),
         showSelectedIcon: true,
         selectedIcon: const Icon(Icons.check),
-        stacked: formFieldContext.options?.fieldSpecificOptions?.stacked,
+        stacked: formFieldContext.options?.enumOptions?.stacked,
       ),
     );
   }

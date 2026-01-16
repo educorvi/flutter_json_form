@@ -13,7 +13,7 @@ class EnumFieldFactory {
     Widget Function(dynamic value, String label)? widgetBuilder,
   ) {
     final values = context.jsonSchema.enumValues!;
-    final displayAs = context.options?.fieldSpecificOptions?.displayAs;
+    final displayAs = context.options?.enumOptions?.displayAs;
 
     switch (displayAs) {
       case ui.DisplayAs.RADIOBUTTONS:

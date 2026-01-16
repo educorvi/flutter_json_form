@@ -49,7 +49,7 @@ class PrimitiveFieldFactory {
 
   static Widget _createNumberField(FormFieldContext context, Type expectedType) {
     // Check for a slider
-    if (context.options?.fieldSpecificOptions?.range == true) {
+    if (context.options?.inputOptions?.range == true) {
       return FormSliderField(formFieldContext: context);
     }
 

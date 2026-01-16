@@ -20,7 +20,7 @@ class FormDropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enumTitles = formFieldContext.options?.fieldSpecificOptions?.enumTitles;
+    final enumTitles = formFieldContext.options?.enumOptions?.enumTitles;
     final mapped = mapEnumValuesToTitles(values, enumTitles);
 
     return FormFieldWrapper(

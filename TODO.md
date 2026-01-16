@@ -40,4 +40,4 @@
 - State what is currently supported or better: what is not supported out of the json draft schema (e.g Conditional validation with dependentRequired,Conditional validation with dependentSchemas, Conditional validation with if-else) is currently not supported
 - store values correctly (string and int notably), the textfield is critical here since it uses string internally
 - Allow configuration for example for the array: should delete being shown or use swipe to delete, should reorder be shown or an explicit view for reordering or no reordering,provide custom icons for reorder and delete, or for the whole button or for the whole reordering itself
-
+- Bug on arrays: when adding a new array entry, old entries wont update their state if it is not the default one

@@ -102,8 +102,8 @@ class FormButton extends StatelessWidget {
         onPressed = handleSubmit;
         break;
       // TODO: wizard
-      // case ui.TheButtonsType.NEXTWIZARDPAGE:
-      // case ui.TheButtonsType.PREVIOUSWIZARDPAGE:
+      case ui.TheButtonsType.NEXT_WIZARD_PAGE:
+      case ui.TheButtonsType.PREVIOUS_WIZARD_PAGE:
     }
 
     return _renderStyledButton(
@@ -116,7 +116,7 @@ class FormButton extends StatelessWidget {
 
   Widget _renderStyledButton({
     required BuildContext context,
-    required ui.ColorVariant? variant,
+    required ui.ColorVariants? variant,
     required VoidCallback? onPressed,
     required Widget child,
   }) {
@@ -127,82 +127,82 @@ class FormButton extends StatelessWidget {
     late final bool isLight;
 
     switch (variant) {
-      case ui.ColorVariant.PRIMARY:
+      case ui.ColorVariants.PRIMARY:
         color = scheme.primary;
         isOutline = false;
         isLight = false;
         break;
-      case ui.ColorVariant.SECONDARY:
+      case ui.ColorVariants.SECONDARY:
         color = scheme.secondary;
         isOutline = false;
         isLight = false;
         break;
-      case ui.ColorVariant.SUCCESS:
+      case ui.ColorVariants.SUCCESS:
         color = Colors.green;
         isOutline = false;
         isLight = false;
         break;
-      case ui.ColorVariant.WARNING:
+      case ui.ColorVariants.WARNING:
         color = Colors.orange;
         isOutline = false;
         isLight = false;
         break;
-      case ui.ColorVariant.DANGER:
+      case ui.ColorVariants.DANGER:
         color = scheme.error;
         isOutline = false;
         isLight = false;
         break;
-      case ui.ColorVariant.INFO:
+      case ui.ColorVariants.INFO:
         color = Colors.blue;
         isOutline = false;
         isLight = false;
         break;
-      case ui.ColorVariant.LIGHT:
+      case ui.ColorVariants.LIGHT:
         color = scheme.surfaceContainerHighest;
         isOutline = false;
         isLight = true;
         break;
-      case ui.ColorVariant.DARK:
+      case ui.ColorVariants.DARK:
         color = Colors.black87;
         isOutline = false;
         isLight = false;
         break;
-      case ui.ColorVariant.OUTLINE_PRIMARY:
+      case ui.ColorVariants.OUTLINE_PRIMARY:
         color = scheme.primary;
         isOutline = true;
         isLight = false;
         break;
-      case ui.ColorVariant.OUTLINE_SECONDARY:
+      case ui.ColorVariants.OUTLINE_SECONDARY:
         color = scheme.secondary;
         isOutline = true;
         isLight = false;
         break;
-      case ui.ColorVariant.OUTLINE_SUCCESS:
+      case ui.ColorVariants.OUTLINE_SUCCESS:
         color = Colors.green;
         isOutline = true;
         isLight = false;
         break;
-      case ui.ColorVariant.OUTLINE_WARNING:
+      case ui.ColorVariants.OUTLINE_WARNING:
         color = Colors.orange;
         isOutline = true;
         isLight = false;
         break;
-      case ui.ColorVariant.OUTLINE_DANGER:
+      case ui.ColorVariants.OUTLINE_DANGER:
         color = scheme.error;
         isOutline = true;
         isLight = false;
         break;
-      case ui.ColorVariant.OUTLINE_INFO:
+      case ui.ColorVariants.OUTLINE_INFO:
         color = Colors.blue;
         isOutline = true;
         isLight = false;
         break;
-      case ui.ColorVariant.OUTLINE_LIGHT:
+      case ui.ColorVariants.OUTLINE_LIGHT:
         color = scheme.surfaceContainerHighest;
         isOutline = true;
         isLight = true;
         break;
-      case ui.ColorVariant.OUTLINE_DARK:
+      case ui.ColorVariants.OUTLINE_DARK:
         color = Colors.black87;
         isOutline = true;
         isLight = false;

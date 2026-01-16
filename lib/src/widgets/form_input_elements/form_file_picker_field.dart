@@ -23,15 +23,15 @@ class FormFilePickerField extends StatelessWidget {
         enabled: formFieldContext.enabled,
         validator: FormFieldUtils.createBaseValidator(formFieldContext),
         decoration: FormFieldUtils.getInputDecoration(formFieldContext, context),
-        maxFiles: formFieldContext.options?.fieldSpecificOptions?.allowMultipleFiles == true ? null : 1,
+        // maxFiles: formFieldContext.options?.fileUploadOptions?.allowMultipleFiles == true ? null : 1, // TODO: breaking change
         allowedExtensions: _getFileExtensions(),
       ),
     );
   }
 
   List<String>? _getFileExtensions() {
-    if (formFieldContext.options?.fieldSpecificOptions?.acceptedFileType != null) {
-      String acceptedFileType = formFieldContext.options!.fieldSpecificOptions!.acceptedFileType!;
+    if (formFieldContext.options?.fileUploadOptions?.acceptedFileType != null) {
+      String acceptedFileType = formFieldContext.options!.fileUploadOptions!.acceptedFileType!;
       List<String> fileTypes = acceptedFileType.split(', ');
       if (fileTypes.contains("*")) {
         return null;

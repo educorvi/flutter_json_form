@@ -14,6 +14,7 @@ import 'package:flutter_json_forms/src/utils/logger.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_json_forms/src/widgets/shared/form_not_implemented.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:flutter_json_forms/src/json_validator.dart';
 
@@ -64,6 +65,8 @@ class FlutterJsonForm extends StatefulWidget {
   /// [loadingWidget] is the widget displayed while the form is loading
   final Widget? loadingWidget;
 
+  /// TODO: error widget
+
   const FlutterJsonForm({
     super.key,
     required this.jsonSchema,
@@ -86,8 +89,8 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   static final _logger = FormLogger.formBuilder;
 
   /// The validation errors of the JSON and UI schema
-  List<ValidationError>? _jsonSchemaValidationErrors;
-  List<ValidationError>? _uiSchemaValidationErrors;
+  List<String>? _jsonSchemaValidationErrors;
+  List<String>? _uiSchemaValidationErrors;
 
   /// Json Schemas
   late final JsonSchema jsonMetaSchema;
@@ -95,7 +98,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
   /// Ui schemas
   late final JsonSchema uiMetaSchema;
-  late final ui.UiSchema uiSchemaModel;
+  late final ui.UiSchema? uiSchemaModel;
 
   /// The dependencies of the form fields which are dependent on other fields
   Map<String, dynamic> _showOnDependencies = {};
@@ -109,7 +112,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   /// Rita Rule Evaluator
   late final RitaRuleEvaluator ritaRuleEvaluator;
   final Map<String, bool> _ritaDependencies = {};
-  bool _ritaInitialized = false;
+  // bool _ritaInitialized = false;
 
   /// Storage for Rita rule results with array indices
   /// Key format: "ruleId|selfIndicesJson" -> bool result
@@ -129,10 +132,10 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     if (_isInitializing) return true;
 
     // If validation is enabled and validation errors haven't been set yet, we're loading
-    if (widget.validate && (_jsonSchemaValidationErrors == null || _uiSchemaValidationErrors == null)) return true;
+    // if (_jsonSchemaValidationErrors == null || _uiSchemaValidationErrors == null) return true;
 
     // If Rita hasn't been initialized yet, we're loading
-    if (!_ritaInitialized) return true;
+    // if (!_ritaInitialized) return true;
 
     return false;
   }
@@ -142,16 +145,16 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
   /// return true if the JSON schema is valid
   bool get validJsonSchema {
-    if (isLoading) return false;
-    if (!widget.validate) return true; // Always valid when validation is disabled
-    return _jsonSchemaValidationErrors?.isEmpty ?? false;
+    // if (isLoading) return false;
+    // if (!widget.validate) return true; // Always valid when validation is disabled
+    return _jsonSchemaValidationErrors?.isEmpty ?? true;
   }
 
   /// return true if the UI schema is valid
   bool get validUISchema {
-    if (isLoading) return false;
-    if (!widget.validate) return true; // Always valid when validation is disabled
-    return _uiSchemaValidationErrors?.isEmpty ?? false;
+    // if (isLoading) return false;
+    // if (!widget.validate) return true; // Always valid when validation is disabled
+    return _uiSchemaValidationErrors?.isEmpty ?? true;
   }
 
   /// return true if the widget has errors in the JSON or UI schema (only if the validation was turned on and is finished)
@@ -160,7 +163,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   }
 
   /// initializationError
-  Object? _initializationError;
+  String? _initializationError;
 
   @override
   void initState() {
@@ -191,8 +194,8 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
       _logger.severe('Form initialization failed', e, stackTrace);
 
       safeSetState(() {
+        _initializationError = e.toString();
         _isInitializing = false;
-        _initializationError = e;
       });
     }
   }
@@ -245,9 +248,19 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
         final Map<String, dynamic> uiSchemaMap = _getMap(widget.uiSchema, "uiSchema");
         if (widget.validate && !_validateUiSchema(uiSchemaMap)) {
           _logger.severe('Invalid UI schema: $uiSchemaMap');
+          uiSchemaModel = null;
           return;
         }
-        uiSchemaModel = ui.UiSchema.fromJson(uiSchemaMap);
+        try {
+          uiSchemaModel = ui.UiSchema.fromJson(uiSchemaMap);
+        } catch (e) {
+          _logger.severe('Error parsing UI schema: $uiSchemaMap', e);
+          safeSetState(() {
+            _uiSchemaValidationErrors = ['Error parsing UI schema: ${e.toString()}'];
+          });
+          uiSchemaModel = null;
+          rethrow;
+        }
       }
     });
 
@@ -258,11 +271,11 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
     // Collect all rita rules
     await Future.microtask(() {
-      final ritaRules = collectRitaRules(uiSchemaModel.layout.elements);
+      final ritaRules = collectRitaRules(getFormElements());
       for (final rule in ritaRules) {
         ritaRuleEvaluator.addRule(rule);
       }
-      _ritaInitialized = false;
+      // _ritaInitialized = false;
     });
 
     // Initialize Rita rules bundle and evaluate
@@ -274,8 +287,22 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
       _ritaDependencies.clear();
       _ritaDependencies.addAll(ritaDependencies);
       _ritaDependenciesRevision++;
-      _ritaInitialized = true;
+      // _ritaInitialized = true;
     });
+  }
+
+  List<ui.LayoutElement> getFormElements() {
+    final layout = uiSchemaModel!.layout;
+    switch (layout) {
+      case ui.Layout(:final elements):
+        return elements;
+      case ui.Wizard(:final pages):
+        List<ui.LayoutElement> elements = [];
+        for (final page in pages) {
+          elements.addAll(page.elements);
+        }
+        return elements;
+    }
   }
 
   /// Save form values and validate all fields of form
@@ -403,7 +430,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   bool _validateJsonSchema(Map<String, dynamic> jsonSchemaMap) {
     final result = jsonMetaSchema.validate(jsonSchemaMap);
     safeSetState(() {
-      _jsonSchemaValidationErrors = result.errors;
+      _jsonSchemaValidationErrors = result.errors.map((e) => e.toString()).toList();
     });
     return result.errors.isEmpty;
   }
@@ -414,7 +441,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   bool _validateUiSchema(Map<String, dynamic> uiSchemaMap) {
     final result = uiMetaSchema.validate(uiSchemaMap);
     safeSetState(() {
-      _uiSchemaValidationErrors = result.errors;
+      _uiSchemaValidationErrors = result.errors.map((e) => e.toString()).toList();
     });
     return result.errors.isEmpty;
   }
@@ -426,54 +453,52 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   /// Returns the form if there are no validation errors
   @override
   Widget build(BuildContext context) {
-    if (widget.validate || _isInitializing) {
-      if (isLoading) {
-        if (!widget.showLoadingWidget) {
-          return Container();
-        }
-        return widget.loadingWidget ?? FormLoader();
-      } else if (hasErrors) {
-        late List<Widget> errorWidgets = [];
-
-        if (_jsonSchemaValidationErrors!.isNotEmpty) {
-          _logger.warning('JSON Schema validation errors: $_jsonSchemaValidationErrors');
-          errorWidgets.addAll([
-            const FormFieldText(
-              "There were errors in the JSON schema:",
-              style: TextStyle(color: Colors.red),
-            ),
-            ..._jsonSchemaValidationErrors!.map((error) => Text(error.toString())),
-          ]);
-        }
-
-        if (_uiSchemaValidationErrors!.isNotEmpty) {
-          _logger.warning('UI Schema validation errors: $_uiSchemaValidationErrors');
-          errorWidgets.addAll([
-            const FormFieldText(
-              "There were errors in the UI schema:",
-              style: TextStyle(color: Colors.red),
-            ),
-            ..._uiSchemaValidationErrors!.map((error) => Text(error.toString())),
-          ]);
-        }
-
-        if (_initializationError != null) {
-          _logger.severe('Initialization error: $_initializationError');
-          errorWidgets.add(
-            FormFieldText(
-              "There was an error during initialization: ${_initializationError.toString()}",
-              style: const TextStyle(color: Colors.red),
-            ),
-          );
-        }
+    if (isLoading) {
+      if (!widget.showLoadingWidget) {
+        return Container();
       }
-    }
+      return widget.loadingWidget ?? FormLoader();
+    } else if (hasErrors) {
+      late List<Widget> errorWidgets = [];
 
-    if (!widget.showLoadingWidget) {
+      if (_jsonSchemaValidationErrors != null && _jsonSchemaValidationErrors!.isNotEmpty) {
+        _logger.warning('JSON Schema validation errors: $_jsonSchemaValidationErrors');
+        errorWidgets.addAll([
+          const FormFieldText(
+            "There were errors in the JSON schema:",
+            style: TextStyle(color: Colors.red),
+          ),
+          ..._jsonSchemaValidationErrors!.map((error) => Text(error.toString())),
+        ]);
+      }
+
+      if (_uiSchemaValidationErrors != null && _uiSchemaValidationErrors!.isNotEmpty) {
+        _logger.warning('UI Schema validation errors: $_uiSchemaValidationErrors');
+        errorWidgets.addAll([
+          const FormFieldText(
+            "There were errors in the UI schema:",
+            style: TextStyle(color: Colors.red),
+          ),
+          ..._uiSchemaValidationErrors!.map((error) => Text(error.toString())),
+        ]);
+      }
+
+      if (_initializationError != null) {
+        _logger.severe('Initialization error: $_initializationError');
+        errorWidgets.add(
+          FormFieldText(
+            "There was an error during initialization: ${_initializationError.toString()}",
+            style: const TextStyle(color: Colors.red),
+          ),
+        );
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: errorWidgets,
+      );
+    } else {
       return _getFormBuilder();
     }
-
-    return _getFormBuilder();
   }
 
   FormBuilder _getFormBuilder() {
@@ -500,7 +525,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
         getFormValues: () => instantValue,
         storeRitaArrayResult: _storeRitaArrayResult,
         checkElementShownWithRita: isElementShownWithRita,
-        child: _generateLayout(),
+        child: _generateRootLayout(),
       ),
     );
   }
@@ -537,10 +562,22 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     return null;
   }
 
+  Widget _generateRootLayout() {
+    final layout = uiSchemaModel!.layout;
+
+    switch (layout) {
+      case ui.Layout():
+        return _generateLayout(layout);
+      case ui.Wizard():
+        return FormNotImplemented(
+          "Wizard layout is not implemented yet.",
+        );
+    }
+  }
+
   /// Generates the form fields based on the elements of the UI schema
-  Widget _generateLayout() {
+  Widget _generateLayout(ui.Layout layout) {
     const nestingLevel = 0;
-    ui.Layout layout = uiSchemaModel.layout;
 
     Widget child;
     switch (layout.type) {

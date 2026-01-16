@@ -19,7 +19,7 @@ class FormRadioGroupField extends StatelessWidget {
 
   @override
   Widget build(BuildContext buildContext) {
-    final enumTitles = formFieldContext.options?.fieldSpecificOptions?.enumTitles;
+    final enumTitles = formFieldContext.options?.enumOptions?.enumTitles;
     final mapped = mapEnumValuesToTitles(values, enumTitles);
 
     return FormFieldWrapper(
@@ -42,6 +42,6 @@ class FormRadioGroupField extends StatelessWidget {
   }
 
   OptionsOrientation _getOptionsOrientation() {
-    return formFieldContext.options?.fieldSpecificOptions?.stacked == true ? OptionsOrientation.vertical : OptionsOrientation.wrap;
+    return formFieldContext.options?.enumOptions?.stacked == true ? OptionsOrientation.vertical : OptionsOrientation.wrap;
   }
 }

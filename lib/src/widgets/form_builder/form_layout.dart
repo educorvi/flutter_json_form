@@ -3,6 +3,7 @@ import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_item_generator.dart';
 import '../../models/ui_schema.g.dart' as ui;
+import '../data/ui_schema_extensions.dart';
 import '../shared/common.dart';
 import '../shared/spacing_utils.dart';
 
@@ -11,6 +12,11 @@ class FormLayout extends StatelessWidget {
   final int nestingLevel;
   final LayoutDirection direction;
   final bool isShownFromParent;
+
+  FormLayout.fromLayout({super.key, required this.layout})
+      : nestingLevel = 0,
+        direction = layout.type == ui.LayoutType.HORIZONTAL_LAYOUT ? LayoutDirection.horizontal : LayoutDirection.vertical,
+        isShownFromParent = true;
 
   const FormLayout.vertical({
     super.key,
@@ -79,7 +85,7 @@ class FormLayout extends StatelessWidget {
       },
       isVisibleChecker: (element, index) {
         // Check if element is explicitly hidden
-        if (element.options?.formattingOptions?.hidden == true) {
+        if (element.asControlOptions?.formattingOptions?.hidden == true) {
           return false;
         }
 

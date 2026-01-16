@@ -24,14 +24,14 @@ class FormControl extends StatelessWidget {
     final formContext = FormContext.of(context)!;
 
     String scope = control.scope.startsWith("#") ? control.scope.substring(1) : control.scope;
-    final ui.ControlOptions? options = control.options;
+    final ui.Options? options = control.options;
     final jsonSchemaFromScope = getObjectFromJson(formContext.jsonSchemaModel, scope);
 
     if (jsonSchemaFromScope == null) {
       return FormError("Control element must have a valid scope. Scope $scope not found in json schema.");
     }
 
-    final format = control.options?.fieldSpecificOptions?.format;
+    final format = control.options?.inputOptions?.format;
     final bool parentIsShown = isShownFromParent;
 
     return FormElementFactory.createFormElement(FormFieldContext.fromFormContext(

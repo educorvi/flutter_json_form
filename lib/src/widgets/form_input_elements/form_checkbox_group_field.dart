@@ -36,6 +36,6 @@ class FormCheckboxGroupField extends StatelessWidget {
   }
 
   OptionsOrientation _getOptionsOrientation() {
-    return context.options?.fieldSpecificOptions?.stacked == true ? OptionsOrientation.vertical : OptionsOrientation.wrap;
+    return context.options?.enumOptions?.stacked == true ? OptionsOrientation.vertical : OptionsOrientation.wrap;
   }
 }

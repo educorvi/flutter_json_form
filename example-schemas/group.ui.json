@@ -1,0 +1,30 @@
+{
+  "version": "2.0",
+  "layout": {
+    "type": "VerticalLayout",
+    "elements": [
+      {
+        "type": "Group",
+        "options": {
+          "label": "Group Label",
+          "description": "Group Description"
+        },
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "/properties/testArray",
+            "options": {
+              "descendantControlOverrides": {
+                "/properties/testArray/items": {
+                  "options": {
+                    "placeholder": "This is a placeholder"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

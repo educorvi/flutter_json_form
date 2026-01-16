@@ -1,5 +1,5 @@
 {
-    "$schema": "https://educorvi.github.io/vue-json-form/schemas/ui.schema.json",
+    "$schema": "ui.schema.json",
     "version": "2.0",
     "layout": {
         "type": "VerticalLayout",

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
+import 'package:flutter_json_forms/src/widgets/data/ui_schema_extensions.dart';
 import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_item_generator.dart';
 import '../../models/ui_schema.g.dart' as ui;
 import '../shared/common.dart';
@@ -61,7 +62,7 @@ class FormGroup extends StatelessWidget {
         layoutDirection: LayoutDirection.vertical,
       ),
       isVisibleChecker: (element, index) {
-        if (element.options?.formattingOptions?.hidden == true) {
+        if (element.asControlOptions?.formattingOptions?.hidden == true) {
           return false;
         }
 

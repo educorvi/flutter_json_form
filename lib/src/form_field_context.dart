@@ -6,7 +6,7 @@ import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:json_schema/json_schema.dart';
 
 class FormFieldContext {
-  final ui.ControlOptions? options;
+  final ui.Options? options;
   final ui.Format? format;
   final String scope;
   final String id;
@@ -75,7 +75,7 @@ class FormFieldContext {
     required JsonSchema jsonSchema,
     required bool required,
     required int nestingLevel,
-    ui.ControlOptions? options,
+    ui.Options? options,
     ui.Format? format,
     ui.ShowOnProperty? showOn,
     dynamic initialValue,
@@ -132,7 +132,7 @@ class FormFieldContext {
     required String childScope,
     required String childId,
     required JsonSchema childJsonSchema,
-    ui.ControlOptions? childOptions,
+    ui.Options? childOptions,
     ui.ShowOnProperty? childShowOn,
     dynamic childInitialValue,
     bool childRequired = false,

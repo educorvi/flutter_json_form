@@ -1,45 +1,49 @@
 // To parse this JSON data, do
 //
+//     final arrayOptions = arrayOptionsFromJson(jsonString);
+//     final baseVariants = baseVariantsFromJson(jsonString);
 //     final button = buttonFromJson(jsonString);
 //     final buttongroup = buttongroupFromJson(jsonString);
 //     final buttonOptions = buttonOptionsFromJson(jsonString);
-//     final colorVariant = colorVariantFromJson(jsonString);
-//     final colorVariant = colorVariantFromJson(jsonString);
+//     final colorVariants = colorVariantsFromJson(jsonString);
 //     final commonEnumOptions = commonEnumOptionsFromJson(jsonString);
 //     final control = controlFromJson(jsonString);
 //     final controlFormattingOptions = controlFormattingOptionsFromJson(jsonString);
-//     final coreSchemaMetaSchema = coreSchemaMetaSchemaFromJson(jsonString);
 //     final descendantControlOverride = descendantControlOverrideFromJson(jsonString);
 //     final descendantControlOverrides = descendantControlOverridesFromJson(jsonString);
 //     final displayAs = displayAsFromJson(jsonString);
 //     final divider = dividerFromJson(jsonString);
 //     final elements = elementsFromJson(jsonString);
 //     final enumOptions = enumOptionsFromJson(jsonString);
-//     final fieldSpecificOptions = fieldSpecificOptionsFromJson(jsonString);
 //     final fileUploadOptions = fileUploadOptionsFromJson(jsonString);
 //     final htmlRenderer = htmlRendererFromJson(jsonString);
 //     final inputOptions = inputOptionsFromJson(jsonString);
 //     final layout = layoutFromJson(jsonString);
 //     final layoutElement = layoutElementFromJson(jsonString);
 //     final legacyShowOnProperty = legacyShowOnPropertyFromJson(jsonString);
-//     final nonNegativeInteger = nonNegativeIntegerFromJson(jsonString);
-//     final nonNegativeIntegerDefault0 = nonNegativeIntegerDefault0FromJson(jsonString);
 //     final now = nowFromJson(jsonString);
 //     final options = optionsFromJson(jsonString);
+//     final outlineVariants = outlineVariantsFromJson(jsonString);
 //     final rule = ruleFromJson(jsonString);
-//     final schemaArray = schemaArrayFromJson(jsonString);
 //     final showOnFunctionType = showOnFunctionTypeFromJson(jsonString);
 //     final showOnProperty = showOnPropertyFromJson(jsonString);
-//     final simpleTypes = simpleTypesFromJson(jsonString);
-//     final stringArray = stringArrayFromJson(jsonString);
 //     final submitOptions = submitOptionsFromJson(jsonString);
 //     final tagOptions = tagOptionsFromJson(jsonString);
 //     final text2 = text2FromJson(jsonString);
 //     final theButtonsType = theButtonsTypeFromJson(jsonString);
 //     final titlesForEnum = titlesForEnumFromJson(jsonString);
 //     final uiSchema = uiSchemaFromJson(jsonString);
+//     final wizard = wizardFromJson(jsonString);
 
 import 'dart:convert';
+
+ArrayOptions arrayOptionsFromJson(String str) => ArrayOptions.fromJson(json.decode(str));
+
+String arrayOptionsToJson(ArrayOptions data) => json.encode(data.toJson());
+
+BaseVariants baseVariantsFromJson(String str) => baseVariantsValues.map[json.decode(str)]!;
+
+String baseVariantsToJson(BaseVariants data) => json.encode(baseVariantsValues.reverse[data]);
 
 Button buttonFromJson(String str) => Button.fromJson(json.decode(str));
 
@@ -53,9 +57,9 @@ ButtonOptions buttonOptionsFromJson(String str) => ButtonOptions.fromJson(json.d
 
 String buttonOptionsToJson(ButtonOptions data) => json.encode(data.toJson());
 
-ColorVariant colorVariantFromJson(String str) => colorVariantValues.map[json.decode(str)]!;
+ColorVariants colorVariantsFromJson(String str) => colorVariantsValues.map[json.decode(str)]!;
 
-String colorVariantToJson(ColorVariant data) => json.encode(colorVariantValues.reverse[data]);
+String colorVariantsToJson(ColorVariants data) => json.encode(colorVariantsValues.reverse[data]);
 
 EnumOptions commonEnumOptionsFromJson(String str) => EnumOptions.fromJson(json.decode(str));
 
@@ -68,10 +72,6 @@ String controlToJson(Control data) => json.encode(data.toJson());
 ControlFormattingOptions controlFormattingOptionsFromJson(String str) => ControlFormattingOptions.fromJson(json.decode(str));
 
 String controlFormattingOptionsToJson(ControlFormattingOptions data) => json.encode(data.toJson());
-
-CoreSchemaMetaSchema coreSchemaMetaSchemaFromJson(String str) => CoreSchemaMetaSchema.fromJson(json.decode(str));
-
-String coreSchemaMetaSchemaToJson(CoreSchemaMetaSchema data) => json.encode(data.toJson());
 
 DescendantControlOverrides descendantControlOverrideFromJson(String str) => DescendantControlOverrides.fromJson(json.decode(str));
 
@@ -99,10 +99,6 @@ EnumOptions enumOptionsFromJson(String str) => EnumOptions.fromJson(json.decode(
 
 String enumOptionsToJson(EnumOptions data) => json.encode(data.toJson());
 
-FieldSpecificOptions fieldSpecificOptionsFromJson(String str) => FieldSpecificOptions.fromJson(json.decode(str));
-
-String fieldSpecificOptionsToJson(FieldSpecificOptions data) => json.encode(data.toJson());
-
 FileUploadOptions fileUploadOptionsFromJson(String str) => FileUploadOptions.fromJson(json.decode(str));
 
 String fileUploadOptionsToJson(FileUploadOptions data) => json.encode(data.toJson());
@@ -127,29 +123,21 @@ LegacyShowOnProperty legacyShowOnPropertyFromJson(String str) => LegacyShowOnPro
 
 String legacyShowOnPropertyToJson(LegacyShowOnProperty data) => json.encode(data.toJson());
 
-double nonNegativeIntegerFromJson(String str) => json.decode(str)?.toDouble();
-
-String nonNegativeIntegerToJson(double data) => json.encode(data);
-
-double nonNegativeIntegerDefault0FromJson(String str) => json.decode(str)?.toDouble();
-
-String nonNegativeIntegerDefault0ToJson(double data) => json.encode(data);
-
 Now nowFromJson(String str) => Now.fromJson(json.decode(str));
 
 String nowToJson(Now data) => json.encode(data.toJson());
 
-dynamic optionsFromJson(String str) => json.decode(str);
+Options optionsFromJson(String str) => Options.fromJson(json.decode(str));
 
-String optionsToJson(dynamic data) => json.encode(data);
+String optionsToJson(Options data) => json.encode(data.toJson());
+
+OutlineVariants outlineVariantsFromJson(String str) => outlineVariantsValues.map[json.decode(str)]!;
+
+String outlineVariantsToJson(OutlineVariants data) => json.encode(outlineVariantsValues.reverse[data]);
 
 Rule ruleFromJson(String str) => Rule.fromJson(json.decode(str));
 
 String ruleToJson(Rule data) => json.encode(data.toJson());
-
-List<dynamic> schemaArrayFromJson(String str) => List<dynamic>.from(json.decode(str).map((x) => x));
-
-String schemaArrayToJson(List<dynamic> data) => json.encode(List<dynamic>.from(data.map((x) => x)));
 
 ShowOnFunctionType showOnFunctionTypeFromJson(String str) => showOnFunctionTypeValues.map[json.decode(str)]!;
 
@@ -158,14 +146,6 @@ String showOnFunctionTypeToJson(ShowOnFunctionType data) => json.encode(showOnFu
 ShowOnProperty showOnPropertyFromJson(String str) => ShowOnProperty.fromJson(json.decode(str));
 
 String showOnPropertyToJson(ShowOnProperty data) => json.encode(data.toJson());
-
-SimpleTypes simpleTypesFromJson(String str) => simpleTypesValues.map[json.decode(str)]!;
-
-String simpleTypesToJson(SimpleTypes data) => json.encode(simpleTypesValues.reverse[data]);
-
-List<String> stringArrayFromJson(String str) => List<String>.from(json.decode(str).map((x) => x));
-
-String stringArrayToJson(List<String> data) => json.encode(List<dynamic>.from(data.map((x) => x)));
 
 SubmitOptions submitOptionsFromJson(String str) => SubmitOptions.fromJson(json.decode(str));
 
@@ -191,8 +171,23 @@ UiSchema uiSchemaFromJson(String str) => UiSchema.fromJson(json.decode(str));
 
 String uiSchemaToJson(UiSchema data) => json.encode(data.toJson());
 
+Wizard wizardFromJson(String str) => Wizard.fromJson(json.decode(str));
+
+String wizardToJson(Wizard data) => json.encode(data.toJson());
+
+class ArrayOptions {
+  ///Text for the add button
+  String? addButtonText;
+
+  ArrayOptions({this.addButtonText});
+
+  factory ArrayOptions.fromJson(Map<String, dynamic> json) => ArrayOptions(addButtonText: json["addButtonText"]);
+
+  Map<String, dynamic> toJson() => {"addButtonText": addButtonText};
+}
+
 ///Used to group buttons
-class Buttongroup {
+class Buttongroup implements LayoutElement {
   ///The buttons in the button group
   List<Button> buttons;
   ButtongroupOptions? options;
@@ -224,7 +219,7 @@ class Buttongroup {
 }
 
 ///Used to put a button into the form
-class Button {
+class Button implements LayoutElement {
   TheButtonsType buttonType;
 
   ///Options for the button
@@ -263,9 +258,14 @@ class Button {
 }
 
 ///Submit or Reset
-enum TheButtonsType { RESET, SUBMIT }
+enum TheButtonsType { NEXT_WIZARD_PAGE, PREVIOUS_WIZARD_PAGE, RESET, SUBMIT }
 
-final theButtonsTypeValues = EnumValues({"reset": TheButtonsType.RESET, "submit": TheButtonsType.SUBMIT});
+final theButtonsTypeValues = EnumValues({
+  "nextWizardPage": TheButtonsType.NEXT_WIZARD_PAGE,
+  "previousWizardPage": TheButtonsType.PREVIOUS_WIZARD_PAGE,
+  "reset": TheButtonsType.RESET,
+  "submit": TheButtonsType.SUBMIT,
+});
 
 ///Options for the button
 class ButtonOptions {
@@ -281,7 +281,7 @@ class ButtonOptions {
   SubmitOptions? submitOptions;
 
   ///Different color variants
-  ColorVariant? variant;
+  ColorVariants? variant;
 
   ButtonOptions({
     this.cssClass,
@@ -294,14 +294,14 @@ class ButtonOptions {
         cssClass: json["cssClass"],
         formnovalidate: json["formnovalidate"],
         submitOptions: json["submitOptions"] == null ? null : SubmitOptions.fromJson(json["submitOptions"]),
-        variant: colorVariantValues.map[json["variant"]],
+        variant: colorVariantsValues.map[json["variant"]],
       );
 
   Map<String, dynamic> toJson() => {
         "cssClass": cssClass,
         "formnovalidate": formnovalidate,
         "submitOptions": submitOptions?.toJson(),
-        "variant": colorVariantValues.reverse[variant],
+        "variant": colorVariantsValues.reverse[variant],
       };
 }
 
@@ -315,10 +315,7 @@ class SubmitOptions {
   ///Settings for request actions
   Request? request;
 
-  SubmitOptions({
-    this.action,
-    this.request,
-  });
+  SubmitOptions({this.action, this.request});
 
   factory SubmitOptions.fromJson(Map<String, dynamic> json) => SubmitOptions(
         action: json["action"],
@@ -339,24 +336,30 @@ class Request {
   ///The HTTP method to use for the request
   Method? method;
 
+  ///URL to redirect to after successful request
+  String? onSuccessRedirect;
+
   ///The URL to send the request to
   String url;
 
   Request({
     this.headers,
     this.method,
+    this.onSuccessRedirect,
     required this.url,
   });
 
   factory Request.fromJson(Map<String, dynamic> json) => Request(
-        headers: json["headers"] == null ? null : Map.from(json["headers"]!).map((k, v) => MapEntry<String, String>(k, v)),
+        headers: json["headers"] == null ? null : Map<String, String>.from(json["headers"]),
         method: methodValues.map[json["method"]],
+        onSuccessRedirect: json["onSuccessRedirect"],
         url: json["url"],
       );
 
   Map<String, dynamic> toJson() => {
-        "headers": headers == null ? null : Map.from(headers!).map((k, v) => MapEntry<String, dynamic>(k, v)),
-        "method": methodValues.reverse[method],
+        "headers": headers == null ? null : Map<String, dynamic>.from(headers!),
+        "method": methodValues.reverse[method]!,
+        "onSuccessRedirect": onSuccessRedirect,
         "url": url,
       };
 }
@@ -364,12 +367,15 @@ class Request {
 ///The HTTP method to use for the request
 enum Method { DELETE, GET, POST, PUT }
 
-final methodValues = EnumValues({"DELETE": Method.DELETE, "GET": Method.GET, "POST": Method.POST, "PUT": Method.PUT});
+final methodValues = EnumValues({
+  "DELETE": Method.DELETE,
+  "GET": Method.GET,
+  "POST": Method.POST,
+  "PUT": Method.PUT,
+});
 
 ///Different color variants
-///
-///The color of the help text popover
-enum ColorVariant {
+enum ColorVariants {
   DANGER,
   DARK,
   INFO,
@@ -385,34 +391,31 @@ enum ColorVariant {
   PRIMARY,
   SECONDARY,
   SUCCESS,
-  WARNING
+  WARNING,
 }
 
-final colorVariantValues = EnumValues({
-  "danger": ColorVariant.DANGER,
-  "dark": ColorVariant.DARK,
-  "info": ColorVariant.INFO,
-  "light": ColorVariant.LIGHT,
-  "outline-danger": ColorVariant.OUTLINE_DANGER,
-  "outline-dark": ColorVariant.OUTLINE_DARK,
-  "outline-info": ColorVariant.OUTLINE_INFO,
-  "outline-light": ColorVariant.OUTLINE_LIGHT,
-  "outline-primary": ColorVariant.OUTLINE_PRIMARY,
-  "outline-secondary": ColorVariant.OUTLINE_SECONDARY,
-  "outline-success": ColorVariant.OUTLINE_SUCCESS,
-  "outline-warning": ColorVariant.OUTLINE_WARNING,
-  "primary": ColorVariant.PRIMARY,
-  "secondary": ColorVariant.SECONDARY,
-  "success": ColorVariant.SUCCESS,
-  "warning": ColorVariant.WARNING
+final colorVariantsValues = EnumValues({
+  "danger": ColorVariants.DANGER,
+  "dark": ColorVariants.DARK,
+  "info": ColorVariants.INFO,
+  "light": ColorVariants.LIGHT,
+  "outline-danger": ColorVariants.OUTLINE_DANGER,
+  "outline-dark": ColorVariants.OUTLINE_DARK,
+  "outline-info": ColorVariants.OUTLINE_INFO,
+  "outline-light": ColorVariants.OUTLINE_LIGHT,
+  "outline-primary": ColorVariants.OUTLINE_PRIMARY,
+  "outline-secondary": ColorVariants.OUTLINE_SECONDARY,
+  "outline-success": ColorVariants.OUTLINE_SUCCESS,
+  "outline-warning": ColorVariants.OUTLINE_WARNING,
+  "primary": ColorVariants.PRIMARY,
+  "secondary": ColorVariants.SECONDARY,
+  "success": ColorVariants.SUCCESS,
+  "warning": ColorVariants.WARNING,
 });
 
 ///Show field depending on value of other field
 ///
 ///Legacy Variant of defining ShowOn property
-///
-///Rita Rule
-///See https://educorvi.github.io/rita/rita-core/docs/schema/#/rule
 class ShowOnProperty {
   ///The field this field depends on in object notation
   String? path;
@@ -455,7 +458,14 @@ class ShowOnProperty {
 }
 
 ///Condition to be applied
-enum ShowOnFunctionType { EQUALS, GREATER, GREATER_OR_EQUAL, NOT_EQUALS, SMALLER, SMALLER_OR_EQUAL }
+enum ShowOnFunctionType {
+  EQUALS,
+  GREATER,
+  GREATER_OR_EQUAL,
+  NOT_EQUALS,
+  SMALLER,
+  SMALLER_OR_EQUAL,
+}
 
 final showOnFunctionTypeValues = EnumValues({
   "EQUALS": ShowOnFunctionType.EQUALS,
@@ -463,7 +473,7 @@ final showOnFunctionTypeValues = EnumValues({
   "GREATER_OR_EQUAL": ShowOnFunctionType.GREATER_OR_EQUAL,
   "NOT_EQUALS": ShowOnFunctionType.NOT_EQUALS,
   "SMALLER": ShowOnFunctionType.SMALLER,
-  "SMALLER_OR_EQUAL": ShowOnFunctionType.SMALLER_OR_EQUAL
+  "SMALLER_OR_EQUAL": ShowOnFunctionType.SMALLER_OR_EQUAL,
 });
 
 enum ButtonType { BUTTON }
@@ -474,26 +484,24 @@ class ButtongroupOptions {
   ///Display the buttons vertical
   bool? vertical;
 
-  ButtongroupOptions({
-    this.vertical,
-  });
+  ButtongroupOptions({this.vertical});
 
   factory ButtongroupOptions.fromJson(Map<String, dynamic> json) => ButtongroupOptions(
         vertical: json["vertical"],
       );
 
-  Map<String, dynamic> toJson() => {
-        "vertical": vertical,
-      };
+  Map<String, dynamic> toJson() => {"vertical": vertical};
 }
 
 enum ButtongroupType { BUTTONGROUP }
 
-final buttongroupTypeValues = EnumValues({"Buttongroup": ButtongroupType.BUTTONGROUP});
+final buttongroupTypeValues = EnumValues({
+  "Buttongroup": ButtongroupType.BUTTONGROUP,
+});
 
 class EnumOptions {
   ///Different color variants
-  ColorVariant? buttonVariant;
+  ColorVariants? buttonVariant;
 
   ///Choose how an enum should be displayed
   DisplayAs? displayAs;
@@ -503,6 +511,11 @@ class EnumOptions {
   ///name
   Map<String, String>? enumTitles;
 
+  ///Use rita rules to conditionally display options. If a rule is set for an option, then it
+  ///will only be displayed, if the rule is fulfilled. The option value is to be used as a key
+  ///in the object.
+  Map<String, Rule>? optionFilters;
+
   ///Radiobutton-/Checkbox group will be stacked if set to true
   bool? stacked;
 
@@ -510,20 +523,32 @@ class EnumOptions {
     this.buttonVariant,
     this.displayAs,
     this.enumTitles,
+    this.optionFilters,
     this.stacked,
   });
 
   factory EnumOptions.fromJson(Map<String, dynamic> json) => EnumOptions(
-        buttonVariant: colorVariantValues.map[json["buttonVariant"]],
+        buttonVariant: colorVariantsValues.map[json["buttonVariant"]],
         displayAs: displayAsValues.map[json["displayAs"]],
-        enumTitles: json["enumTitles"] == null ? null : Map.from(json["enumTitles"]!).map((k, v) => MapEntry<String, String>(k, v)),
+        enumTitles: json["enumTitles"] == null
+            ? null
+            : Map.from(
+                json["enumTitles"],
+              ).map((k, v) => MapEntry<String, String>(k, v)),
+        optionFilters: json["optionFilters"] == null
+            ? null
+            : Map.from(
+                json["optionFilters"],
+              ).map((k, v) => MapEntry<String, Rule>(k, Rule.fromJson(v))),
         stacked: json["stacked"],
       );
 
   Map<String, dynamic> toJson() => {
-        "buttonVariant": colorVariantValues.reverse[buttonVariant],
+        "buttonVariant": colorVariantsValues.reverse[buttonVariant],
         "displayAs": displayAsValues.reverse[displayAs],
-        "enumTitles": enumTitles == null ? null : Map.from(enumTitles!).map((k, v) => MapEntry<String, dynamic>(k, v)),
+        "enumTitles": enumTitles == null ? null : Map<String, dynamic>.from(enumTitles!),
+        "optionFilters":
+            optionFilters == null ? null : Map<String, dynamic>.from(optionFilters!.map((k, v) => MapEntry<String, dynamic>(k, v.toJson()))),
         "stacked": stacked,
       };
 }
@@ -531,34 +556,71 @@ class EnumOptions {
 ///Choose how an enum should be displayed
 enum DisplayAs { BUTTONS, RADIOBUTTONS, SELECT, SWITCHES }
 
-final displayAsValues =
-    EnumValues({"buttons": DisplayAs.BUTTONS, "radiobuttons": DisplayAs.RADIOBUTTONS, "select": DisplayAs.SELECT, "switches": DisplayAs.SWITCHES});
+final displayAsValues = EnumValues({
+  "buttons": DisplayAs.BUTTONS,
+  "radiobuttons": DisplayAs.RADIOBUTTONS,
+  "select": DisplayAs.SELECT,
+  "switches": DisplayAs.SWITCHES,
+});
 
-class ControlOptions {
-  final FieldSpecificOptions? fieldSpecificOptions;
+class Rule {
+  ///A comment about what the rule does
+  String? comment;
+  String id;
+  dynamic rule;
+
+  Rule({this.comment, required this.id, required this.rule});
+
+  factory Rule.fromJson(Map<String, dynamic> json) => Rule(comment: json["comment"], id: json["id"], rule: json["rule"]);
+
+  Map<String, dynamic> toJson() => {"comment": comment, "id": id, "rule": rule};
+}
+
+/// Manually crated because dart doesn't support & union types
+/// To use most of the automatically generated classes for each & part class, a separate getter is created
+/// Union classes: [TagOptions], [EnumOptions], [FileUploadOptions], [ArrayOptions], [InputOptions], [ControlFormattingOptions]
+class Options {
+  final TagOptions? tagOptions;
+  final EnumOptions? enumOptions;
+  final FileUploadOptions? fileUploadOptions;
+  final ArrayOptions? arrayOptions;
+  final InputOptions? inputOptions;
   final ControlFormattingOptions? formattingOptions;
 
-  ControlOptions({
-    this.fieldSpecificOptions,
+  Options({
+    this.tagOptions,
+    this.enumOptions,
+    this.fileUploadOptions,
+    this.arrayOptions,
+    this.inputOptions,
     this.formattingOptions,
   });
 
-  factory ControlOptions.fromJson(Map<String, dynamic> json) => ControlOptions(
-        fieldSpecificOptions: FieldSpecificOptions.fromJson(json),
+  factory Options.fromJson(Map<String, dynamic> json) => Options(
+        tagOptions: TagOptions.fromJson(json),
+        enumOptions: EnumOptions.fromJson(json),
+        fileUploadOptions: FileUploadOptions.fromJson(json),
+        arrayOptions: ArrayOptions.fromJson(json),
+        inputOptions: InputOptions.fromJson(json),
         formattingOptions: ControlFormattingOptions.fromJson(json),
       );
 
   Map<String, dynamic> toJson() {
-    final fieldJson = fieldSpecificOptions?.toJson() ?? {};
-    final formattingJson = formattingOptions?.toJson() ?? {};
-    return {...fieldJson, ...formattingJson};
+    return {
+      ...?tagOptions?.toJson(),
+      ...?enumOptions?.toJson(),
+      ...?fileUploadOptions?.toJson(),
+      ...?arrayOptions?.toJson(),
+      ...?inputOptions?.toJson(),
+      ...?formattingOptions?.toJson(),
+    };
   }
 }
 
 ///Contains a form element, e. g. a text input
-class Control {
+class Control implements LayoutElement {
   ///Gives multiple options to configure the element
-  ControlOptions? options;
+  Options? options;
 
   ///A json pointer referring to the form element in the forms json schema
   String scope;
@@ -567,15 +629,10 @@ class Control {
   ShowOnProperty? showOn;
   ControlType type;
 
-  Control({
-    this.options,
-    required this.scope,
-    this.showOn,
-    required this.type,
-  });
+  Control({this.options, required this.scope, this.showOn, required this.type});
 
   factory Control.fromJson(Map<String, dynamic> json) => Control(
-        options: json["options"] == null ? null : ControlOptions.fromJson(json["options"]),
+        options: json["options"] == null ? null : Options.fromJson(json["options"]),
         scope: json["scope"],
         showOn: json["showOn"] == null ? null : ShowOnProperty.fromJson(json["showOn"]),
         type: controlTypeValues.map[json["type"]]!,
@@ -586,6 +643,26 @@ class Control {
         "scope": scope,
         "showOn": showOn?.toJson(),
         "type": controlTypeValues.reverse[type],
+      };
+}
+
+class DescendantControlOverrides {
+  ///Gives multiple options to configure the element
+  Options? options;
+
+  ///Show field depending on value of other field
+  ShowOnProperty? showOn;
+
+  DescendantControlOverrides({this.options, this.showOn});
+
+  factory DescendantControlOverrides.fromJson(Map<String, dynamic> json) => DescendantControlOverrides(
+        options: json["options"] == null ? null : Options.fromJson(json["options"]),
+        showOn: json["showOn"] == null ? null : ShowOnProperty.fromJson(json["showOn"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "options": options?.toJson(),
+        "showOn": showOn?.toJson(),
       };
 }
 
@@ -648,7 +725,7 @@ enum Autocomplete {
   TRANSACTION_CURRENCY,
   URL,
   USERNAME,
-  WEBAUTHN
+  WEBAUTHN,
 }
 
 final autocompleteValues = EnumValues({
@@ -708,11 +785,23 @@ final autocompleteValues = EnumValues({
   "transaction-currency": Autocomplete.TRANSACTION_CURRENCY,
   "url": Autocomplete.URL,
   "username": Autocomplete.USERNAME,
-  "webauthn": Autocomplete.WEBAUTHN
+  "webauthn": Autocomplete.WEBAUTHN,
 });
 
 ///Format for string fields
-enum Format { COLOR, DATE, DATETIME_LOCAL, EMAIL, HIDDEN, PASSWORD, SEARCH, TEL, TEXT, TIME, URL }
+enum Format {
+  COLOR,
+  DATE,
+  DATETIME_LOCAL,
+  EMAIL,
+  HIDDEN,
+  PASSWORD,
+  SEARCH,
+  TEL,
+  TEXT,
+  TIME,
+  URL,
+}
 
 final formatValues = EnumValues({
   "color": Format.COLOR,
@@ -725,14 +814,84 @@ final formatValues = EnumValues({
   "tel": Format.TEL,
   "text": Format.TEXT,
   "time": Format.TIME,
-  "url": Format.URL
+  "url": Format.URL,
 });
+
+///Help text popover
+class OptionsHelp {
+  String? label;
+  String text;
+  BaseVariants? variant;
+
+  OptionsHelp({this.label, required this.text, this.variant});
+
+  factory OptionsHelp.fromJson(Map<String, dynamic> json) => OptionsHelp(
+        label: json["label"],
+        text: json["text"],
+        variant: baseVariantsValues.map[json["variant"]]!,
+      );
+
+  Map<String, dynamic> toJson() => {
+        "label": label,
+        "text": text,
+        "variant": baseVariantsValues.reverse[variant],
+      };
+}
+
+enum BaseVariants {
+  DANGER,
+  DARK,
+  INFO,
+  LIGHT,
+  PRIMARY,
+  SECONDARY,
+  SUCCESS,
+  WARNING,
+}
+
+final baseVariantsValues = EnumValues({
+  "danger": BaseVariants.DANGER,
+  "dark": BaseVariants.DARK,
+  "info": BaseVariants.INFO,
+  "light": BaseVariants.LIGHT,
+  "primary": BaseVariants.PRIMARY,
+  "secondary": BaseVariants.SECONDARY,
+  "success": BaseVariants.SUCCESS,
+  "warning": BaseVariants.WARNING,
+});
+
+///Will be rendered as tags-Field
+class OptionsTags {
+  ///Set to true to render the field as tags field
+  bool? enabled;
+  bool? pills;
+  BaseVariants? variant;
+
+  OptionsTags({this.enabled, this.pills, this.variant});
+
+  factory OptionsTags.fromJson(Map<String, dynamic> json) => OptionsTags(
+        enabled: json["enabled"],
+        pills: json["pills"],
+        variant: baseVariantsValues.map[json["variant"]]!,
+      );
+
+  Map<String, dynamic> toJson() => {
+        "enabled": enabled,
+        "pills": pills,
+        "variant": baseVariantsValues.reverse[variant],
+      };
+}
 
 ///Set the text-align of input fields
 enum TextAlign { CENTER, END, LEFT, RIGHT, START }
 
-final textAlignValues =
-    EnumValues({"center": TextAlign.CENTER, "end": TextAlign.END, "left": TextAlign.LEFT, "right": TextAlign.RIGHT, "start": TextAlign.START});
+final textAlignValues = EnumValues({
+  "center": TextAlign.CENTER,
+  "end": TextAlign.END,
+  "left": TextAlign.LEFT,
+  "right": TextAlign.RIGHT,
+  "start": TextAlign.START,
+});
 
 enum ControlType { CONTROL }
 
@@ -752,17 +911,19 @@ class ControlFormattingOptions {
   ///Disables the field
   bool? disabled;
 
+  ///If set to true, the field will be marked as required even if it is not required by the
+  ///schema
+  bool? forceRequired;
+
   ///Help text popover
-  Help? help;
+  ControlFormattingOptionsHelp? help;
 
   ///Sets the visibility of the field to hidden. For example useful in combination with a
   ///DateTime field with default:"$now" to create a hidden timestamp.
   bool? hidden;
 
   ///Defines whether the fields label is shown
-  ///
-  ///Adds a label for groups (only for type=Group)
-  dynamic label;
+  bool? label;
 
   ///Will be shown as placeholder in form fields, if supported by field
   String? placeholder;
@@ -781,6 +942,7 @@ class ControlFormattingOptions {
     this.cssClass,
     this.descendantControlOverrides,
     this.disabled,
+    this.forceRequired,
     this.help,
     this.hidden,
     this.label,
@@ -795,10 +957,15 @@ class ControlFormattingOptions {
         cssClass: json["cssClass"],
         descendantControlOverrides: json["descendantControlOverrides"] == null
             ? null
-            : Map.from(json["descendantControlOverrides"]!)
-                .map((k, v) => MapEntry<String, DescendantControlOverrides>(k, DescendantControlOverrides.fromJson(v))),
+            : Map.from(json["descendantControlOverrides"]!).map(
+                (k, v) => MapEntry<String, DescendantControlOverrides>(
+                  k,
+                  DescendantControlOverrides.fromJson(v),
+                ),
+              ),
         disabled: json["disabled"],
-        help: json["help"] == null ? null : Help.fromJson(json["help"]),
+        forceRequired: json["forceRequired"],
+        help: json["help"] == null ? null : ControlFormattingOptionsHelp.fromJson(json["help"]),
         hidden: json["hidden"],
         label: json["label"],
         placeholder: json["placeholder"],
@@ -810,9 +977,13 @@ class ControlFormattingOptions {
   Map<String, dynamic> toJson() => {
         "append": append,
         "cssClass": cssClass,
-        "descendantControlOverrides":
-            descendantControlOverrides == null ? null : Map.from(descendantControlOverrides!).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
+        "descendantControlOverrides": descendantControlOverrides == null
+            ? null
+            : Map.from(
+                descendantControlOverrides!,
+              ).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
         "disabled": disabled,
+        "forceRequired": forceRequired,
         "help": help?.toJson(),
         "hidden": hidden,
         "label": label,
@@ -823,277 +994,34 @@ class ControlFormattingOptions {
       };
 }
 
-class DescendantControlOverrides {
-  ///Gives multiple options to configure the element
-  ControlOptions? options;
-
-  ///Show field depending on value of other field
-  ShowOnProperty? showOn;
-
-  DescendantControlOverrides({
-    this.options,
-    this.showOn,
-  });
-
-  factory DescendantControlOverrides.fromJson(Map<String, dynamic> json) => DescendantControlOverrides(
-        options: json["options"] == null ? null : ControlOptions.fromJson(json["options"]),
-        showOn: json["showOn"] == null ? null : ShowOnProperty.fromJson(json["showOn"]),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "options": options?.toJson(),
-        "showOn": showOn?.toJson(),
-      };
-}
-
 ///Help text popover
-class Help {
+class ControlFormattingOptionsHelp {
   String? label;
   String text;
+  BaseVariants? variant;
 
-  ///The color of the help text popover
-  ColorVariant? variant;
+  ControlFormattingOptionsHelp({this.label, required this.text, this.variant});
 
-  Help({
-    this.label,
-    required this.text,
-    this.variant,
-  });
-
-  factory Help.fromJson(Map<String, dynamic> json) => Help(
+  factory ControlFormattingOptionsHelp.fromJson(Map<String, dynamic> json) => ControlFormattingOptionsHelp(
         label: json["label"],
         text: json["text"],
-        variant: colorVariantValues.map[json["variant"]],
+        variant: baseVariantsValues.map[json["variant"]],
       );
 
   Map<String, dynamic> toJson() => {
         "label": label,
         "text": text,
-        "variant": colorVariantValues.reverse[variant],
+        "variant": baseVariantsValues.reverse[variant],
       };
 }
-
-///This file was automatically generated by json-schema-to-typescript.
-///DO NOT MODIFY IT BY HAND. Instead, modify the source JSONSchema file,
-///and run json-schema-to-typescript to regenerate this file.
-class CoreSchemaMetaSchema {
-  String? comment;
-  String? id;
-  String? ref;
-  String? schema;
-  dynamic additionalItems;
-  dynamic additionalProperties;
-  List<dynamic>? allOf;
-  List<dynamic>? anyOf;
-  dynamic coreSchemaMetaSchemaConst;
-  dynamic contains;
-  String? contentEncoding;
-  String? contentMediaType;
-  dynamic coreSchemaMetaSchemaDefault;
-  Map<String, dynamic>? definitions;
-  Map<String, dynamic>? dependencies;
-  String? description;
-  dynamic coreSchemaMetaSchemaElse;
-  List<dynamic>? coreSchemaMetaSchemaEnum;
-  List<dynamic>? examples;
-  double? exclusiveMaximum;
-  double? exclusiveMinimum;
-  String? format;
-  dynamic coreSchemaMetaSchemaIf;
-  dynamic items;
-  double? maximum;
-  double? maxItems;
-  double? maxLength;
-  double? maxProperties;
-  double? minimum;
-  double? minItems;
-  double? minLength;
-  double? minProperties;
-  double? multipleOf;
-  dynamic not;
-  List<dynamic>? oneOf;
-  String? pattern;
-  Map<String, dynamic>? patternProperties;
-  Map<String, dynamic>? properties;
-  dynamic propertyNames;
-  bool? readOnly;
-  List<String>? required;
-  dynamic then;
-  String? title;
-  dynamic type;
-  bool? uniqueItems;
-  bool? writeOnly;
-
-  CoreSchemaMetaSchema({
-    this.comment,
-    this.id,
-    this.ref,
-    this.schema,
-    this.additionalItems,
-    this.additionalProperties,
-    this.allOf,
-    this.anyOf,
-    this.coreSchemaMetaSchemaConst,
-    this.contains,
-    this.contentEncoding,
-    this.contentMediaType,
-    this.coreSchemaMetaSchemaDefault,
-    this.definitions,
-    this.dependencies,
-    this.description,
-    this.coreSchemaMetaSchemaElse,
-    this.coreSchemaMetaSchemaEnum,
-    this.examples,
-    this.exclusiveMaximum,
-    this.exclusiveMinimum,
-    this.format,
-    this.coreSchemaMetaSchemaIf,
-    this.items,
-    this.maximum,
-    this.maxItems,
-    this.maxLength,
-    this.maxProperties,
-    this.minimum,
-    this.minItems,
-    this.minLength,
-    this.minProperties,
-    this.multipleOf,
-    this.not,
-    this.oneOf,
-    this.pattern,
-    this.patternProperties,
-    this.properties,
-    this.propertyNames,
-    this.readOnly,
-    this.required,
-    this.then,
-    this.title,
-    this.type,
-    this.uniqueItems,
-    this.writeOnly,
-  });
-
-  factory CoreSchemaMetaSchema.fromJson(Map<String, dynamic> json) => CoreSchemaMetaSchema(
-        comment: json["\u0024comment"],
-        id: json["\u0024id"],
-        ref: json["\u0024ref"],
-        schema: json["\u0024schema"],
-        additionalItems: json["additionalItems"],
-        additionalProperties: json["additionalProperties"],
-        allOf: json["allOf"] == null ? [] : List<dynamic>.from(json["allOf"]!.map((x) => x)),
-        anyOf: json["anyOf"] == null ? [] : List<dynamic>.from(json["anyOf"]!.map((x) => x)),
-        coreSchemaMetaSchemaConst: json["const"],
-        contains: json["contains"],
-        contentEncoding: json["contentEncoding"],
-        contentMediaType: json["contentMediaType"],
-        coreSchemaMetaSchemaDefault: json["default"],
-        definitions: Map.from(json["definitions"]!).map((k, v) => MapEntry<String, dynamic>(k, v)),
-        dependencies: Map.from(json["dependencies"]!).map((k, v) => MapEntry<String, dynamic>(k, v)),
-        description: json["description"],
-        coreSchemaMetaSchemaElse: json["else"],
-        coreSchemaMetaSchemaEnum: json["enum"] == null ? [] : List<dynamic>.from(json["enum"]!.map((x) => x)),
-        examples: json["examples"] == null ? [] : List<dynamic>.from(json["examples"]!.map((x) => x)),
-        exclusiveMaximum: json["exclusiveMaximum"]?.toDouble(),
-        exclusiveMinimum: json["exclusiveMinimum"]?.toDouble(),
-        format: json["format"],
-        coreSchemaMetaSchemaIf: json["if"],
-        items: json["items"],
-        maximum: json["maximum"]?.toDouble(),
-        maxItems: json["maxItems"]?.toDouble(),
-        maxLength: json["maxLength"]?.toDouble(),
-        maxProperties: json["maxProperties"]?.toDouble(),
-        minimum: json["minimum"]?.toDouble(),
-        minItems: json["minItems"]?.toDouble(),
-        minLength: json["minLength"]?.toDouble(),
-        minProperties: json["minProperties"]?.toDouble(),
-        multipleOf: json["multipleOf"]?.toDouble(),
-        not: json["not"],
-        oneOf: json["oneOf"] == null ? [] : List<dynamic>.from(json["oneOf"]!.map((x) => x)),
-        pattern: json["pattern"],
-        patternProperties: Map.from(json["patternProperties"]!).map((k, v) => MapEntry<String, dynamic>(k, v)),
-        properties: Map.from(json["properties"]!).map((k, v) => MapEntry<String, dynamic>(k, v)),
-        propertyNames: json["propertyNames"],
-        readOnly: json["readOnly"],
-        required: json["required"] == null ? [] : List<String>.from(json["required"]!.map((x) => x)),
-        then: json["then"],
-        title: json["title"],
-        type: json["type"],
-        uniqueItems: json["uniqueItems"],
-        writeOnly: json["writeOnly"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "\u0024comment": comment,
-        "\u0024id": id,
-        "\u0024ref": ref,
-        "\u0024schema": schema,
-        "additionalItems": additionalItems,
-        "additionalProperties": additionalProperties,
-        "allOf": allOf == null ? [] : List<dynamic>.from(allOf!.map((x) => x)),
-        "anyOf": anyOf == null ? [] : List<dynamic>.from(anyOf!.map((x) => x)),
-        "const": coreSchemaMetaSchemaConst,
-        "contains": contains,
-        "contentEncoding": contentEncoding,
-        "contentMediaType": contentMediaType,
-        "default": coreSchemaMetaSchemaDefault,
-        "definitions": Map.from(definitions!).map((k, v) => MapEntry<String, dynamic>(k, v)),
-        "dependencies": Map.from(dependencies!).map((k, v) => MapEntry<String, dynamic>(k, v)),
-        "description": description,
-        "else": coreSchemaMetaSchemaElse,
-        "enum": coreSchemaMetaSchemaEnum == null ? [] : List<dynamic>.from(coreSchemaMetaSchemaEnum!.map((x) => x)),
-        "examples": examples == null ? [] : List<dynamic>.from(examples!.map((x) => x)),
-        "exclusiveMaximum": exclusiveMaximum,
-        "exclusiveMinimum": exclusiveMinimum,
-        "format": format,
-        "if": coreSchemaMetaSchemaIf,
-        "items": items,
-        "maximum": maximum,
-        "maxItems": maxItems,
-        "maxLength": maxLength,
-        "maxProperties": maxProperties,
-        "minimum": minimum,
-        "minItems": minItems,
-        "minLength": minLength,
-        "minProperties": minProperties,
-        "multipleOf": multipleOf,
-        "not": not,
-        "oneOf": oneOf == null ? [] : List<dynamic>.from(oneOf!.map((x) => x)),
-        "pattern": pattern,
-        "patternProperties": Map.from(patternProperties!).map((k, v) => MapEntry<String, dynamic>(k, v)),
-        "properties": Map.from(properties!).map((k, v) => MapEntry<String, dynamic>(k, v)),
-        "propertyNames": propertyNames,
-        "readOnly": readOnly,
-        "required": required == null ? [] : List<dynamic>.from(required!.map((x) => x)),
-        "then": then,
-        "title": title,
-        "type": type,
-        "uniqueItems": uniqueItems,
-        "writeOnly": writeOnly,
-      };
-}
-
-enum SimpleTypes { ARRAY, BOOLEAN, INTEGER, NULL, NUMBER, OBJECT, STRING }
-
-final simpleTypesValues = EnumValues({
-  "array": SimpleTypes.ARRAY,
-  "boolean": SimpleTypes.BOOLEAN,
-  "integer": SimpleTypes.INTEGER,
-  "null": SimpleTypes.NULL,
-  "number": SimpleTypes.NUMBER,
-  "object": SimpleTypes.OBJECT,
-  "string": SimpleTypes.STRING
-});
 
 ///inserts a simple divider
-class Divider {
+class Divider implements LayoutElement {
   ///Show field depending on value of other field
   ShowOnProperty? showOn;
   DividerType type;
 
-  Divider({
-    this.showOn,
-    required this.type,
-  });
+  Divider({this.showOn, required this.type});
 
   factory Divider.fromJson(Map<String, dynamic> json) => Divider(
         showOn: json["showOn"] == null ? null : ShowOnProperty.fromJson(json["showOn"]),
@@ -1110,189 +1038,50 @@ enum DividerType { DIVIDER }
 
 final dividerTypeValues = EnumValues({"Divider": DividerType.DIVIDER});
 
-///Options for text fields
-class FieldSpecificOptions {
-  ///Different color variants
-  ColorVariant? buttonVariant;
-
-  ///Choose how an enum should be displayed
-  DisplayAs? displayAs;
-
-  ///If the text in a enums select field is supposed to differ from the keys, they can be
-  ///specified as properties of this object. The value in the enum must be used as property
-  ///name
-  Map<String, String>? enumTitles;
-
-  ///Radiobutton-/Checkbox group will be stacked if set to true
-  bool? stacked;
-
-  ///Will be rendered as tags-Field
-  FieldSpecificOptionsTags? tags;
-
-  ///The accepted File Types
-  String? acceptedFileType;
-
-  ///Allows the upload of multiple files with fileupload
-  bool? allowMultipleFiles;
-
-  ///Specifies what should be autocompleted by the browser. Possible values are taken from
-  ///https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete#values
-  Autocomplete? autocomplete;
-
-  ///Format for string fields
-  Format? format;
-
-  ///If set true, textarea will be shown instead of textfield.
-  ///Alternatively can be set to the number of wanted lines
-  dynamic multi;
-
-  ///If set true, a range input will be shown instead of a text input
-  bool? range;
-
-  ///Set the text-align of input fields
-  TextAlign? textAlign;
-
-  FieldSpecificOptions({
-    this.buttonVariant,
-    this.displayAs,
-    this.enumTitles,
-    this.stacked,
-    this.tags,
-    this.acceptedFileType,
-    this.allowMultipleFiles,
-    this.autocomplete,
-    this.format,
-    this.multi,
-    this.range,
-    this.textAlign,
-  });
-
-  factory FieldSpecificOptions.fromJson(Map<String, dynamic> json) => FieldSpecificOptions(
-        buttonVariant: colorVariantValues.map[json["buttonVariant"]],
-        displayAs: displayAsValues.map[json["displayAs"]],
-        enumTitles: json["enumTitles"] == null ? null : Map.from(json["enumTitles"]!).map((k, v) => MapEntry<String, String>(k, v)),
-        stacked: json["stacked"],
-        tags: json["tags"] == null ? null : FieldSpecificOptionsTags.fromJson(json["tags"]),
-        acceptedFileType: json["acceptedFileType"],
-        allowMultipleFiles: json["allowMultipleFiles"],
-        autocomplete: autocompleteValues.map[json["autocomplete"]],
-        format: formatValues.map[json["format"]],
-        multi: json["multi"],
-        range: json["range"],
-        textAlign: textAlignValues.map[json["textAlign"]],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "buttonVariant": colorVariantValues.reverse[buttonVariant],
-        "displayAs": displayAsValues.reverse[displayAs],
-        "enumTitles": enumTitles == null ? null : Map.from(enumTitles!).map((k, v) => MapEntry<String, dynamic>(k, v)),
-        "stacked": stacked,
-        "tags": tags?.toJson(),
-        "acceptedFileType": acceptedFileType,
-        "allowMultipleFiles": allowMultipleFiles,
-        "autocomplete": autocompleteValues.reverse[autocomplete],
-        "format": formatValues.reverse[format],
-        "multi": multi,
-        "range": range,
-        "textAlign": textAlignValues.reverse[textAlign],
-      };
-}
-
-// abstract class FieldSpecificOptions {
-//   factory FieldSpecificOptions.fromJson(Map<String, dynamic> json) {
-//     if (json.containsKey('tags')) {
-//       return TagOptions.fromJson(json);
-//     }
-//     if (json.containsKey('enumTitles') ||
-//         json.containsKey('stacked') ||
-//         json.containsKey('displayAs') ||
-//         json.containsKey('buttonVariant')) {
-//       return EnumOptions.fromJson(json);
-//     }
-//     if (json.containsKey('acceptedFileType') || json.containsKey('allowMultipleFiles')) {
-//       return FileUploadOptions.fromJson(json);
-//     }
-//     if (json.containsKey('format') ||
-//         json.containsKey('multi') ||
-//         json.containsKey('autocomplete') ||
-//         json.containsKey('range') ||
-//         json.containsKey('textAlign')) {
-//       return InputOptions.fromJson(json);
-//     }
-//     throw Exception('Unknown FieldSpecificOptions type: $json');
-//   }
-//   Map<String, dynamic> toJson();
-// }
-
-///Will be rendered as tags-Field
-class FieldSpecificOptionsTags {
-  ///Set to true to render the field as tags field
-  bool? enabled;
-  bool? pills;
-
-  ///Different color variants
-  ColorVariant? variant;
-
-  FieldSpecificOptionsTags({
-    this.enabled,
-    this.pills,
-    this.variant,
-  });
-
-  factory FieldSpecificOptionsTags.fromJson(Map<String, dynamic> json) => FieldSpecificOptionsTags(
-        enabled: json["enabled"],
-        pills: json["pills"],
-        variant: colorVariantValues.map[json["variant"]],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "enabled": enabled,
-        "pills": pills,
-        "variant": colorVariantValues.reverse[variant],
-      };
-}
-
 class FileUploadOptions {
   ///The accepted File Types
   String? acceptedFileType;
 
-  ///Allows the upload of multiple files with fileupload
-  bool? allowMultipleFiles;
+  ///If this is an array of upload fields, display as a single Multi-Upload field instead
+  bool? displayAsSingleUploadField;
+
+  ///Maximum file size in bytes per file. If file using a multi file upload, this needs to be
+  ///set on the array that is the multi file upload.
+  double? maxFileSize;
 
   FileUploadOptions({
     this.acceptedFileType,
-    this.allowMultipleFiles,
+    this.displayAsSingleUploadField,
+    this.maxFileSize,
   });
 
   factory FileUploadOptions.fromJson(Map<String, dynamic> json) => FileUploadOptions(
         acceptedFileType: json["acceptedFileType"],
-        allowMultipleFiles: json["allowMultipleFiles"],
+        displayAsSingleUploadField: json["displayAsSingleUploadField"],
+        maxFileSize: json["maxFileSize"]?.toDouble(),
       );
 
   Map<String, dynamic> toJson() => {
         "acceptedFileType": acceptedFileType,
-        "allowMultipleFiles": allowMultipleFiles,
+        "displayAsSingleUploadField": displayAsSingleUploadField,
+        "maxFileSize": maxFileSize,
       };
 }
 
 ///Some HTML to be rendered in the form
-class HtmlRenderer {
+class HtmlRenderer implements LayoutElement {
   String htmlData;
 
   ///Show field depending on value of other field
   ShowOnProperty? showOn;
   HtmlRendererType? type;
 
-  HtmlRenderer({
-    required this.htmlData,
-    this.showOn,
-    this.type,
-  });
+  HtmlRenderer({required this.htmlData, this.showOn, this.type});
 
   factory HtmlRenderer.fromJson(Map<String, dynamic> json) => HtmlRenderer(
         htmlData: json["htmlData"],
         showOn: json["showOn"] == null ? null : ShowOnProperty.fromJson(json["showOn"]),
-        type: htmlRendererTypeValues.map[json["type"]],
+        type: htmlRendererTypeValues.map[json["type"]]!,
       );
 
   Map<String, dynamic> toJson() => {
@@ -1382,112 +1171,171 @@ class LegacyShowOnProperty {
 class Now {
   NowType? type;
 
-  Now({
-    this.type,
-  });
+  Now({this.type});
 
-  factory Now.fromJson(Map<String, dynamic> json) => Now(
-        type: nowTypeValues.map[json["type"]],
-      );
+  factory Now.fromJson(Map<String, dynamic> json) => Now(type: nowTypeValues.map[json["type"]]);
 
-  Map<String, dynamic> toJson() => {
-        "type": nowTypeValues.reverse[type],
-      };
+  Map<String, dynamic> toJson() => {"type": nowTypeValues.reverse[type]};
 }
 
 enum NowType { NOW }
 
 final nowTypeValues = EnumValues({"now": NowType.NOW});
 
-class OptionsClass {
-  OptionsClass();
-
-  factory OptionsClass.fromJson(Map<String, dynamic> json) => OptionsClass();
-
-  Map<String, dynamic> toJson() => {};
+enum OutlineVariants {
+  OUTLINE_DANGER,
+  OUTLINE_DARK,
+  OUTLINE_INFO,
+  OUTLINE_LIGHT,
+  OUTLINE_PRIMARY,
+  OUTLINE_SECONDARY,
+  OUTLINE_SUCCESS,
+  OUTLINE_WARNING,
 }
 
-///Rita Rule
-///See https://educorvi.github.io/rita/rita-core/docs/schema/#/rule
-class Rule {
-  ///A comment about what the rule does
-  String? comment;
-  String id;
-  dynamic rule;
-
-  Rule({
-    this.comment,
-    required this.id,
-    required this.rule,
-  });
-
-  factory Rule.fromJson(Map<String, dynamic> json) => Rule(
-        comment: json["comment"],
-        id: json["id"],
-        rule: json["rule"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "comment": comment,
-        "id": id,
-        "rule": rule,
-      };
-}
+final outlineVariantsValues = EnumValues({
+  "outline-danger": OutlineVariants.OUTLINE_DANGER,
+  "outline-dark": OutlineVariants.OUTLINE_DARK,
+  "outline-info": OutlineVariants.OUTLINE_INFO,
+  "outline-light": OutlineVariants.OUTLINE_LIGHT,
+  "outline-primary": OutlineVariants.OUTLINE_PRIMARY,
+  "outline-secondary": OutlineVariants.OUTLINE_SECONDARY,
+  "outline-success": OutlineVariants.OUTLINE_SUCCESS,
+  "outline-warning": OutlineVariants.OUTLINE_WARNING,
+});
 
 class TagOptions {
   ///Will be rendered as tags-Field
-  FieldSpecificOptionsTags? tags;
+  TagOptionsTags? tags;
 
-  TagOptions({
-    this.tags,
-  });
+  TagOptions({this.tags});
 
   factory TagOptions.fromJson(Map<String, dynamic> json) => TagOptions(
-        tags: json["tags"] == null ? null : FieldSpecificOptionsTags.fromJson(json["tags"]),
+        tags: json["tags"] == null ? null : TagOptionsTags.fromJson(json["tags"]),
+      );
+
+  Map<String, dynamic> toJson() => {"tags": tags?.toJson()};
+}
+
+///Will be rendered as tags-Field
+class TagOptionsTags {
+  ///Set to true to render the field as tags field
+  bool? enabled;
+  bool? pills;
+  BaseVariants? variant;
+
+  TagOptionsTags({this.enabled, this.pills, this.variant});
+
+  factory TagOptionsTags.fromJson(Map<String, dynamic> json) => TagOptionsTags(
+        enabled: json["enabled"],
+        pills: json["pills"],
+        variant: baseVariantsValues.map[json["variant"]]!,
       );
 
   Map<String, dynamic> toJson() => {
-        "tags": tags?.toJson(),
+        "enabled": enabled,
+        "pills": pills,
+        "variant": baseVariantsValues.reverse[variant],
       };
+}
+
+/// Manually crated because dart doesn't support union types
+/// Discriminator: Type
+/// Union classes: [Wizard], [Layout]
+sealed class RootLayout {
+  Map<String, dynamic> toJson();
+
+  factory RootLayout.fromJson(Map<String, dynamic> json) {
+    final type = layoutTypeEnumValues.map[json["type"]];
+    switch (type) {
+      case LayoutTypeEnum.WIZARD:
+        return Wizard.fromJson(json);
+      case LayoutTypeEnum.HORIZONTAL_LAYOUT:
+      case LayoutTypeEnum.VERTICAL_LAYOUT:
+      case LayoutTypeEnum.GROUP:
+        return Layout.fromJson(json);
+      default:
+        throw Exception("Unknown RootLayout type: $type");
+    }
+  }
 }
 
 ///Schema for the UI Schema
 class UiSchema {
-  ///The Metaschema of the UI Schema
-  String? schema;
-  Layout layout;
+  RootLayout layout;
 
   ///Version of the UI Schema. Changes in a major version are backwards compatible. So a
   ///parser for version z.x must be compatible with all versions z.y where y is <=x.
   String version;
 
-  UiSchema({
-    this.schema,
-    required this.layout,
-    required this.version,
-  });
+  UiSchema({required this.layout, required this.version});
 
   factory UiSchema.fromJson(Map<String, dynamic> json) => UiSchema(
-        schema: json["\u0024schema"],
-        layout: Layout.fromJson(json["layout"]),
+        layout: RootLayout.fromJson(json["layout"]),
         version: json["version"],
       );
 
   Map<String, dynamic> toJson() => {
-        "\u0024schema": schema,
         "layout": layout.toJson(),
         "version": version,
       };
 }
 
+/// Manually crated because dart doesn't support union types
+/// Discriminator: Type
+/// Union classes: [Control], [Layout], [HtmlRenderer], [Divider], [Button], [Buttongroup]
+sealed class LayoutElement {
+  Map<String, dynamic> toJson();
+
+  ShowOnProperty? get showOn;
+
+  factory LayoutElement.fromJson(Map<String, dynamic> json) {
+    final type = layoutElementTypeValues.map[json["type"]];
+    switch (type) {
+      case LayoutElementType.CONTROL:
+        return Control.fromJson(json);
+      case LayoutElementType.VERTICAL_LAYOUT:
+      case LayoutElementType.HORIZONTAL_LAYOUT:
+      case LayoutElementType.GROUP:
+        return Layout.fromJson(json);
+      case LayoutElementType.HTML:
+        return HtmlRenderer.fromJson(json);
+      case LayoutElementType.DIVIDER:
+        return Divider.fromJson(json);
+      case LayoutElementType.BUTTON:
+        return Button.fromJson(json);
+      case LayoutElementType.BUTTONGROUP:
+        return Buttongroup.fromJson(json);
+      case null:
+        throw Exception("Unknown LayoutElement type: null");
+    }
+  }
+}
+
+enum LayoutElementType {
+  BUTTON,
+  BUTTONGROUP,
+  CONTROL,
+  DIVIDER,
+  GROUP,
+  HORIZONTAL_LAYOUT,
+  HTML,
+  VERTICAL_LAYOUT,
+}
+
+final layoutElementTypeValues = EnumValues({
+  "Button": LayoutElementType.BUTTON,
+  "Buttongroup": LayoutElementType.BUTTONGROUP,
+  "Control": LayoutElementType.CONTROL,
+  "Divider": LayoutElementType.DIVIDER,
+  "Group": LayoutElementType.GROUP,
+  "HorizontalLayout": LayoutElementType.HORIZONTAL_LAYOUT,
+  "HTML": LayoutElementType.HTML,
+  "VerticalLayout": LayoutElementType.VERTICAL_LAYOUT,
+});
+
 ///The different layouts
-class Layout {
-  ///The ID of the layout
-  String? id;
-
-  ///May contain a schema reference to the ui schema
-  String? schema;
-
+class Layout implements LayoutElement, RootLayout {
   List<LayoutElement> elements;
 
   ///Additional options
@@ -1498,8 +1346,6 @@ class Layout {
   LayoutType type;
 
   Layout({
-    this.id,
-    this.schema,
     required this.elements,
     this.options,
     this.showOn,
@@ -1507,17 +1353,15 @@ class Layout {
   });
 
   factory Layout.fromJson(Map<String, dynamic> json) => Layout(
-        id: json["\u0024id"],
-        schema: json["\u0024schema"],
-        elements: List<LayoutElement>.from(json["elements"].map((x) => LayoutElement.fromJson(x))),
+        elements: List<LayoutElement>.from(
+          json["elements"].map((x) => LayoutElement.fromJson(x)),
+        ),
         options: json["options"] == null ? null : LayoutOptions.fromJson(json["options"]),
         showOn: json["showOn"] == null ? null : ShowOnProperty.fromJson(json["showOn"]),
         type: layoutTypeValues.map[json["type"]]!,
       );
 
   Map<String, dynamic> toJson() => {
-        "\u0024id": id,
-        "\u0024schema": schema,
         "elements": List<dynamic>.from(elements.map((x) => x.toJson())),
         "options": options?.toJson(),
         "showOn": showOn?.toJson(),
@@ -1525,224 +1369,89 @@ class Layout {
       };
 }
 
-///The elements of the layout
-///
-///Different types of layout elements
-///
-///Used to put a button into the form
-///
-///Used to group buttons
-///
-///Contains a form element, e. g. a text input
-///
-///inserts a simple divider
-///
-///The different layouts
-///
-///Some HTML to be rendered in the form
-class LayoutElement {
-  TheButtonsType? buttonType;
-
-  ///Options for the button
-  ///
-  ///Gives multiple options to configure the element
-  ///
-  ///Additional options
-  LayoutElementOptions? options;
-
-  ///Show field depending on value of other field
-  ShowOnProperty? showOn;
-
-  ///The buttons text
-  String? text;
-  LayoutElementType? type;
-
-  ///The buttons in the button group
-  List<Button>? buttons;
-
-  ///A json pointer referring to the form element in the forms json schema
-  String? scope;
-
-  ///The ID of the layout
-  String? id;
-
-  ///May contain a schema reference to the ui schema
-  String? schema;
-  List<LayoutElement>? elements;
-  String? htmlData;
-
-  LayoutElement({
-    this.buttonType,
-    this.options,
-    this.showOn,
-    this.text,
-    this.type,
-    this.buttons,
-    this.scope,
-    this.id,
-    this.schema,
-    this.elements,
-    this.htmlData,
-  });
-
-  factory LayoutElement.fromJson(Map<String, dynamic> json) => LayoutElement(
-        buttonType: theButtonsTypeValues.map[json["buttonType"]],
-        options: json["options"] == null ? null : LayoutElementOptions.fromJson(json["options"]),
-        showOn: json["showOn"] == null ? null : ShowOnProperty.fromJson(json["showOn"]),
-        text: json["text"],
-        type: layoutElementTypeValues.map[json["type"]],
-        buttons: json["buttons"] == null ? [] : List<Button>.from(json["buttons"]!.map((x) => Button.fromJson(x))),
-        scope: json["scope"],
-        id: json["\u0024id"],
-        schema: json["\u0024schema"],
-        elements: json["elements"] == null ? [] : List<LayoutElement>.from(json["elements"]!.map((x) => LayoutElement.fromJson(x))),
-        htmlData: json["htmlData"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "buttonType": theButtonsTypeValues.reverse[buttonType],
-        "options": options?.toJson(),
-        "showOn": showOn?.toJson(),
-        "text": text,
-        "type": layoutElementTypeValues.reverse[type],
-        "buttons": buttons == null ? [] : List<dynamic>.from(buttons!.map((x) => x.toJson())),
-        "scope": scope,
-        "\u0024id": id,
-        "\u0024schema": schema,
-        "elements": elements == null ? [] : List<dynamic>.from(elements!.map((x) => x.toJson())),
-        "htmlData": htmlData,
-      };
-}
-
-// abstract class LayoutElement {
-
-//   factory LayoutElement.fromJson(Map<String, dynamic> json) {
-//     switch (json['type']) {
-//       case 'Control':
-//         return Control.fromJson(json);
-//       case 'VerticalLayout' || 'HorizontalLayout' || 'Group':
-//         return Layout.fromJson(json);
-//       case 'HTML':
-//         return HtmlRenderer.fromJson(json);
-//       case 'Divider':
-//         return Divider.fromJson(json);
-//       case 'Button':
-//         return Button.fromJson(json);
-//       case 'Buttongroup':
-//         return Buttongroup.fromJson(json);
-//       default:
-//         throw Exception('Unknown layout element type: ${json['type']}');
-//     }
-//   }
-
-//   Map<String, dynamic> toJson();
-// }
-
-class LayoutElementOptions {
-  final FieldSpecificOptions? fieldSpecificOptions;
-  final ControlFormattingOptions? formattingOptions;
-
-  ///The layout's CSS classes
-  String? cssClass;
-
-  ///Specifies that the form-data should not be validated on submission
-  bool? formnovalidate;
-
-  ///Options that are passed to the submit function. This will not change the behaviour of
-  ///VueJsonForm itself, but can bes used by the application/the webcomponent to change the
-  ///behaviour of the submit function.
-  SubmitOptions? submitOptions;
-
-  ///Different color variants
-  ColorVariant? variant;
-
-  ///Display the buttons vertical
-  bool? vertical;
-
-  ///Defines whether the fields label is shown
-  ///
-  ///Adds a label for groups (only for type=Group)
-  dynamic label;
-
-  LayoutElementOptions({
-    this.fieldSpecificOptions,
-    this.formattingOptions,
-    this.cssClass,
-    this.formnovalidate,
-    this.submitOptions,
-    this.variant,
-    this.vertical,
-    this.label,
-  });
-
-  factory LayoutElementOptions.fromJson(Map<String, dynamic> json) => LayoutElementOptions(
-        fieldSpecificOptions: FieldSpecificOptions.fromJson(json),
-        formattingOptions: ControlFormattingOptions.fromJson(json),
-        cssClass: json["cssClass"],
-        formnovalidate: json["formnovalidate"],
-        submitOptions: json["submitOptions"] == null ? null : SubmitOptions.fromJson(json["submitOptions"]),
-        variant: colorVariantValues.map[json["variant"]],
-        vertical: json["vertical"],
-        label: json["label"],
-      );
-
-  Map<String, dynamic> toJson() {
-    final fieldJson = fieldSpecificOptions?.toJson() ?? {};
-    final formattingJson = formattingOptions?.toJson() ?? {};
-    return {
-      ...fieldJson,
-      ...formattingJson,
-      "cssClass": cssClass,
-      "formnovalidate": formnovalidate,
-      "submitOptions": submitOptions?.toJson(),
-      "variant": colorVariantValues.reverse[variant],
-      "vertical": vertical,
-      "label": label
-    };
-  }
-}
-
-enum LayoutElementType { BUTTON, BUTTONGROUP, CONTROL, DIVIDER, GROUP, HORIZONTAL_LAYOUT, HTML, VERTICAL_LAYOUT }
-
-final layoutElementTypeValues = EnumValues({
-  "Button": LayoutElementType.BUTTON,
-  "Buttongroup": LayoutElementType.BUTTONGROUP,
-  "Control": LayoutElementType.CONTROL,
-  "Divider": LayoutElementType.DIVIDER,
-  "Group": LayoutElementType.GROUP,
-  "HorizontalLayout": LayoutElementType.HORIZONTAL_LAYOUT,
-  "HTML": LayoutElementType.HTML,
-  "VerticalLayout": LayoutElementType.VERTICAL_LAYOUT
-});
-
 ///Additional options
 class LayoutOptions {
   ///The layout's CSS classes
   String? cssClass;
 
+  ///Adds a description for a group (only for type=Group)
+  String? description;
+
   ///Adds a label for groups (only for type=Group)
   String? label;
 
-  LayoutOptions({
-    this.cssClass,
-    this.label,
-  });
+  LayoutOptions({this.cssClass, this.description, this.label});
 
   factory LayoutOptions.fromJson(Map<String, dynamic> json) => LayoutOptions(
         cssClass: json["cssClass"],
+        description: json["description"],
         label: json["label"],
       );
 
   Map<String, dynamic> toJson() => {
         "cssClass": cssClass,
+        "description": description,
         "label": label,
       };
 }
 
 enum LayoutType { GROUP, HORIZONTAL_LAYOUT, VERTICAL_LAYOUT }
 
-final layoutTypeValues =
-    EnumValues({"Group": LayoutType.GROUP, "HorizontalLayout": LayoutType.HORIZONTAL_LAYOUT, "VerticalLayout": LayoutType.VERTICAL_LAYOUT});
+final layoutTypeValues = EnumValues({
+  "Group": LayoutType.GROUP,
+  "HorizontalLayout": LayoutType.HORIZONTAL_LAYOUT,
+  "VerticalLayout": LayoutType.VERTICAL_LAYOUT,
+});
+
+enum LayoutTypeEnum { GROUP, HORIZONTAL_LAYOUT, VERTICAL_LAYOUT, WIZARD }
+
+final layoutTypeEnumValues = EnumValues({
+  "Group": LayoutTypeEnum.GROUP,
+  "HorizontalLayout": LayoutTypeEnum.HORIZONTAL_LAYOUT,
+  "VerticalLayout": LayoutTypeEnum.VERTICAL_LAYOUT,
+  "Wizard": LayoutTypeEnum.WIZARD,
+});
+
+///A wizard
+class Wizard implements RootLayout {
+  ///Additional options
+  WizardOptions? options;
+  List<Layout> pages;
+  WizardType type;
+
+  Wizard({this.options, required this.pages, required this.type});
+
+  factory Wizard.fromJson(Map<String, dynamic> json) => Wizard(
+        options: json["options"] == null ? null : WizardOptions.fromJson(json["options"]),
+        pages: List<Layout>.from(json["pages"].map((x) => Layout.fromJson(x))),
+        type: wizardTypeValues.map[json["type"]]!,
+      );
+
+  Map<String, dynamic> toJson() => {
+        "options": options?.toJson(),
+        "pages": List<dynamic>.from(pages.map((x) => x.toJson())),
+        "type": wizardTypeValues.reverse[type],
+      };
+}
+
+///Additional options
+class WizardOptions {
+  List<String>? pageTitles;
+
+  WizardOptions({this.pageTitles});
+
+  factory WizardOptions.fromJson(Map<String, dynamic> json) => WizardOptions(
+        pageTitles: json["pageTitles"] == null ? [] : List<String>.from(json["pageTitles"]!.map((x) => x)),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "pageTitles": pageTitles == null ? [] : List<dynamic>.from(pageTitles!.map((x) => x)),
+      };
+}
+
+enum WizardType { WIZARD }
+
+final wizardTypeValues = EnumValues({"Wizard": WizardType.WIZARD});
 
 class EnumValues<T> {
   Map<String, T> map;

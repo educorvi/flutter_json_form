@@ -15,7 +15,6 @@
                 "type": "Control",
                 "scope": "/properties/name",
                 "options": {
-                    "label": "Label Name",
                     "placeholder": "Placeholder Name",
                     "autocomplete": "name",
                     "help": {

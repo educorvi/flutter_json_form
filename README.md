@@ -127,7 +127,7 @@ Example values for the `jsonSchema`, `uiSchema` and `formData` can be seen here:
 
   uiSchema = {
       "version": "2.0",
-      "$schema": "https://educorvi.github.io/vue-json-form/schemas/ui.schema.json",
+      "$schema": "ui.schema.json",
       "layout": {
           "type": "Group",
           "options": {
