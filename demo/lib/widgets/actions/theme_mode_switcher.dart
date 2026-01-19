@@ -1,30 +1,5 @@
 import 'package:flutter/material.dart';
-
-class ThemeModeNotifier extends ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.system;
-
-  ThemeMode get themeMode => _themeMode;
-
-  void setThemeMode(ThemeMode mode) {
-    _themeMode = mode;
-    notifyListeners();
-  }
-
-  void cycleThemeMode() {
-    switch (_themeMode) {
-      case ThemeMode.system:
-        _themeMode = ThemeMode.light;
-        break;
-      case ThemeMode.light:
-        _themeMode = ThemeMode.dark;
-        break;
-      case ThemeMode.dark:
-        _themeMode = ThemeMode.system;
-        break;
-    }
-    notifyListeners();
-  }
-}
+import 'package:flutter_json_forms_demo/notifiers/theme_mode_notifier.dart';
 
 class ThemeModeIcon extends StatelessWidget {
   final ThemeMode themeMode;

@@ -1,0 +1,214 @@
+{
+  "@@locale": "en",
+  "appTitle": "Flutter Json Forms Demo",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "navExamples": "Examples",
+  "@navExamples": {
+    "description": "Navigation label for examples page"
+  },
+  "navCustomForm": "Custom Form",
+  "@navCustomForm": {
+    "description": "Navigation label for custom form page"
+  },
+  "navSettings": "Settings",
+  "@navSettings": {
+    "description": "Navigation label for settings page"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings page title"
+  },
+  "settingsFormDesignSystem": "Form Design System",
+  "@settingsFormDesignSystem": {
+    "description": "Form design system section title"
+  },
+  "settingsFormDesignSystemDesc": "Select the design system for form rendering",
+  "@settingsFormDesignSystemDesc": {
+    "description": "Form design system section description"
+  },
+  "designSystemGoogleMaterial": "Google Material Design",
+  "@designSystemGoogleMaterial": {
+    "description": "Google Material Design option"
+  },
+  "designSystemGoogleMaterialDesc": "Standard Material Design components",
+  "@designSystemGoogleMaterialDesc": {
+    "description": "Google Material Design description"
+  },
+  "designSystemUVCooperative": "UV Cooperate Design",
+  "@designSystemUVCooperative": {
+    "description": "UV Cooperate Design option"
+  },
+  "designSystemUVCooperativeDesc": "Custom UV Cooperate design system",
+  "@designSystemUVCooperativeDesc": {
+    "description": "UV Cooperate Design description"
+  },
+  "settingsThemeMode": "Theme Mode",
+  "@settingsThemeMode": {
+    "description": "Theme mode section title"
+  },
+  "settingsThemeModeDesc": "Select the color theme for the app",
+  "@settingsThemeModeDesc": {
+    "description": "Theme mode section description"
+  },
+  "themeModeSystem": "System",
+  "@themeModeSystem": {
+    "description": "System theme mode option"
+  },
+  "themeModeLight": "Light",
+  "@themeModeLight": {
+    "description": "Light theme mode option"
+  },
+  "themeModeDark": "Dark",
+  "@themeModeDark": {
+    "description": "Dark theme mode option"
+  },
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Language section title"
+  },
+  "settingsLanguageDesc": "Select your preferred language",
+  "@settingsLanguageDesc": {
+    "description": "Language section description"
+  },
+  "languageSystem": "System",
+  "@languageSystem": {
+    "description": "System language option"
+  },
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language option"
+  },
+  "languageGerman": "German",
+  "@languageGerman": {
+    "description": "German language option"
+  },
+  "settingsAccessibility": "Accessibility",
+  "@settingsAccessibility": {
+    "description": "Accessibility section title"
+  },
+  "settingsAccessibilityDesc": "Enable accessibility inspector to test your forms",
+  "@settingsAccessibilityDesc": {
+    "description": "Accessibility section description"
+  },
+  "accessibilityInspector": "Accessibility Inspector",
+  "@accessibilityInspector": {
+    "description": "Accessibility inspector switch title"
+  },
+  "accessibilityInspectorDesc": "Show accessibility overlay with tap areas and semantics",
+  "@accessibilityInspectorDesc": {
+    "description": "Accessibility inspector switch description"
+  },
+  "settingsAbout": "About",
+  "@settingsAbout": {
+    "description": "About section title"
+  },
+  "aboutAppName": "Flutter JSON Forms Demo",
+  "@aboutAppName": {
+    "description": "App name in about section"
+  },
+  "aboutAppDesc": "A demonstration app for the Flutter JSON Forms package",
+  "@aboutAppDesc": {
+    "description": "App description in about section"
+  },
+  "aboutViewOnGitHub": "View on GitHub",
+  "@aboutViewOnGitHub": {
+    "description": "View on GitHub link text"
+  },
+  "jsonSchema": "JSON Schema",
+  "@jsonSchema": {
+    "description": "JSON Schema label"
+  },
+  "uiSchema": "UI Schema",
+  "@uiSchema": {
+    "description": "UI Schema label"
+  },
+  "presetData": "Preset Data",
+  "@presetData": {
+    "description": "Preset Data label"
+  },
+  "showFormData": "Show Form Data",
+  "@showFormData": {
+    "description": "Show Form Data button"
+  },
+  "resetForm": "Reset Form",
+  "@resetForm": {
+    "description": "Reset Form button"
+  },
+  "showJsonSchema": "Show JSON Schema",
+  "@showJsonSchema": {
+    "description": "Show JSON Schema button"
+  },
+  "showUiSchema": "Show UI Schema",
+  "@showUiSchema": {
+    "description": "Show UI Schema button"
+  },
+  "selectForm": "Select Form",
+  "@selectForm": {
+    "description": "Select Form dropdown label"
+  },
+  "copy": "Copy",
+  "@copy": {
+    "description": "Copy button"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button"
+  },
+  "jsonSchemaFile": "JSON Schema File",
+  "@jsonSchemaFile": {
+    "description": "JSON Schema file upload label"
+  },
+  "uiSchemaFile": "UI Schema File",
+  "@uiSchemaFile": {
+    "description": "UI Schema file upload label"
+  },
+  "loadFiles": "Load Files",
+  "@loadFiles": {
+    "description": "Load Files button"
+  },
+  "loadSchemas": "Load Schemas",
+  "@loadSchemas": {
+    "description": "Load Schemas button"
+  },
+  "errorLoadingSchemas": "Error loading schemas: {error}",
+  "@errorLoadingSchemas": {
+    "description": "Error loading schemas message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "schemasLoadedSuccessfully": "Schemas loaded successfully!",
+  "@schemasLoadedSuccessfully": {
+    "description": "Schemas loaded successfully message"
+  },
+  "errorParsingJson": "Error parsing JSON: {error}",
+  "@errorParsingJson": {
+    "description": "Error parsing JSON message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseSelectBothSchemaFiles": "Please select both schema files",
+  "@pleaseSelectBothSchemaFiles": {
+    "description": "Please select both schema files message"
+  },
+  "filesLoadedSuccessfully": "Files loaded successfully!",
+  "@filesLoadedSuccessfully": {
+    "description": "Files loaded successfully message"
+  },
+  "errorLoadingFiles": "Error loading files: {error}",
+  "@errorLoadingFiles": {
+    "description": "Error loading files message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+}

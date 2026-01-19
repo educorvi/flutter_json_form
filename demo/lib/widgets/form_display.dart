@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 import 'package:flutter_json_forms_demo/constants/constants.dart';
+import 'package:flutter_json_forms_demo/l10n/app_localizations.dart';
 import 'json_dialog.dart';
 
 /// Reusable widget for displaying a JSON form with action buttons
@@ -33,17 +34,17 @@ class FormDisplay extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: [
               FilledButton.tonal(
-                onPressed: () => showJsonDialog(context, 'JSON Schema', jsonSchema),
-                child: const Text('JSON Schema'),
+                onPressed: () => showJsonDialog(context, AppLocalizations.of(context)!.jsonSchema, jsonSchema),
+                child: Text(AppLocalizations.of(context)!.jsonSchema),
               ),
               FilledButton.tonal(
-                onPressed: () => showJsonDialog(context, 'UI Schema', uiSchema),
-                child: const Text('UI Schema'),
+                onPressed: () => showJsonDialog(context, AppLocalizations.of(context)!.uiSchema, uiSchema),
+                child: Text(AppLocalizations.of(context)!.uiSchema),
               ),
               if (hasPresetData)
                 FilledButton.tonal(
-                  onPressed: () => showJsonDialog(context, 'Preset Form Data', formData),
-                  child: const Text('Preset Data'),
+                  onPressed: () => showJsonDialog(context, AppLocalizations.of(context)!.presetData, formData),
+                  child: Text(AppLocalizations.of(context)!.presetData),
                 ),
             ],
           ),
@@ -74,13 +75,13 @@ class FormDisplay extends StatelessWidget {
                     showJsonDialog(context, 'Form Data', formData);
                   }
                 },
-                child: const Text('Show Form Data'),
+                child: Text(AppLocalizations.of(context)!.showFormData),
               ),
               FilledButton.tonal(
                 onPressed: () {
                   formKey.currentState?.reset();
                 },
-                child: const Text('Reset Form'),
+                child: Text(AppLocalizations.of(context)!.resetForm),
               ),
             ],
           ),

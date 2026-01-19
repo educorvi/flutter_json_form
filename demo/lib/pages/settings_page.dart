@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms_demo/constants/constants.dart';
-
-class FormThemeNotifier extends ChangeNotifier {
-  DesignSystem _designSystem = appConstants.designSystem;
-
-  DesignSystem get designSystem => _designSystem;
-
-  void setDesignSystem(DesignSystem system) {
-    _designSystem = system;
-    notifyListeners();
-  }
-}
+import 'package:flutter_json_forms_demo/notifiers/form_theme_notifier.dart';
+import 'package:flutter_json_forms_demo/notifiers/theme_mode_notifier.dart';
+import 'package:flutter_json_forms_demo/notifiers/locale_notifier.dart';
+import 'package:flutter_json_forms_demo/notifiers/accessibility_notifier.dart';
+import 'package:flutter_json_forms_demo/widgets/settings/settings_design_system_card.dart';
+import 'package:flutter_json_forms_demo/widgets/settings/settings_theme_mode_card.dart';
+import 'package:flutter_json_forms_demo/widgets/settings/settings_language_card.dart';
+import 'package:flutter_json_forms_demo/widgets/settings/settings_accessibility_card.dart';
+import 'package:flutter_json_forms_demo/widgets/settings/settings_about_card.dart';
+import 'package:flutter_json_forms_demo/l10n/app_localizations.dart';
 
 class SettingsPage extends StatelessWidget {
-  final FormThemeNotifier themeNotifier;
+  final FormThemeNotifier formThemeNotifier;
+  final ThemeModeNotifier themeModeNotifier;
+  final AccessibilityNotifier accessibilityNotifier;
+  final LocaleNotifier localeNotifier;
 
   const SettingsPage({
     super.key,
-    required this.themeNotifier,
+    required this.formThemeNotifier,
+    required this.themeModeNotifier,
+    required this.accessibilityNotifier,
+    required this.localeNotifier,
   });
 
   @override
@@ -32,82 +37,19 @@ class SettingsPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Settings',
+                  AppLocalizations.of(context)!.settingsTitle,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 LayoutConstants.gapL,
-                Card(
-                  child: Padding(
-                    padding: LayoutConstants.paddingAll,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Form Theme',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        LayoutConstants.gapM,
-                        Text(
-                          'Select the design system for form rendering',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        LayoutConstants.gapM,
-                        ListenableBuilder(
-                          listenable: themeNotifier,
-                          builder: (context, child) {
-                            return RadioGroup<DesignSystem>(
-                              groupValue: themeNotifier.designSystem,
-                              onChanged: (value) {
-                                if (value != null) {
-                                  themeNotifier.setDesignSystem(value);
-                                }
-                              },
-                              child: Column(
-                                children: [
-                                  RadioListTile<DesignSystem>(
-                                    title: const Text('Google Material Design'),
-                                    subtitle: const Text('Standard Material Design components'),
-                                    value: DesignSystem.googleMaterial,
-                                  ),
-                                  RadioListTile<DesignSystem>(
-                                    title: const Text('UV Cooperate Design'),
-                                    subtitle: const Text('Custom UV Cooperate design system'),
-                                    value: DesignSystem.uvCooperativeDesign,
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                SettingsDesignSystemCard(notifier: formThemeNotifier),
                 LayoutConstants.gapM,
-                SizedBox(
-                  width: double.infinity,
-                  child: Card(
-                    child: Padding(
-                      padding: LayoutConstants.paddingCard,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'About',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          LayoutConstants.gapM,
-                          const Text('Flutter JSON Forms Demo'),
-                          LayoutConstants.gapS,
-                          Text(
-                            'A demonstration app for the Flutter JSON Forms package',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                SettingsThemeModeCard(notifier: themeModeNotifier),
+                LayoutConstants.gapM,
+                SettingsLanguageCard(notifier: localeNotifier),
+                LayoutConstants.gapM,
+                SettingsAccessibilityCard(notifier: accessibilityNotifier),
+                LayoutConstants.gapM,
+                const SettingsAboutCard(),
               ],
             ),
           ),
