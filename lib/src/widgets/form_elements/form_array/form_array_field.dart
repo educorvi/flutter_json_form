@@ -191,6 +191,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
           FormArrayAddButton(
             testKey: Key('${widget.formFieldContext.id}/add'),
             onPressed: maxItems == null || items.length < maxItems ? _addItem : null,
+            label: widget.formFieldContext.options?.arrayOptions?.addButtonText,
           ),
         ],
       );
@@ -371,6 +372,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
               gap: sideActionGap,
               index: index,
               label: context.localize((l) => l.buttonDragHandle),
+              canReorder: useCustomReorder || items.length > 1,
             ),
           ),
           Positioned(
@@ -420,6 +422,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
     required double gap,
     required int index,
     required String label,
+    required bool canReorder,
   }) {
     return Padding(
       padding: EdgeInsets.only(right: gap),
@@ -428,7 +431,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
         child: ReorderableDragStartListener(
           index: index,
           child: FilledButton.tonal(
-            onPressed: () => {},
+            onPressed: canReorder ? () => {} : null,
             style: FilledButton.styleFrom(
               padding: EdgeInsets.zero,
             ),

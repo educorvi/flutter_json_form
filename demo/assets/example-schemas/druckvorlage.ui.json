@@ -284,7 +284,8 @@
                 "type": "Control",
                 "scope": "/properties/bitte-laden-sie-ihre-anlagen-hoch",
                 "options": {
-                    "acceptedFileType": "*"
+                    "acceptedFileType": "*",
+                    "displayAsSingleUploadField": true
                 }
             }
         ]

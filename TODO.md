@@ -41,3 +41,15 @@
 - store values correctly (string and int notably), the textfield is critical here since it uses string internally
 - Allow configuration for example for the array: should delete being shown or use swipe to delete, should reorder be shown or an explicit view for reordering or no reordering,provide custom icons for reorder and delete, or for the whole button or for the whole reordering itself
 - Bug on arrays: when adding a new array entry, old entries wont update their state if it is not the default one
+- [x] Test Upload field with only one single file allowed (could be that array is returned instead of single file)
+
+## Tests:
+- Tests of Validators
+- Test for fileUpload Bytes calculator logic
+
+## UI Schema Functionality:
+- Json schema validation with if rules
+- ControlFormattingOptionsHelp
+- Wizard
+- Conditional Options
+- forceRequired in ui schema

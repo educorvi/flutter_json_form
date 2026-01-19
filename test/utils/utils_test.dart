@@ -12,12 +12,16 @@ void main() {
       };
       final uiSchema = generateDefaultUISchema(jsonSchema);
       expect(uiSchema.version, equals('2.0'));
-      expect(uiSchema.layout.type, equals(ui.LayoutType.VERTICAL_LAYOUT));
-      expect(uiSchema.layout.elements.length, equals(2));
-      expect(uiSchema.layout.elements[0].type, equals(ui.LayoutElementType.CONTROL));
-      expect(uiSchema.layout.elements[0].scope, equals('/properties/name'));
-      expect(uiSchema.layout.elements[1].type, equals(ui.LayoutElementType.CONTROL));
-      expect(uiSchema.layout.elements[1].scope, equals('/properties/age'));
+      expect(uiSchema.layout is ui.Layout, isTrue);
+      ui.Layout layout = uiSchema.layout as ui.Layout;
+      expect(layout.type, equals(ui.LayoutType.VERTICAL_LAYOUT));
+      expect(layout.elements.length, equals(2));
+      expect(layout.elements[0], isA<ui.Control>());
+      ui.Control control = layout.elements[0] as ui.Control;
+      expect(control.scope, equals('/properties/name'));
+      expect(layout.elements[1], isA<ui.Control>());
+      ui.Control control2 = layout.elements[1] as ui.Control;
+      expect(control2.scope, equals('/properties/age'));
     });
 
     test('generates UI schema for nested object properties (flat only)', () {
@@ -33,17 +37,23 @@ void main() {
       };
       final uiSchema = generateDefaultUISchema(jsonSchema);
       // Only top-level controls are generated (current implementation)
-      expect(uiSchema.layout.elements.length, equals(2));
-      expect(uiSchema.layout.elements[0].type, equals(ui.LayoutElementType.CONTROL));
-      expect(uiSchema.layout.elements[0].scope, equals('/properties/person'));
-      expect(uiSchema.layout.elements[1].type, equals(ui.LayoutElementType.CONTROL));
-      expect(uiSchema.layout.elements[1].scope, equals('/properties/age'));
+      expect(uiSchema.layout is ui.Layout, isTrue);
+      ui.Layout layout = uiSchema.layout as ui.Layout;
+      expect(layout.elements.length, equals(2));
+      expect(layout.elements[0], isA<ui.Control>());
+      ui.Control control = layout.elements[0] as ui.Control;
+      expect(control.scope, equals('/properties/person'));
+      expect(layout.elements[1], isA<ui.Control>());
+      ui.Control control2 = layout.elements[1] as ui.Control;
+      expect(control2.scope, equals('/properties/age'));
     });
 
     test('handles empty schema', () {
       final Map<String, dynamic> jsonSchema = {};
       final uiSchema = generateDefaultUISchema(jsonSchema);
-      expect(uiSchema.layout.elements, isEmpty);
+      expect(uiSchema.layout is ui.Layout, isTrue);
+      ui.Layout layout = uiSchema.layout as ui.Layout;
+      expect(layout.elements, isEmpty);
     });
 
     test('handles single property', () {
@@ -51,8 +61,12 @@ void main() {
         'foo': {'type': 'string'},
       };
       final uiSchema = generateDefaultUISchema(jsonSchema);
-      expect(uiSchema.layout.elements.length, equals(1));
-      expect(uiSchema.layout.elements[0].scope, equals('/properties/foo'));
+      expect(uiSchema.layout is ui.Layout, isTrue);
+      ui.Layout layout = uiSchema.layout as ui.Layout;
+      expect(layout.elements.length, equals(1));
+      expect(layout.elements[0], isA<ui.Control>());
+      ui.Control control = layout.elements[0] as ui.Control;
+      expect(control.scope, equals('/properties/foo'));
     });
   });
 

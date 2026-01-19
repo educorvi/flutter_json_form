@@ -1,5 +1,7 @@
 {
   "buttonRemove": "Entfernen",
   "buttonAdd": "Hinzufügen",
-  "buttonDragHandle": "Ziehen zum Verschieben"
+  "buttonDragHandle": "Ziehen zum Verschieben",
+  "validateMinItems": "Bitte mindestens {minItems} Elemente hinzufügen.",
+  "validateMaxFileSize": "Die Datei überschreitet die maximale Größe von {maxFileSize}"
 }

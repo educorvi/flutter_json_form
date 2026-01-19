@@ -6,16 +6,22 @@ ui.ShowOnProperty makeShowOn(String? id) => ui.ShowOnProperty(id: id);
 
 ui.DescendantControlOverrides makeOverride(String? id, [Map<String, ui.DescendantControlOverrides>? nested]) => ui.DescendantControlOverrides(
       showOn: id != null ? makeShowOn(id) : null,
-      options: nested != null ? ui.ControlOptions(formattingOptions: ui.ControlFormattingOptions(descendantControlOverrides: nested)) : null,
+      options: nested != null ? ui.Options(formattingOptions: ui.ControlFormattingOptions(descendantControlOverrides: nested)) : null,
     );
 
 ui.LayoutElement makeElement(String? id, {List<ui.LayoutElement>? elements, Map<String, ui.DescendantControlOverrides>? overrides}) =>
-    ui.LayoutElement(
-      showOn: id != null ? makeShowOn(id) : null,
-      elements: elements,
-      options:
-          overrides != null ? ui.LayoutElementOptions(formattingOptions: ui.ControlFormattingOptions(descendantControlOverrides: overrides)) : null,
-    );
+    (elements != null)
+        ? ui.Layout(
+            type: ui.LayoutType.VERTICAL_LAYOUT,
+            showOn: id != null ? makeShowOn(id) : null,
+            elements: elements,
+          )
+        : ui.Control(
+            type: ui.ControlType.CONTROL,
+            scope: id != null ? '/properties/$id' : "",
+            showOn: id != null ? makeShowOn(id) : null,
+            options: overrides != null ? ui.Options(formattingOptions: ui.ControlFormattingOptions(descendantControlOverrides: overrides)) : null,
+          );
 
 void main() {
   group('collectDescendantRitaRules', () {

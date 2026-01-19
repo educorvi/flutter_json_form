@@ -381,7 +381,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
   /// Returns the saved value only (populated after saveAndValidate is called)
   Map<String, dynamic> get value {
-    return processFormValues(_formSubmitValues);
+    return processFormValues(_formSubmitValues, skipFiles: false);
   }
 
   /// Returns the current form values (regardless of validation state)
@@ -394,7 +394,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     _logger.config('Getting instant form values');
     final currentValues = _formKey.currentState?.instantValue ?? {};
     _logger.finer('Instant form values: $currentValues');
-    final processedValues = processFormValues(currentValues);
+    final processedValues = processFormValues(currentValues, skipFiles: false);
     _logger.finer('Processed instant form values: $processedValues');
     return processedValues;
   }

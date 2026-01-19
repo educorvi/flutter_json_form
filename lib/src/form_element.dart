@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_array/form_array_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_object_field.dart';
+import 'package:flutter_json_forms/src/widgets/form_input_elements/form_file_picker_field.dart';
 import 'package:flutter_json_forms/src/widgets/form_utils/form_primitive_field_selector.dart';
 import 'package:flutter_json_forms/src/widgets/form_utils/enum_field_factory.dart';
 import 'package:flutter_json_forms/src/widgets/form_utils/enum_value_builder.dart';
@@ -32,6 +33,11 @@ class FormElementFactory {
     Widget child;
     switch (type) {
       case SchemaType.array:
+        if (context.options?.fileUploadOptions?.displayAsSingleUploadField == true) {
+          _logger.finest('Creating file picker field for ${context.scope}');
+          child = FormFilePickerField(formFieldContext: context);
+          break;
+        }
         _logger.finest('Creating array field for ${context.scope}');
         child = FormArrayField(formFieldContext: context);
       case SchemaType.object:

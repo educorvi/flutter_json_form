@@ -173,6 +173,7 @@
             "type": "Control",
             "scope": "/properties/testArray",
             "options": {
+              "addButtonText": "Custom labeled Add Button",
               "descendantControlOverrides": {
                 "/properties/testArray/items": {
                   "options": {

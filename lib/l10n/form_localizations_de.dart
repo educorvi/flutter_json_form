@@ -16,4 +16,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get buttonDragHandle => 'Ziehen zum Verschieben';
+
+  @override
+  String validateMinItems(Object minItems) {
+    return 'Bitte mindestens $minItems Elemente hinzufügen.';
+  }
+
+  @override
+  String validateMaxFileSize(Object maxFileSize) {
+    return 'Die Datei überschreitet die maximale Größe von $maxFileSize';
+  }
 }

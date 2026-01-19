@@ -1,5 +1,7 @@
 {
   "buttonRemove": "Remove",
   "buttonAdd": "Add",
-  "buttonDragHandle": "Drag to reorder"
+  "buttonDragHandle": "Drag to reorder",
+  "validateMinItems": "Please add at least {minItems} items.",
+  "validateMaxFileSize": "The file exceeds the maximum size of {maxFileSize}"
 }

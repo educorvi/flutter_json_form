@@ -16,4 +16,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get buttonDragHandle => 'Drag to reorder';
+
+  @override
+  String validateMinItems(Object minItems) {
+    return 'Please add at least $minItems items.';
+  }
+
+  @override
+  String validateMaxFileSize(Object maxFileSize) {
+    return 'The file exceeds the maximum size of $maxFileSize';
+  }
 }

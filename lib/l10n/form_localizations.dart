@@ -109,6 +109,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Drag to reorder'**
   String get buttonDragHandle;
+
+  /// No description provided for @validateMinItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add at least {minItems} items.'**
+  String validateMinItems(Object minItems);
+
+  /// No description provided for @validateMaxFileSize.
+  ///
+  /// In en, this message translates to:
+  /// **'The file exceeds the maximum size of {maxFileSize}'**
+  String validateMaxFileSize(Object maxFileSize);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
