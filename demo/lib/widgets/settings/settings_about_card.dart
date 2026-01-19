@@ -30,7 +30,7 @@ class SettingsAboutCard extends StatelessWidget {
               LayoutConstants.gapM,
               InkWell(
                 onTap: () async {
-                  final uri = Uri.parse('https://github.com/your-repo/flutter_json_forms');
+                  final uri = Uri.parse('https://github.com/educorvi/flutter_json_form');
                   if (await canLaunchUrl(uri)) {
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
                   }
