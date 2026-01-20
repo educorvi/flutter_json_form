@@ -33,6 +33,7 @@ class RitaRuleEvaluator {
       _logger.fine('Rita JS bundle loaded and evaluated');
 
       jsRuntime.onMessage('flutterCallback', (args) {
+        _logger.fine('JS -> Dart message: $args (pending completer: ${_ritaCompleter != null})');
         _ritaCompleter?.complete(args);
       });
 
@@ -57,7 +58,7 @@ class RitaRuleEvaluator {
             var result = await evaluator.evaluate(data);
             sendMessage("flutterCallback", result);
           } catch (e) {
-            sendMessage("flutterCallback", "JS Exception: " + (e && e.message ? e.message : e));
+            sendMessage("flutterCallback", JSON.stringify({ ruleId: ruleId, message: e.message, data: data}));
           }
         }
       ''';
@@ -98,6 +99,7 @@ class RitaRuleEvaluator {
     }
 
     _ritaCompleter = Completer<dynamic>();
+    _logger.finer('Dispatching Rita rule $ruleId with payload: $dataJson');
     try {
       _logger.finest('Evaluating rule $ruleId');
       jsRuntime.evaluate('ritaEvalById("$ruleId", $dataJson);');
@@ -106,6 +108,7 @@ class RitaRuleEvaluator {
       return false;
     }
     final result = await _ritaCompleter!.future;
+    _logger.finer('Received Rita result for $ruleId: $result');
     return result == true || result.toString().trim() == 'true' || result.toString().trim() == '1';
   }
 

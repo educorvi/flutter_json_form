@@ -4,6 +4,7 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
 import 'package:http/http.dart' as http;
 import '../../models/ui_schema.g.dart' as ui;
+import 'package:flutter_json_forms/src/widgets/form_builder/form_wizard.dart';
 
 class FormButton extends StatelessWidget {
   final ui.Button button;
@@ -18,6 +19,7 @@ class FormButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formContext = FormContext.of(context)!;
+    final wizardScope = FormWizardScope.maybeOf(context);
     final formNoValidate = button.options?.formnovalidate ?? false;
     final submitOptions = button.options?.submitOptions;
 
@@ -89,7 +91,12 @@ class FormButton extends StatelessWidget {
           debugPrint('Print action: ${jsonEncode(formContext.getFormValues())}');
           break;
         default:
-          debugPrint('$action action : ${jsonEncode(formContext.getFormValues())}');
+          if (formContext.onFormSubmitSaveCallback != null) {
+            _logger.info('Submitting form data to onFormSubmitCallback: ${jsonEncode(formContext.getFormValues())}');
+            formContext.onFormSubmitSaveCallback!(formContext.getFormValues());
+          } else {
+            debugPrint('$action action : ${jsonEncode(formContext.getFormValues())}');
+          }
       }
     }
 
@@ -101,9 +108,12 @@ class FormButton extends StatelessWidget {
       case ui.TheButtonsType.SUBMIT:
         onPressed = handleSubmit;
         break;
-      // TODO: wizard
       case ui.TheButtonsType.NEXT_WIZARD_PAGE:
+        onPressed = wizardScope?.nextPage;
+        break;
       case ui.TheButtonsType.PREVIOUS_WIZARD_PAGE:
+        onPressed = wizardScope?.previousPage;
+        break;
     }
 
     return _renderStyledButton(

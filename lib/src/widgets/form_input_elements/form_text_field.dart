@@ -81,7 +81,7 @@ class _FormTextFieldState extends State<FormTextField> {
 
   void _handleValueChange(String? value) {
     if (widget.formFieldContext.onChanged != null) {
-      widget.formFieldContext.onChanged!(value.toString()); // (_convertValue(value));
+      widget.formFieldContext.onChanged!(_convertValue(value));
     }
   }
 

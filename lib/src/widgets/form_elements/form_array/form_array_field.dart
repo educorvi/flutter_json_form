@@ -225,14 +225,14 @@ class _FormArrayFieldState extends State<FormArrayField> {
     );
 
     return handleShowOn(
-      child: arrayWidget,
-      parentIsShown: widget.formFieldContext.parentIsShown,
-      showOn: widget.formFieldContext.showOn,
-      ritaDependencies: formContext.ritaDependencies,
-      checkValueForShowOn: formContext.checkValueForShowOn,
-      selfIndices: widget.formFieldContext.selfIndices,
-      ritaEvaluator: widget.formFieldContext.ritaEvaluator,
-      getFullFormData: widget.formFieldContext.getFullFormData,
+      widget.formFieldContext.showOn,
+      arrayWidget,
+      formContext.ritaDependencies,
+      formContext.checkValueForShowOn,
+      widget.formFieldContext.parentIsShown,
+      widget.formFieldContext.selfIndices,
+      widget.formFieldContext.ritaEvaluator,
+      widget.formFieldContext.getFullFormData,
     );
   }
 

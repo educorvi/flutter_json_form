@@ -4,17 +4,15 @@ import 'package:flutter_json_forms/src/process_form_values.dart';
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
+import 'package:flutter_json_forms/src/widgets/constants.dart';
 import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
-import 'package:flutter_json_forms/src/widgets/form_builder/form_group.dart';
-import 'package:flutter_json_forms/src/widgets/form_builder/form_layout.dart';
+import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_generator.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_loader.dart';
-import 'package:flutter_json_forms/src/widgets/shared/css.dart';
 import 'package:flutter_json_forms/src/utils/utils.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_json_forms/src/widgets/shared/form_not_implemented.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:flutter_json_forms/src/json_validator.dart';
 
@@ -267,6 +265,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     // Initialize ShowOnDependencies
     await Future.microtask(() {
       _showOnDependencies = initShowOnDependencies(jsonSchemaModel.properties, formData);
+      _logger.fine('Initialized showOn dependencies: $_showOnDependencies');
     });
 
     // Collect all rita rules
@@ -281,7 +280,15 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     // Initialize Rita rules bundle and evaluate
     await ritaRuleEvaluator.initializeWithBundle();
 
-    final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValues(_showOnDependencies))));
+    final processed = processFormValues(
+      _showOnDependencies,
+    );
+    _logger.fine('Initial Rita payload: $processed');
+    final ritaDependencies = await ritaRuleEvaluator.evaluateAll(
+      jsonEncode(
+        toEncodable(processed),
+      ),
+    );
 
     safeSetState(() {
       _ritaDependencies.clear();
@@ -516,7 +523,11 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
         setValueForShowOn: setValueForShowOn,
         checkValueForShowOn: checkValueForShowOn,
         isRequired: (path) => _isRequired(jsonSchemaModel, path),
-        getFullFormData: () => processFormValues(_showOnDependencies),
+        getFullFormData: () {
+          final data = processFormValues(_showOnDependencies);
+          _logger.finest('getFullFormData payload: $data');
+          return data;
+        },
         onFormValueSaved: _onFormValueSaved,
         onFormValueChanged: _onFormValueChanged,
         saveAndValidate: ({bool focusOnInvalid = true, bool autoScrollWhenFocusOnInvalid = false}) =>
@@ -525,7 +536,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
         getFormValues: () => instantValue,
         storeRitaArrayResult: _storeRitaArrayResult,
         checkElementShownWithRita: isElementShownWithRita,
-        child: _generateRootLayout(),
+        child: generateForm(uiSchemaModel!.layout),
       ),
     );
   }
@@ -537,7 +548,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     List<Widget> header = [];
     if (title != null && title.isNotEmpty) {
       header.add(Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
+        padding: const EdgeInsets.only(bottom: UIConstants.verticalElementSpacing),
         child: FormFieldText(
           title,
           style: Theme.of(context).textTheme.headlineMedium,
@@ -546,7 +557,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     }
     if (description != null && description.isNotEmpty) {
       header.add(Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
+        padding: const EdgeInsets.only(bottom: UIConstants.verticalElementSpacing),
         child: FormFieldText(
           description,
           style: Theme.of(context).textTheme.bodyLarge,
@@ -562,57 +573,21 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     return null;
   }
 
-  Widget _generateRootLayout() {
-    final layout = uiSchemaModel!.layout;
-
-    switch (layout) {
-      case ui.Layout():
-        return _generateLayout(layout);
-      case ui.Wizard():
-        return FormNotImplemented(
-          "Wizard layout is not implemented yet.",
-        );
-    }
-  }
-
   /// Generates the form fields based on the elements of the UI schema
-  Widget _generateLayout(ui.Layout layout) {
-    const nestingLevel = 0;
-
-    Widget child;
-    switch (layout.type) {
-      case ui.LayoutType.VERTICAL_LAYOUT:
-        child = FormLayout.vertical(
-          layout: layout,
-          nestingLevel: nestingLevel,
-          isShownFromParent: true, // Top Level Layout is always shown
-        );
-      case ui.LayoutType.HORIZONTAL_LAYOUT:
-        child = FormLayout.horizontal(
-          layout: layout,
-          nestingLevel: nestingLevel,
-          isShownFromParent: true, // Top Level Layout is always shown
-        );
-      case ui.LayoutType.GROUP:
-        child = FormGroup(layout: layout, nestingLevel: nestingLevel, isShownFromParent: true // Top Level Layout is always shown
-            );
-    }
+  Widget generateForm(ui.RootLayout layout) {
+    Widget child = ItemGenerator.generateRootLayout(layout);
 
     final Widget? header = _buildFormHeader();
     if (header != null) {
-      return applyCss(
-        context,
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            header,
-            child,
-          ],
-        ),
-        cssClass: layout.options?.cssClass,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          header,
+          child,
+        ],
       );
     } else {
-      return applyCss(context, child, cssClass: layout.options?.cssClass);
+      return child;
     }
   }
 
@@ -636,7 +611,15 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
     // Evaluate Rita rules with the updated dependencies
     _logger.finer('Evaluating Rita rules for updated dependencies');
-    final ritaDependencies = await ritaRuleEvaluator.evaluateAll(jsonEncode(toEncodable(processFormValues(_showOnDependencies))));
+    final processed = processFormValues(
+      _showOnDependencies,
+    );
+    _logger.finer('Rita payload after value change: $processed');
+    final ritaDependencies = await ritaRuleEvaluator.evaluateAll(
+      jsonEncode(
+        toEncodable(processed),
+      ),
+    );
 
     // Update UI
     safeSetState(() {

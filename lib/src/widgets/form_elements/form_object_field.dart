@@ -62,14 +62,14 @@ class _FormObjectFieldState extends State<FormObjectField> {
         : objectElements;
 
     return handleShowOn(
-      child: objectWidget,
-      checkValueForShowOn: effectiveFormContext.checkValueForShowOn,
-      parentIsShown: widget.formFieldContext.parentIsShown,
-      showOn: widget.formFieldContext.showOn,
-      ritaDependencies: effectiveFormContext.ritaDependencies,
-      selfIndices: widget.formFieldContext.selfIndices,
-      ritaEvaluator: widget.formFieldContext.ritaEvaluator,
-      getFullFormData: widget.formFieldContext.getFullFormData,
+      widget.formFieldContext.showOn,
+      objectWidget,
+      effectiveFormContext.ritaDependencies,
+      effectiveFormContext.checkValueForShowOn,
+      widget.formFieldContext.parentIsShown,
+      widget.formFieldContext.selfIndices,
+      widget.formFieldContext.ritaEvaluator,
+      widget.formFieldContext.getFullFormData,
     );
   }
 

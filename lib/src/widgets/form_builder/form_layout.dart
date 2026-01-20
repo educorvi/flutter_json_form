@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
-import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_item_generator.dart';
+import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_generator.dart';
 import '../../models/ui_schema.g.dart' as ui;
 import '../data/ui_schema_extensions.dart';
 import '../shared/common.dart';
@@ -67,14 +67,13 @@ class FormLayout extends StatelessWidget {
       elements: elements,
       layoutDirection: layoutDirection,
       widgetBuilder: (element, index) {
-        Widget widget = FormLayoutItemGenerator.generateItem(
+        Widget widget = ItemGenerator.generateLayoutElement(
           isShownFromParent: formContext.elementShown(
             showOn: element.showOn,
-            parentIsShown: true,
+            parentIsShown: isShownFromParent,
           ),
           element,
           nestingLevel,
-          layoutDirection: layoutDirection,
         );
 
         if (layoutDirection == LayoutDirection.horizontal) {

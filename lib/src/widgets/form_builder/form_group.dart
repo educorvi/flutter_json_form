@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/data/ui_schema_extensions.dart';
-import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_item_generator.dart';
+import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_generator.dart';
 import '../../models/ui_schema.g.dart' as ui;
 import '../shared/common.dart';
 import '../shared/spacing_utils.dart';
@@ -55,11 +54,10 @@ class FormGroup extends StatelessWidget {
     return SpacingUtils.buildLayoutElementsWithSpacing(
       context: context,
       elements: elements,
-      widgetBuilder: (element, index) => FormLayoutItemGenerator.generateItem(
+      widgetBuilder: (element, index) => ItemGenerator.generateLayoutElement(
         element,
         nestingLevel,
         isShownFromParent: parentIsShown,
-        layoutDirection: LayoutDirection.vertical,
       ),
       isVisibleChecker: (element, index) {
         if (element.asControlOptions?.formattingOptions?.hidden == true) {

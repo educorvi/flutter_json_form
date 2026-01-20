@@ -13,6 +13,7 @@ class FormSelector extends StatefulWidget {
       : formFiles = [
           ExampleFormFile(name: "Registration", filename: "registration", formData: getRegistration()),
           ExampleFormFile(name: "Showcase", filename: "showcase"),
+          ExampleFormFile(name: "Wizard", filename: "wizard"),
           ExampleFormFile(name: "Specification", filename: "specification"),
           ExampleFormFile(name: "Druckvorlage", filename: "druckvorlage"),
           ExampleFormFile(name: "Reproduce", filename: "reproduce"),

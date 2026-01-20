@@ -48,7 +48,8 @@ class FormFieldWrapper extends StatelessWidget {
     }
 
     return handleShowOn(
-      child: MergeSemantics(
+      context.showOn,
+      MergeSemantics(
         child: columnChildren.length == 1
             ? columnChildren.first
             : Column(
@@ -56,13 +57,12 @@ class FormFieldWrapper extends StatelessWidget {
                 children: columnChildren,
               ),
       ),
-      parentIsShown: context.parentIsShown ?? true,
-      showOn: context.showOn,
-      ritaDependencies: context.ritaDependencies,
-      checkValueForShowOn: context.checkValueForShowOn,
-      selfIndices: context.selfIndices,
-      ritaEvaluator: context.ritaEvaluator,
-      getFullFormData: context.getFullFormData,
+      context.ritaDependencies,
+      context.checkValueForShowOn,
+      context.parentIsShown,
+      context.selfIndices,
+      context.ritaEvaluator,
+      context.getFullFormData,
     );
   }
 }

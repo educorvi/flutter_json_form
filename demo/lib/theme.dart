@@ -39,6 +39,18 @@ final class AppTheme {
           ),
         ),
       ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(uiConstants.buttonBorderRadius),
+            ),
+          ),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 12.0),
+          ),
+        ),
+      ),
       cardTheme: CardThemeData(
         elevation: uiConstants.cardElevation,
         shape: RoundedRectangleBorder(
