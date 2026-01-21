@@ -102,9 +102,9 @@ class FormElementFactory {
 
     return FormFieldWrapper(
       formFieldContext: context,
-      child: child,
       complexElement: complexElement,
       ignoreLabel: ignoreLabel,
+      child: child,
     );
   }
 

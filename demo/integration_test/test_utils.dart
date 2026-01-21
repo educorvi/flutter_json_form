@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_field_text.dart';
 
 /// Common testing utilities for Flutter JSON Forms integration tests
 
