@@ -5,7 +5,7 @@ import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
-import 'package:flutter_json_forms/src/widgets/data/ui_schema_extensions.dart';
+import 'package:flutter_json_forms/src/utils/data/ui_schema_extensions.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_visibility.dart';
 
 bool isElementShown({

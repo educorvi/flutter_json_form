@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_json_forms/src/process_form_values.dart';
-import 'package:flutter_json_forms/src/widgets/data/list_item.dart';
+import 'package:flutter_json_forms/src/utils/data/list_item.dart';
 
 class DummyListItem implements ListItem {
   @override

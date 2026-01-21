@@ -4,7 +4,8 @@
     "layout": {
         "type": "Group",
         "options": {
-            "label": "Registration"
+            "label": "Personal Information",
+            "description": "Please fill in your personal details"
         },
         "elements": [
             {

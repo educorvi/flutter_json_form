@@ -86,6 +86,15 @@ final class AppTheme {
           borderRadius: BorderRadius.circular(uiConstants.buttonBorderRadius),
         ),
       ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        menuStyle: MenuStyle(
+          shape: MaterialStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(uiConstants.inputBorderRadius),
+            ),
+          ),
+        ),
+      ),
       useMaterial3: true,
       brightness: brightness,
       textTheme: uiConstants.getTextTheme(brightness),

@@ -50,6 +50,14 @@
 ## UI Schema Functionality:
 - Json schema validation with if rules
 - ControlFormattingOptionsHelp
-- Wizard
+- Wizard almost working, submit values is currently wrong
 - Conditional Options
 - forceRequired in ui schema
+
+
+Morgen:
+- showon einheitlich machen. Aktuell vertielt für nicht showon zentral, fpr schowon vertielt auf fieldwrapper, object, array enum usw. Lieber zentrla und schauen ob es geht, parent Is Visible zentral machen.
+- Array und Object Refactoring,
+- forceRequired umsetzen, akutell sollte required mit dme is visible zeug im validotr umgesetzt sein, da forcerequired an einer zentralen Stelle mitaufnehmen
+- Array und Object State management mit initial value, reporting mit on save etc ein für alle mal sauber machen
+- 

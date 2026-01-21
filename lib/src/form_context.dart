@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
-import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:json_schema/json_schema.dart';
 
 class FormContext extends InheritedWidget {
@@ -24,7 +23,7 @@ class FormContext extends InheritedWidget {
   final VoidCallback reset;
   final Map<String, dynamic> Function() getFormValues;
   final void Function(String, Map<String, int>?, bool) storeRitaArrayResult;
-  final bool Function(ui.ShowOnProperty?, Map<String, int>?, bool?) checkElementShownWithRita;
+  final bool Function({required ui.ShowOnProperty? showOn, Map<String, int>? selfIndices, required bool? parentIsShown}) elementShown;
 
   const FormContext({
     super.key,
@@ -46,7 +45,7 @@ class FormContext extends InheritedWidget {
     required this.reset,
     required this.getFormValues,
     required this.storeRitaArrayResult,
-    required this.checkElementShownWithRita,
+    required this.elementShown,
     required super.child,
   });
 
@@ -62,22 +61,23 @@ class FormContext extends InheritedWidget {
         ritaDependenciesRevision != oldWidget.ritaDependenciesRevision;
   }
 
-  bool elementShown({
-    ui.ShowOnProperty? showOn,
-    bool? parentIsShown,
-    Map<String, int>? selfIndices,
-  }) {
-    // Use Rita checking if selfIndices are provided
-    if (selfIndices != null && selfIndices.isNotEmpty) {
-      return checkElementShownWithRita(showOn, selfIndices, parentIsShown);
-    }
+  // bool elementShown({
+  //   ui.ShowOnProperty? showOn,
+  //   bool? parentIsShown,
+  //   Map<String, int>? selfIndices,
+  // }) {
+  //   return elementShown(showOn: showOn, selfIndices: selfIndices, parentIsShown: parentIsShown);
+  //   // // Use Rita checking if selfIndices are provided
+  //   // if (selfIndices != null && selfIndices.isNotEmpty) {
+  //   //   return checkElementShownWithRita(showOn, selfIndices, parentIsShown);
+  //   // }
 
-    // Fall back to old showOn evaluation
-    return isElementShown(
-      parentIsShown: parentIsShown ?? true,
-      showOn: showOn,
-      ritaDependencies: ritaDependencies,
-      checkValueForShowOn: checkValueForShowOn,
-    );
-  }
+  //   // // Fall back to old showOn evaluation
+  //   // return isElementShown(
+  //   //   parentIsShown: parentIsShown ?? true,
+  //   //   showOn: showOn,
+  //   //   ritaDependencies: ritaDependencies,
+  //   //   checkValueForShowOn: checkValueForShowOn,
+  //   // );
+  // }
 }

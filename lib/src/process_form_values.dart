@@ -5,7 +5,7 @@ import 'dart:io';
 import 'dart:ui';
 
 // import 'package:flutter_json_forms/src/utils/logger.dart';
-import 'package:flutter_json_forms/src/widgets/data/list_item.dart';
+import 'package:flutter_json_forms/src/utils/data/list_item.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 // import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 

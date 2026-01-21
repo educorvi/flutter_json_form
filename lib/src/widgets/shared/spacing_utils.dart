@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/layout_direction.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
 
@@ -53,70 +52,70 @@ class SpacingUtils {
   }
 
   /// Simplified version for layout elements (FormGroup/FormLayout)
-  static List<Widget> buildLayoutElementsWithSpacing({
-    required BuildContext context,
-    required List<ui.LayoutElement> elements,
-    required Widget Function(ui.LayoutElement element, int index) widgetBuilder,
-    required bool Function(ui.LayoutElement element, int index) isVisibleChecker,
-    LayoutDirection layoutDirection = LayoutDirection.vertical,
-    double spacing = UIConstants.elementSpacing,
-  }) {
-    return buildWidgetsWithSpacing<ui.LayoutElement>(
-      items: elements,
-      widgetBuilder: widgetBuilder,
-      isVisibleChecker: isVisibleChecker,
-      layoutDirection: layoutDirection,
-      spacing: spacing,
-    );
-  }
+  // static List<Widget> buildLayoutElementsWithSpacing({
+  //   required BuildContext context,
+  //   required List<ui.LayoutElement> elements,
+  //   required Widget Function(ui.LayoutElement element, int index) widgetBuilder,
+  //   required bool Function(ui.LayoutElement element, int index) isVisibleChecker,
+  //   LayoutDirection layoutDirection = LayoutDirection.vertical,
+  //   double spacing = UIConstants.elementSpacing,
+  // }) {
+  //   return buildWidgetsWithSpacing<ui.LayoutElement>(
+  //     items: elements,
+  //     widgetBuilder: widgetBuilder,
+  //     isVisibleChecker: isVisibleChecker,
+  //     layoutDirection: layoutDirection,
+  //     spacing: spacing,
+  //   );
+  // }
 
   /// Specialized version for object properties
-  static List<Widget> buildObjectPropertiesWithSpacing({
-    required BuildContext context,
-    required List<String> propertyKeys,
-    required Widget Function(String key, int index) widgetBuilder,
-    required bool Function(String key, int index) isVisibleChecker,
-    double spacing = UIConstants.elementSpacing,
-  }) {
-    return buildWidgetsWithSpacing<String>(
-      items: propertyKeys,
-      widgetBuilder: widgetBuilder,
-      isVisibleChecker: isVisibleChecker,
-      layoutDirection: LayoutDirection.vertical,
-      spacing: spacing,
-    );
-  }
+  // static List<Widget> buildObjectPropertiesWithSpacing({
+  //   required BuildContext context,
+  //   required List<String> propertyKeys,
+  //   required Widget Function(String key, int index) widgetBuilder,
+  //   required bool Function(String key, int index) isVisibleChecker,
+  //   double spacing = UIConstants.elementSpacing,
+  // }) {
+  //   return buildWidgetsWithSpacing<String>(
+  //     items: propertyKeys,
+  //     widgetBuilder: widgetBuilder,
+  //     isVisibleChecker: isVisibleChecker,
+  //     layoutDirection: LayoutDirection.vertical,
+  //     spacing: spacing,
+  //   );
+  // }
 
   /// Specialized version for array items with custom spacing widgets
-  static List<Widget> buildArrayItemsWithSpacing<T>({
-    required List<T> items,
-    required Widget Function(T item, int index) widgetBuilder,
-    required bool Function(T item, int index) isVisibleChecker,
-    required Widget Function(T item, int index) spacingWidgetBuilder,
-    double spacing = UIConstants.elementSpacing,
-  }) {
-    return buildWidgetsWithSpacing<T>(
-      items: items,
-      widgetBuilder: widgetBuilder,
-      isVisibleChecker: isVisibleChecker,
-      layoutDirection: LayoutDirection.vertical,
-      spacing: spacing,
-      spacingBuilder: (item, index, isVisible, hasVisibleElement) {
-        final spacingWidget = spacingWidgetBuilder(item, index);
+  // static List<Widget> buildArrayItemsWithSpacing<T>({
+  //   required List<T> items,
+  //   required Widget Function(T item, int index) widgetBuilder,
+  //   required bool Function(T item, int index) isVisibleChecker,
+  //   required Widget Function(T item, int index) spacingWidgetBuilder,
+  //   double spacing = UIConstants.elementSpacing,
+  // }) {
+  //   return buildWidgetsWithSpacing<T>(
+  //     items: items,
+  //     widgetBuilder: widgetBuilder,
+  //     isVisibleChecker: isVisibleChecker,
+  //     layoutDirection: LayoutDirection.vertical,
+  //     spacing: spacing,
+  //     spacingBuilder: (item, index, isVisible, hasVisibleElement) {
+  //       final spacingWidget = spacingWidgetBuilder(item, index);
 
-        if (spacingWidget is Container) {
-          return SizedBox(
-            key: spacingWidget.key,
-            height: (isVisible && hasVisibleElement) ? spacing : 0.0,
-            width: spacingWidget.constraints?.maxWidth,
-            child: spacingWidget.child,
-          );
-        }
+  //       if (spacingWidget is Container) {
+  //         return SizedBox(
+  //           key: spacingWidget.key,
+  //           height: (isVisible && hasVisibleElement) ? spacing : 0.0,
+  //           width: spacingWidget.constraints?.maxWidth,
+  //           child: spacingWidget.child,
+  //         );
+  //       }
 
-        return SizedBox(
-          height: (isVisible && hasVisibleElement) ? spacing : 0.0,
-        );
-      },
-    );
-  }
+  //       return SizedBox(
+  //         height: (isVisible && hasVisibleElement) ? spacing : 0.0,
+  //       );
+  //     },
+  //   );
+  // }
 }

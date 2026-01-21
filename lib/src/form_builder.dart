@@ -5,8 +5,8 @@ import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evalu
 import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
-import 'package:flutter_json_forms/src/widgets/custom_form_fields/form_field_text.dart';
-import 'package:flutter_json_forms/src/widgets/form_builder/form_layout_generator.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_field_text.dart';
+import 'package:flutter_json_forms/src/widgets/ui_layout_elements/form_layout_factory.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_loader.dart';
 import 'package:flutter_json_forms/src/utils/utils.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
@@ -535,7 +535,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
         reset: reset,
         getFormValues: () => instantValue,
         storeRitaArrayResult: _storeRitaArrayResult,
-        checkElementShownWithRita: isElementShownWithRita,
+        elementShown: isElementShownWithRita,
         child: generateForm(uiSchemaModel!.layout),
       ),
     );
@@ -575,7 +575,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
   /// Generates the form fields based on the elements of the UI schema
   Widget generateForm(ui.RootLayout layout) {
-    Widget child = ItemGenerator.generateRootLayout(layout);
+    Widget child = LayoutFactory.generateRootLayout(layout);
 
     final Widget? header = _buildFormHeader();
     if (header != null) {
@@ -693,7 +693,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   }
 
   /// Check if an element with Rita rules is shown (handles both global and array-specific rules)
-  bool isElementShownWithRita(ui.ShowOnProperty? showOn, Map<String, int>? selfIndices, bool? parentIsShown) {
+  bool isElementShownWithRita({required ui.ShowOnProperty? showOn, Map<String, int>? selfIndices, required bool? parentIsShown}) {
     if (parentIsShown == false) return false;
     if (showOn == null) return true;
 
