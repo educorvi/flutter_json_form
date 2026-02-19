@@ -7,34 +7,35 @@ import 'form_file/form_file_base.dart';
 
 class FormSelector extends StatefulWidget {
   final int initialSelectionIndex;
-  final List<FormFile> formFiles;
 
-  FormSelector({super.key, this.initialSelectionIndex = 0})
-      : formFiles = [
-          ExampleFormFile(name: "Registration", filename: "registration", formData: getRegistration()),
-          ExampleFormFile(name: "Showcase", filename: "showcase"),
-          ExampleFormFile(name: "Wizard", filename: "wizard"),
-          ExampleFormFile(name: "Specification", filename: "specification"),
-          ExampleFormFile(name: "Druckvorlage", filename: "druckvorlage"),
-          ExampleFormFile(name: "Reproduce", filename: "reproduce"),
-          ExampleFormFile(name: "Json Schema", filename: "jsonSchema"),
-          ExampleFormFile(
-              name: "Reisekostenantrag mit Prozessautomatisierung", filename: "reisekostenantrag_paut", formData: getFormDataReisekostenantrag()),
-          ExampleFormFile(name: "5 Sicherheitsregeln", filename: "fiverules", formData: getFormDataFiverules()),
-          ExampleFormFile(name: "Gefährdungsbeurteilung für Kleinbetriebe", filename: "gfk1", formData: getFormDataGfk1()),
-        ];
+  const FormSelector({super.key, this.initialSelectionIndex = 0});
 
   @override
   State<FormSelector> createState() => FormSelectorState();
 }
 
 class FormSelectorState extends State<FormSelector> {
+  late final List<FormFile> formFiles;
   late FormFile formFile;
 
   @override
   void initState() {
     super.initState();
-    formFile = widget.formFiles[widget.initialSelectionIndex];
+    // Create formFiles once in state, so they persist across rebuilds
+    formFiles = [
+      ExampleFormFile(name: "Registration", filename: "registration", formData: getRegistration()),
+      ExampleFormFile(name: "Showcase", filename: "showcase"),
+      ExampleFormFile(name: "Wizard", filename: "wizard"),
+      ExampleFormFile(name: "Specification", filename: "specification"),
+      ExampleFormFile(name: "Druckvorlage", filename: "druckvorlage"),
+      ExampleFormFile(name: "Reproduce", filename: "reproduce"),
+      ExampleFormFile(name: "Json Schema", filename: "jsonSchema"),
+      ExampleFormFile(
+          name: "Reisekostenantrag mit Prozessautomatisierung", filename: "reisekostenantrag_paut", formData: getFormDataReisekostenantrag()),
+      ExampleFormFile(name: "5 Sicherheitsregeln", filename: "fiverules", formData: getFormDataFiverules()),
+      ExampleFormFile(name: "Gefährdungsbeurteilung für Kleinbetriebe", filename: "gfk1", formData: getFormDataGfk1()),
+    ];
+    formFile = formFiles[widget.initialSelectionIndex];
   }
 
   @override
@@ -44,9 +45,9 @@ class FormSelectorState extends State<FormSelector> {
         MergeSemantics(
             child: DropdownMenu<FormFile>(
           label: const Text('Select Form'),
-          initialSelection: widget.formFiles[widget.initialSelectionIndex],
+          initialSelection: formFiles[widget.initialSelectionIndex],
           width: LayoutConstants.maxPageWidth,
-          dropdownMenuEntries: widget.formFiles
+          dropdownMenuEntries: formFiles
               .map((formFile) => DropdownMenuEntry<FormFile>(
                     value: formFile,
                     label: formFile.name,

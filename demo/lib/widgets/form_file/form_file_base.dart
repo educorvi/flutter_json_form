@@ -9,6 +9,7 @@ abstract class FormFile {
   Map<String, dynamic>? jsonSchema;
   Map<String, dynamic>? uiSchema;
   Map<String, dynamic> formData;
+  Future<void>? _loadSchemasFuture;
 
   FormFile({
     required this.name,
@@ -17,23 +18,35 @@ abstract class FormFile {
 
   Future<void> loadSchemas();
 
-  FutureBuilder getForm() {
+  Widget getForm() {
+    // If schemas are already loaded, return FormDisplay directly
+    if (jsonSchema != null && uiSchema != null) {
+      return get_form_display();
+    }
+
+    // Otherwise, load schemas with FutureBuilder
+    _loadSchemasFuture ??= loadSchemas();
     return FutureBuilder(
-      future: loadSchemas(),
+      future: _loadSchemasFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error loading schemas: ${snapshot.error}'));
+          return Center(child: Text('Error loading schemass: ${snapshot.error}'));
         } else {
-          return FormDisplay(
-            formKey: formKey,
-            jsonSchema: jsonSchema,
-            uiSchema: uiSchema,
-            formData: formData,
-          );
+          return get_form_display();
         }
       },
+    );
+  }
+
+  get_form_display() {
+    return FormDisplay(
+      key: ValueKey('form_display_$name'),
+      formKey: formKey,
+      jsonSchema: jsonSchema,
+      uiSchema: uiSchema,
+      formData: formData,
     );
   }
 }
