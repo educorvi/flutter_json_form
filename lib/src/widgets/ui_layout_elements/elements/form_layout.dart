@@ -60,7 +60,13 @@ class FormLayout extends StatelessWidget {
         );
     }
     // TODO: when allowing custom styling, allow passing generic header function but also wrap this function and allow to provide individual header function for verticalLAyout, horizontalLayout, Group, Object, array etc.)
-    return withCss(context, withHeader(context, options?.label, options?.description, content), cssClass: options?.cssClass);
+    final bool hasLabel = (options?.label?.trim().isNotEmpty ?? false);
+    final bool hasDescription = (options?.description?.trim().isNotEmpty ?? false);
+    final Widget scopedContent = LayoutHeaderScope(
+      hasHeader: hasLabel || hasDescription,
+      child: content,
+    );
+    return withCss(context, withHeader(context, options?.label, options?.description, scopedContent), cssClass: options?.cssClass);
   }
 
   /// Builds a list of widgets with proper spacing using shared utility
@@ -72,9 +78,8 @@ class FormLayout extends StatelessWidget {
       layoutDirection: direction,
       widgetBuilder: (element, index) {
         Widget widget = LayoutFactory.generateLayoutElement(
-          isShownFromParent: isElementVisible(
-            formContext: formContext,
-            element: element,
+          isShownFromParent: formContext.elementShown(
+            showOn: element.showOn,
             parentIsShown: isShownFromParent,
           ),
           element,
@@ -86,28 +91,21 @@ class FormLayout extends StatelessWidget {
         }
         return widget;
       },
-      isVisibleChecker: (element, index) => isElementVisible(
-        formContext: formContext,
-        element: element,
+      isVisibleChecker: (element, index) => formContext.elementShown(
+        showOn: element.showOn,
         parentIsShown: isShownFromParent,
       ),
     );
   }
 }
 
-bool isElementVisible({
-  required FormContext formContext,
-  required ui.LayoutElement element,
-  required bool parentIsShown,
-}) {
-  // Check if element is explicitly hidden
-  // TODO: not necessary here and only relevant for control
-  // if (element.asControlOptions?.formattingOptions?.hidden == true) {
-  //   return false;
-  // }
-  // Check normal showOn visibility
-  return formContext.elementShown(
-    showOn: element.showOn,
-    parentIsShown: parentIsShown,
-  );
-}
+// bool isElementVisible({
+//   required FormContext formContext,
+//   required ui.LayoutElement element,
+//   required bool parentIsShown,
+// }) {
+//   return formContext.elementShown(
+//     showOn: element.showOn,
+//     parentIsShown: parentIsShown,
+//   );
+// }

@@ -39,18 +39,18 @@ class FormArrayField extends StatefulWidget {
 class _FormArrayFieldState extends State<FormArrayField> {
   List<ListItem> items = [];
   bool itemsInitialized = false;
-  int _idCounter = 0;
+  late int _idCounter;
   FormContext? _cachedFormContext;
-  int _lastResetRevision = 0;
-  int _lastRitaDependenciesRevision = 0;
   late final _ArrayReorderDelegate _reorderDelegate;
-  static final _logger = FormLogger.arrayField;
 
-  bool get _useCustomReorder => _arrayReorderMode == FormArrayReorderMode.custom;
+  static final _logger = FormLogger.arrayField;
+  static bool get _useCustomReorder => _arrayReorderMode == FormArrayReorderMode.custom;
 
   @override
   void initState() {
     super.initState();
+    _cachedFormContext = null;
+    _idCounter = 0;
     _initializeItems();
     _reorderDelegate = _ArrayReorderDelegate(
       getItems: () => items,
@@ -72,32 +72,19 @@ class _FormArrayFieldState extends State<FormArrayField> {
           widget.formFieldContext.initialValue = [];
         }
         for (dynamic item in widget.formFieldContext.initialValue) {
-          items.add(ListItem<dynamic>(id: _idCounter, value: item));
-          _idCounter++;
-        }
-      } else {
-        int minItems = safeParseInt(widget.formFieldContext.jsonSchema.minItems);
-        for (int i = 0; i < minItems; i++) {
-          items.add(ListItem<dynamic>(id: _idCounter++, value: null));
+          items.add(ListItem<dynamic>(id: _idCounter++, value: item));
         }
       }
+      // else {
+      int minItems = safeParseInt(widget.formFieldContext.jsonSchema.minItems);
+      for (int i = _idCounter; i < minItems; i++) {
+        items.add(ListItem<dynamic>(id: _idCounter++, value: null));
+      }
+      // }
     }
   }
 
   /// Initialize items for reset - ignores current initialValue and uses only schema defaults
-  void _initializeItemsForReset() {
-    if (!itemsInitialized) {
-      itemsInitialized = true;
-
-      // On reset, ignore current initialValue and use only schema defaults
-      int minItems = safeParseInt(widget.formFieldContext.jsonSchema.minItems);
-      for (int i = 0; i < minItems; i++) {
-        // Use schema default value if available, otherwise null
-        dynamic defaultValue = widget.formFieldContext.jsonSchema.items?.defaultValue;
-        items.add(ListItem<dynamic>(id: _idCounter++, value: defaultValue));
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,20 +102,6 @@ class _FormArrayFieldState extends State<FormArrayField> {
 
     // Use available FormContext or cached one
     final effectiveFormContext = formContext ?? _cachedFormContext!;
-
-    // Check if form was reset and items need to be re-initialized
-    if (effectiveFormContext.formResetRevision != _lastResetRevision) {
-      _lastResetRevision = effectiveFormContext.formResetRevision;
-      itemsInitialized = false;
-      items.clear();
-      _idCounter = 0;
-      _initializeItemsForReset();
-    }
-
-    // Check if Rita dependencies have changed and trigger rebuild for dependent fields
-    if (effectiveFormContext.ritaDependenciesRevision != _lastRitaDependenciesRevision) {
-      _lastRitaDependenciesRevision = effectiveFormContext.ritaDependenciesRevision;
-    }
 
     return _buildArrayWidget(effectiveFormContext);
   }
@@ -171,10 +144,10 @@ class _FormArrayFieldState extends State<FormArrayField> {
   void _addItem() {
     _logger.fine('Adding new array item');
     setState(() {
-      _idCounter++;
-      items.add(ListItem<dynamic>(id: _idCounter, value: null));
+      items.add(ListItem<dynamic>(id: _idCounter++, value: null));
     });
     _logger.finer('Array now has ${items.length} items');
+    _notifyItemsChanged();
   }
 
   void _removeItem(int index) {
@@ -305,6 +278,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
               index: index,
               label: context.localize((l) => l.buttonDragHandle),
               canReorder: useCustomReorder || items.length > 1,
+              testKey: Key('${parentContext.id}/items/${item.id}/drag'),
             ),
           ),
           Positioned(
@@ -320,6 +294,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
               canRemove: canRemove,
               tooltip: context.localize((l) => l.buttonRemove),
               onRemove: _removeItem,
+              testKey: Key('${parentContext.id}/items/${item.id}/remove'),
             ),
           ),
         ],

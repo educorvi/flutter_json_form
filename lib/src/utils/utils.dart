@@ -29,7 +29,6 @@ ui.UiSchema generateDefaultUISchema(Map<String, dynamic> jsonSchema) {
       //   ));
       // } else {
       elements.add(ui.Control(
-        type: ui.ControlType.CONTROL,
         scope: "$path/$key",
       ));
       // }

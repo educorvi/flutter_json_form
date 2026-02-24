@@ -8,7 +8,7 @@ import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_
 import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_layout.dart';
 import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_wizard.dart';
 import '../../models/ui_schema.g.dart' as ui;
-import '../../utils/show_on.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_visibility.dart';
 
 class LayoutFactory {
   static Widget generateLayoutElement(
@@ -44,19 +44,17 @@ class LayoutFactory {
     // why is this needed? All primitive fields already have showOnWrapper. Maybe we remove the primitive field wrappers or add this logic at a better place since root layout elements don't get show and css logic here
     return Builder(
       builder: (context) {
+        if (child is FormControl) {
+          return child;
+        }
+
         final formContext = FormContext.of(context)!;
-        return child is FormControl
-            ? child
-            : handleShowOn(
-                item.showOn,
-                child,
-                formContext.ritaDependencies,
-                formContext.checkValueForShowOn,
-                isShownFromParent,
-                null,
-                formContext.ritaEvaluator,
-                formContext.getFullFormData,
-              );
+        final isVisible = formContext.elementShown(
+          showOn: item.showOn,
+          parentIsShown: isShownFromParent,
+          selfIndices: null,
+        );
+        return buildAnimatedVisibility(child: child, isVisible: isVisible);
       },
     );
   }

@@ -8,9 +8,6 @@ class FormContext extends InheritedWidget {
   final void Function(Map<String, dynamic>?)? onFormSubmitSaveCallback;
   final void Function(Map<String, dynamic>?, ui.Request?)? onFormRequestCallback;
   final Map<String, dynamic> showOnDependencies;
-  final Map<String, bool> ritaDependencies;
-  final int ritaDependenciesRevision;
-  final int formResetRevision;
   final JsonSchema jsonSchemaModel;
   final RitaRuleEvaluator ritaEvaluator;
   final Function(String, dynamic) setValueForShowOn;
@@ -22,7 +19,6 @@ class FormContext extends InheritedWidget {
   final Function({bool focusOnInvalid, bool autoScrollWhenFocusOnInvalid}) saveAndValidate;
   final VoidCallback reset;
   final Map<String, dynamic> Function() getFormValues;
-  final void Function(String, Map<String, int>?, bool) storeRitaArrayResult;
   final bool Function({required ui.ShowOnProperty? showOn, Map<String, int>? selfIndices, required bool? parentIsShown}) elementShown;
 
   const FormContext({
@@ -30,9 +26,6 @@ class FormContext extends InheritedWidget {
     this.onFormSubmitSaveCallback,
     this.onFormRequestCallback,
     required this.showOnDependencies,
-    required this.ritaDependencies,
-    required this.ritaDependenciesRevision,
-    required this.formResetRevision,
     required this.jsonSchemaModel,
     required this.ritaEvaluator,
     required this.setValueForShowOn,
@@ -44,7 +37,6 @@ class FormContext extends InheritedWidget {
     required this.saveAndValidate,
     required this.reset,
     required this.getFormValues,
-    required this.storeRitaArrayResult,
     required this.elementShown,
     required super.child,
   });
@@ -56,9 +48,7 @@ class FormContext extends InheritedWidget {
   @override
   bool updateShouldNotify(FormContext oldWidget) {
     // Use mapEquals for deep comparison to ensure updates are triggered when content changes
-    return !mapEquals(showOnDependencies, oldWidget.showOnDependencies) ||
-        !mapEquals(ritaDependencies, oldWidget.ritaDependencies) ||
-        ritaDependenciesRevision != oldWidget.ritaDependenciesRevision;
+    return !mapEquals(showOnDependencies, oldWidget.showOnDependencies);
   }
 
   // bool elementShown({

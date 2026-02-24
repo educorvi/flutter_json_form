@@ -21,7 +21,13 @@ abstract class FormFile {
   Widget getForm() {
     // If schemas are already loaded, return FormDisplay directly
     if (jsonSchema != null && uiSchema != null) {
-      return get_form_display();
+      return FormDisplay(
+        key: ValueKey('form_display_$name'),
+        formKey: formKey,
+        jsonSchema: jsonSchema,
+        uiSchema: uiSchema,
+        formData: formData,
+      );
     }
 
     // Otherwise, load schemas with FutureBuilder
@@ -32,21 +38,17 @@ abstract class FormFile {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error loading schemass: ${snapshot.error}'));
+          return Center(child: Text('Error loading schemas: ${snapshot.error}'));
         } else {
-          return get_form_display();
+          return FormDisplay(
+            key: ValueKey('form_display_$name'),
+            formKey: formKey,
+            jsonSchema: jsonSchema,
+            uiSchema: uiSchema,
+            formData: formData,
+          );
         }
       },
-    );
-  }
-
-  get_form_display() {
-    return FormDisplay(
-      key: ValueKey('form_display_$name'),
-      formKey: formKey,
-      jsonSchema: jsonSchema,
-      uiSchema: uiSchema,
-      formData: formData,
     );
   }
 }

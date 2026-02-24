@@ -5,7 +5,7 @@ import 'package:flutter_json_forms/src/widgets/constants.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_help.dart';
 import 'package:flutter_json_forms/src/widgets/shared/common.dart';
 import 'package:flutter_json_forms/src/widgets/shared/form_field_utils.dart';
-import '../../utils/show_on.dart';
+import 'package:flutter_json_forms/src/widgets/form_elements/form_visibility.dart';
 import '../custom_form_input_fields/html_widget.dart';
 
 class FormFieldWrapper extends StatelessWidget {
@@ -43,18 +43,22 @@ class FormFieldWrapper extends StatelessWidget {
       columnChildren.add(CustomHtmlWidget(htmlData: preHtml));
     }
 
-    final labelText =
-        ignoreLabel == true ? null : FormFieldUtils.getLabel(formFieldContext, getLabel: complexElement ?? UIConstants.labelSeparateText);
+    final layoutHeaderScope = LayoutHeaderScope.maybeOf(context);
+    final bool suppressComplexHeader = layoutHeaderScope?.hasHeader == true && (complexElement ?? false);
+    final bool shouldIgnoreLabel = ignoreLabel == true || suppressComplexHeader;
+    final labelText = shouldIgnoreLabel ? null : FormFieldUtils.getLabel(formFieldContext, getLabel: complexElement ?? UIConstants.labelSeparateText);
+    final String? descriptionText = suppressComplexHeader ? null : formFieldContext.description;
 
     Widget? labelRow;
-    if ((formFieldContext.showLabel && labelText != null) || help != null) {
+    final bool hasHeaderContent = labelText != null || (complexElement == true && descriptionText != null);
+    if ((formFieldContext.showLabel && hasHeaderContent) || help != null) {
       labelRow = Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (labelText != null || formFieldContext.description != null)
+          if (hasHeaderContent)
             Expanded(
               child: complexElement == true
-                  ? withHeader(context, labelText, formFieldContext.description, null, required: formFieldContext.required)
+                  ? withHeader(context, labelText, descriptionText, null, required: formFieldContext.required)
                   : withPrimitiveFieldTitle(context, labelText, null, required: formFieldContext.required),
             ),
           if (help != null)
@@ -76,25 +80,22 @@ class FormFieldWrapper extends StatelessWidget {
       columnChildren.add(CustomHtmlWidget(htmlData: postHtml));
     }
 
-    return handleShowOn(
-      formFieldContext.showOn,
-      MergeSemantics(
-          child: withCss(
-        context,
-        columnChildren.length == 1
-            ? columnChildren.first
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: columnChildren,
-              ),
-        cssClass: formFieldContext.options?.formattingOptions?.cssClass,
-      )),
-      formFieldContext.ritaDependencies,
-      formFieldContext.checkValueForShowOn,
-      formFieldContext.parentIsShown,
-      formFieldContext.selfIndices,
-      formFieldContext.ritaEvaluator,
-      formFieldContext.getFullFormData,
+    final isVisible = formFieldContext.isShownCallback();
+
+    return buildAnimatedVisibility(
+      child: MergeSemantics(
+        child: withCss(
+          context,
+          columnChildren.length == 1
+              ? columnChildren.first
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: columnChildren,
+                ),
+          cssClass: formFieldContext.options?.formattingOptions?.cssClass,
+        ),
+      ),
+      isVisible: isVisible,
     );
   }
 }

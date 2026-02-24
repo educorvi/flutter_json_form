@@ -64,23 +64,19 @@ class _FormObjectFieldState extends State<FormObjectField> {
 
   /// Creates a child widget for the given property key
   Widget _buildChildWidget(String key, FormContext formContext) {
-    bool childRequired = widget.formFieldContext.jsonSchema.propertyRequired(key) || widget.formFieldContext.required;
     String childScope = "${widget.formFieldContext.scope}/properties/$key";
 
     ui.DescendantControlOverrides? descendantControlOverrides =
         widget.formFieldContext.options?.formattingOptions?.descendantControlOverrides?[childScope];
 
-    final childOptions = descendantControlOverrides?.options ?? widget.formFieldContext.options;
-    final childShowOn = descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn;
-
     return FormElementFactory.createFormElement(widget.formFieldContext.createChildContext(
         childScope: childScope,
         childId: '${widget.formFieldContext.id}/properties/$key',
         childJsonSchema: widget.formFieldContext.jsonSchema.properties[key]!,
-        childOptions: childOptions,
-        childShowOn: childShowOn,
+        childOptions: descendantControlOverrides?.options ?? widget.formFieldContext.options,
+        childShowOn: descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn,
         childInitialValue: _getChildInitialValue(key),
-        childRequired: childRequired,
+        childRequired: widget.formFieldContext.jsonSchema.propertyRequired(key) || widget.formFieldContext.required,
         childSelfIndices: widget.formFieldContext.selfIndices,
         childOnChanged: (value) {
           if (widget.formFieldContext.onChanged != null) {
@@ -117,11 +113,11 @@ class _FormObjectFieldState extends State<FormObjectField> {
     //   return false;
     // }
 
-    final childShowOn = descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn;
+    // final childShowOn = descendantControlOverrides?.showOn ?? widget.formFieldContext.showOn;
 
     return formContext.elementShown(
-      showOn: childShowOn,
-      parentIsShown: true,
+      showOn: descendantControlOverrides?.showOn,
+      parentIsShown: widget.formFieldContext.parentIsShown,
       selfIndices: computedSelfIndices ?? widget.formFieldContext.selfIndices,
     );
 

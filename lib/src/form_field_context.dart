@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
-import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:json_schema/json_schema.dart';
 
 class FormFieldContext {
@@ -17,8 +16,6 @@ class FormFieldContext {
   dynamic initialValue;
   final int nestingLevel;
   final bool? parentIsShown;
-  final Map<String, bool>? ritaDependencies;
-  final dynamic Function(String path) checkValueForShowOn;
   final ui.ShowOnProperty? showOn;
   final Map<String, int>? selfIndices;
   final RitaRuleEvaluator? ritaEvaluator;
@@ -26,6 +23,7 @@ class FormFieldContext {
   final bool showLabel;
   final void Function(dynamic, {Map<String, int>? computedSelfIndices})? onSavedCallback;
   final bool showObjectLeadingLine;
+  final bool Function({required ui.ShowOnProperty? showOn, Map<String, int>? selfIndices, required bool? parentIsShown}) isElementShown;
 
   // Computed properties
   late final String? title;
@@ -46,8 +44,6 @@ class FormFieldContext {
     required this.initialValue,
     required this.nestingLevel,
     required this.parentIsShown,
-    required this.ritaDependencies,
-    required this.checkValueForShowOn,
     required this.showOn,
     required this.selfIndices,
     required this.ritaEvaluator,
@@ -55,6 +51,7 @@ class FormFieldContext {
     required this.showLabel,
     required this.onSavedCallback,
     required this.showObjectLeadingLine,
+    required this.isElementShown,
   }) {
     title = jsonSchema.title;
     description = jsonSchema.description;
@@ -104,8 +101,6 @@ class FormFieldContext {
       initialValue: initialValue ?? jsonSchema.defaultValue,
       nestingLevel: nestingLevel,
       parentIsShown: parentIsShown,
-      ritaDependencies: formContext.ritaDependencies, //formContext.ritaDependencies,
-      checkValueForShowOn: formContext.checkValueForShowOn,
       showOn: showOn,
       selfIndices: selfIndices,
       ritaEvaluator: formContext.ritaEvaluator,
@@ -124,6 +119,7 @@ class FormFieldContext {
         }
       },
       showObjectLeadingLine: showObjectLeadingLine,
+      isElementShown: formContext.elementShown,
     );
   }
 
@@ -157,12 +153,10 @@ class FormFieldContext {
 
         // Check child-specific showOn conditions
         if (childShowOn != null) {
-          // Use the same visibility logic as other form elements
           return isElementShown(
-            parentIsShown: true, // Parent is already checked above
             showOn: childShowOn,
-            ritaDependencies: ritaDependencies,
-            checkValueForShowOn: checkValueForShowOn,
+            parentIsShown: parentShown,
+            selfIndices: childSelfIndices ?? selfIndices,
           );
         }
         return true;
@@ -170,8 +164,6 @@ class FormFieldContext {
       initialValue: childInitialValue,
       nestingLevel: nestingLevel + 1,
       parentIsShown: isShownCallback(),
-      ritaDependencies: ritaDependencies,
-      checkValueForShowOn: checkValueForShowOn,
       showOn: childShowOn,
       selfIndices: childSelfIndices,
       ritaEvaluator: ritaEvaluator,
@@ -179,6 +171,7 @@ class FormFieldContext {
       showLabel: childShowLabel,
       onSavedCallback: childOnSavedCallback,
       showObjectLeadingLine: childShowObjectLeadingLine ?? showObjectLeadingLine,
+      isElementShown: isElementShown,
     );
   }
 }

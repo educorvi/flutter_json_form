@@ -187,7 +187,7 @@ class ArrayOptions {
 }
 
 ///Used to group buttons
-class Buttongroup implements LayoutElement {
+class Buttongroup {
   ///The buttons in the button group
   List<Button> buttons;
   ButtongroupOptions? options;
@@ -200,7 +200,7 @@ class Buttongroup implements LayoutElement {
     required this.buttons,
     this.options,
     this.showOn,
-    this.type = ButtongroupType.BUTTONGROUP,
+    required this.type,
   });
 
   factory Buttongroup.fromJson(Map<String, dynamic> json) => Buttongroup(
@@ -219,7 +219,7 @@ class Buttongroup implements LayoutElement {
 }
 
 ///Used to put a button into the form
-class Button implements LayoutElement {
+class Button {
   TheButtonsType buttonType;
 
   ///Options for the button
@@ -237,7 +237,7 @@ class Button implements LayoutElement {
     this.options,
     this.showOn,
     required this.text,
-    this.type = ButtonType.BUTTON,
+    required this.type,
   });
 
   factory Button.fromJson(Map<String, dynamic> json) => Button(
@@ -294,7 +294,7 @@ class ButtonOptions {
         cssClass: json["cssClass"],
         formnovalidate: json["formnovalidate"],
         submitOptions: json["submitOptions"] == null ? null : SubmitOptions.fromJson(json["submitOptions"]),
-        variant: colorVariantsValues.map[json["variant"]],
+        variant: colorVariantsValues.map[json["variant"]]!,
       );
 
   Map<String, dynamic> toJson() => {
@@ -350,15 +350,19 @@ class Request {
   });
 
   factory Request.fromJson(Map<String, dynamic> json) => Request(
-        headers: json["headers"] == null ? null : Map<String, String>.from(json["headers"]),
-        method: methodValues.map[json["method"]],
+        headers: Map.from(
+          json["headers"]!,
+        ).map((k, v) => MapEntry<String, String>(k, v)),
+        method: methodValues.map[json["method"]]!,
         onSuccessRedirect: json["onSuccessRedirect"],
         url: json["url"],
       );
 
   Map<String, dynamic> toJson() => {
-        "headers": headers == null ? null : Map<String, dynamic>.from(headers!),
-        "method": methodValues.reverse[method]!,
+        "headers": Map.from(
+          headers!,
+        ).map((k, v) => MapEntry<String, dynamic>(k, v)),
+        "method": methodValues.reverse[method],
         "onSuccessRedirect": onSuccessRedirect,
         "url": url,
       };
@@ -441,7 +445,7 @@ class ShowOnProperty {
   factory ShowOnProperty.fromJson(Map<String, dynamic> json) => ShowOnProperty(
         path: json["path"],
         referenceValue: json["referenceValue"],
-        type: showOnFunctionTypeValues.map[json["type"]],
+        type: showOnFunctionTypeValues.map[json["type"]]!,
         comment: json["comment"],
         id: json["id"],
         rule: json["rule"],
@@ -486,9 +490,7 @@ class ButtongroupOptions {
 
   ButtongroupOptions({this.vertical});
 
-  factory ButtongroupOptions.fromJson(Map<String, dynamic> json) => ButtongroupOptions(
-        vertical: json["vertical"],
-      );
+  uttongroupOptions({this.vertical});
 
   Map<String, dynamic> toJson() => {"vertical": vertical};
 }
@@ -528,27 +530,26 @@ class EnumOptions {
   });
 
   factory EnumOptions.fromJson(Map<String, dynamic> json) => EnumOptions(
-        buttonVariant: colorVariantsValues.map[json["buttonVariant"]],
-        displayAs: displayAsValues.map[json["displayAs"]],
-        enumTitles: json["enumTitles"] == null
-            ? null
-            : Map.from(
-                json["enumTitles"],
-              ).map((k, v) => MapEntry<String, String>(k, v)),
-        optionFilters: json["optionFilters"] == null
-            ? null
-            : Map.from(
-                json["optionFilters"],
-              ).map((k, v) => MapEntry<String, Rule>(k, Rule.fromJson(v))),
+        buttonVariant: colorVariantsValues.map[json["buttonVariant"]]!,
+        displayAs: displayAsValues.map[json["displayAs"]]!,
+        enumTitles: Map.from(
+          json["enumTitles"]!,
+        ).map((k, v) => MapEntry<String, String>(k, v)),
+        optionFilters: Map.from(
+          json["optionFilters"]!,
+        ).map((k, v) => MapEntry<String, Rule>(k, Rule.fromJson(v))),
         stacked: json["stacked"],
       );
 
   Map<String, dynamic> toJson() => {
         "buttonVariant": colorVariantsValues.reverse[buttonVariant],
         "displayAs": displayAsValues.reverse[displayAs],
-        "enumTitles": enumTitles == null ? null : Map<String, dynamic>.from(enumTitles!),
-        "optionFilters":
-            optionFilters == null ? null : Map<String, dynamic>.from(optionFilters!.map((k, v) => MapEntry<String, dynamic>(k, v.toJson()))),
+        "enumTitles": Map.from(
+          enumTitles!,
+        ).map((k, v) => MapEntry<String, dynamic>(k, v)),
+        "optionFilters": Map.from(
+          optionFilters!,
+        ).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
         "stacked": stacked,
       };
 }
@@ -576,49 +577,8 @@ class Rule {
   Map<String, dynamic> toJson() => {"comment": comment, "id": id, "rule": rule};
 }
 
-/// Manually crated because dart doesn't support & union types
-/// To use most of the automatically generated classes for each & part class, a separate getter is created
-/// Union classes: [TagOptions], [EnumOptions], [FileUploadOptions], [ArrayOptions], [InputOptions], [ControlFormattingOptions]
-class Options {
-  final TagOptions? tagOptions;
-  final EnumOptions? enumOptions;
-  final FileUploadOptions? fileUploadOptions;
-  final ArrayOptions? arrayOptions;
-  final InputOptions? inputOptions;
-  final ControlFormattingOptions? formattingOptions;
-
-  Options({
-    this.tagOptions,
-    this.enumOptions,
-    this.fileUploadOptions,
-    this.arrayOptions,
-    this.inputOptions,
-    this.formattingOptions,
-  });
-
-  factory Options.fromJson(Map<String, dynamic> json) => Options(
-        tagOptions: TagOptions.fromJson(json),
-        enumOptions: EnumOptions.fromJson(json),
-        fileUploadOptions: FileUploadOptions.fromJson(json),
-        arrayOptions: ArrayOptions.fromJson(json),
-        inputOptions: InputOptions.fromJson(json),
-        formattingOptions: ControlFormattingOptions.fromJson(json),
-      );
-
-  Map<String, dynamic> toJson() {
-    return {
-      ...?tagOptions?.toJson(),
-      ...?enumOptions?.toJson(),
-      ...?fileUploadOptions?.toJson(),
-      ...?arrayOptions?.toJson(),
-      ...?inputOptions?.toJson(),
-      ...?formattingOptions?.toJson(),
-    };
-  }
-}
-
 ///Contains a form element, e. g. a text input
-class Control implements LayoutElement {
+class Control {
   ///Gives multiple options to configure the element
   Options? options;
 
@@ -629,7 +589,7 @@ class Control implements LayoutElement {
   ShowOnProperty? showOn;
   ControlType type;
 
-  Control({this.options, required this.scope, this.showOn, this.type = ControlType.CONTROL});
+  Control({this.options, required this.scope, this.showOn, required this.type});
 
   factory Control.fromJson(Map<String, dynamic> json) => Control(
         options: json["options"] == null ? null : Options.fromJson(json["options"]),
@@ -663,6 +623,157 @@ class DescendantControlOverrides {
   Map<String, dynamic> toJson() => {
         "options": options?.toJson(),
         "showOn": showOn?.toJson(),
+      };
+}
+
+///Gives multiple options to configure the element
+class Options {
+  ///The accepted File Types
+  String? acceptedFileType;
+
+  ///Will be appended to field
+  String? append;
+
+  ///Specifies what should be autocompleted by the browser. Possible values are taken from
+  ///https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete#values
+  Autocomplete? autocomplete;
+
+  ///The Controls CSS classes
+  String? cssClass;
+
+  ///Allows to override UI options and ShowOn for all descendant controls of this control. The
+  ///key is the scope of the descendant control. Options will be merged.
+  Map<String, DescendantControlOverrides>? descendantControlOverrides;
+
+  ///Disables the field
+  bool? disabled;
+
+  ///If this is an array of upload fields, display as a single Multi-Upload field instead
+  bool? displayAsSingleUploadField;
+
+  ///If set to true, the field will be marked as required even if it is not required by the
+  ///schema
+  bool? forceRequired;
+
+  ///Format for string fields
+  Format? format;
+
+  ///Help text popover
+  OptionsHelp? help;
+
+  ///Sets the visibility of the field to hidden. For example useful in combination with a
+  ///DateTime field with default:"$now" to create a hidden timestamp.
+  bool? hidden;
+
+  ///Defines whether the fields label is shown
+  bool? label;
+
+  ///Maximum file size in bytes per file. If file using a multi file upload, this needs to be
+  ///set on the array that is the multi file upload.
+  double? maxFileSize;
+
+  ///If set true, textarea will be shown instead of textfield.
+  ///Alternatively can be set to the number of wanted lines
+  dynamic multi;
+
+  ///Will be shown as placeholder in form fields, if supported by field
+  String? placeholder;
+
+  ///Will be appended to field
+  String? postHtml;
+
+  ///Will be prepended to field (before the label)
+  String? preHtml;
+
+  ///Will be prepended to field
+  String? prepend;
+
+  ///If set true, a range input will be shown instead of a text input
+  bool? range;
+
+  ///Will be rendered as tags-Field
+  OptionsTags? tags;
+
+  ///Set the text-align of input fields
+  TextAlign? textAlign;
+
+  Options({
+    this.acceptedFileType,
+    this.append,
+    this.autocomplete,
+    this.cssClass,
+    this.descendantControlOverrides,
+    this.disabled,
+    this.displayAsSingleUploadField,
+    this.forceRequired,
+    this.format,
+    this.help,
+    this.hidden,
+    this.label,
+    this.maxFileSize,
+    this.multi,
+    this.placeholder,
+    this.postHtml,
+    this.preHtml,
+    this.prepend,
+    this.range,
+    this.tags,
+    this.textAlign,
+  });
+
+  factory Options.fromJson(Map<String, dynamic> json) => Options(
+        acceptedFileType: json["acceptedFileType"],
+        append: json["append"],
+        autocomplete: autocompleteValues.map[json["autocomplete"]]!,
+        cssClass: json["cssClass"],
+        descendantControlOverrides: Map.from(json["descendantControlOverrides"]!).map(
+          (k, v) => MapEntry<String, DescendantControlOverrides>(
+            k,
+            DescendantControlOverrides.fromJson(v),
+          ),
+        ),
+        disabled: json["disabled"],
+        displayAsSingleUploadField: json["displayAsSingleUploadField"],
+        forceRequired: json["forceRequired"],
+        format: formatValues.map[json["format"]]!,
+        help: json["help"] == null ? null : OptionsHelp.fromJson(json["help"]),
+        hidden: json["hidden"],
+        label: json["label"],
+        maxFileSize: json["maxFileSize"]?.toDouble(),
+        multi: json["multi"],
+        placeholder: json["placeholder"],
+        postHtml: json["postHtml"],
+        preHtml: json["preHtml"],
+        prepend: json["prepend"],
+        range: json["range"],
+        tags: json["tags"] == null ? null : OptionsTags.fromJson(json["tags"]),
+        textAlign: textAlignValues.map[json["textAlign"]]!,
+      );
+
+  Map<String, dynamic> toJson() => {
+        "acceptedFileType": acceptedFileType,
+        "append": append,
+        "autocomplete": autocompleteValues.reverse[autocomplete],
+        "cssClass": cssClass,
+        "descendantControlOverrides": Map.from(
+          descendantControlOverrides!,
+        ).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
+        "disabled": disabled,
+        "displayAsSingleUploadField": displayAsSingleUploadField,
+        "forceRequired": forceRequired,
+        "format": formatValues.reverse[format],
+        "help": help?.toJson(),
+        "hidden": hidden,
+        "label": label,
+        "maxFileSize": maxFileSize,
+        "multi": multi,
+        "placeholder": placeholder,
+        "postHtml": postHtml,
+        "preHtml": preHtml,
+        "prepend": prepend,
+        "range": range,
+        "tags": tags?.toJson(),
+        "textAlign": textAlignValues.reverse[textAlign],
       };
 }
 
@@ -955,14 +1066,12 @@ class ControlFormattingOptions {
   factory ControlFormattingOptions.fromJson(Map<String, dynamic> json) => ControlFormattingOptions(
         append: json["append"],
         cssClass: json["cssClass"],
-        descendantControlOverrides: json["descendantControlOverrides"] == null
-            ? null
-            : Map.from(json["descendantControlOverrides"]!).map(
-                (k, v) => MapEntry<String, DescendantControlOverrides>(
-                  k,
-                  DescendantControlOverrides.fromJson(v),
-                ),
-              ),
+        descendantControlOverrides: Map.from(json["descendantControlOverrides"]!).map(
+          (k, v) => MapEntry<String, DescendantControlOverrides>(
+            k,
+            DescendantControlOverrides.fromJson(v),
+          ),
+        ),
         disabled: json["disabled"],
         forceRequired: json["forceRequired"],
         help: json["help"] == null ? null : ControlFormattingOptionsHelp.fromJson(json["help"]),
@@ -977,11 +1086,9 @@ class ControlFormattingOptions {
   Map<String, dynamic> toJson() => {
         "append": append,
         "cssClass": cssClass,
-        "descendantControlOverrides": descendantControlOverrides == null
-            ? null
-            : Map.from(
-                descendantControlOverrides!,
-              ).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
+        "descendantControlOverrides": Map.from(
+          descendantControlOverrides!,
+        ).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
         "disabled": disabled,
         "forceRequired": forceRequired,
         "help": help?.toJson(),
@@ -1005,7 +1112,7 @@ class ControlFormattingOptionsHelp {
   factory ControlFormattingOptionsHelp.fromJson(Map<String, dynamic> json) => ControlFormattingOptionsHelp(
         label: json["label"],
         text: json["text"],
-        variant: baseVariantsValues.map[json["variant"]],
+        variant: baseVariantsValues.map[json["variant"]]!,
       );
 
   Map<String, dynamic> toJson() => {
@@ -1016,12 +1123,12 @@ class ControlFormattingOptionsHelp {
 }
 
 ///inserts a simple divider
-class Divider implements LayoutElement {
+class Divider {
   ///Show field depending on value of other field
   ShowOnProperty? showOn;
   DividerType type;
 
-  Divider({this.showOn, this.type = DividerType.DIVIDER});
+  Divider({this.showOn, required this.type});
 
   factory Divider.fromJson(Map<String, dynamic> json) => Divider(
         showOn: json["showOn"] == null ? null : ShowOnProperty.fromJson(json["showOn"]),
@@ -1069,14 +1176,14 @@ class FileUploadOptions {
 }
 
 ///Some HTML to be rendered in the form
-class HtmlRenderer implements LayoutElement {
+class HtmlRenderer {
   String htmlData;
 
   ///Show field depending on value of other field
   ShowOnProperty? showOn;
   HtmlRendererType? type;
 
-  HtmlRenderer({required this.htmlData, this.showOn, this.type = HtmlRendererType.HTML});
+  HtmlRenderer({required this.htmlData, this.showOn, this.type});
 
   factory HtmlRenderer.fromJson(Map<String, dynamic> json) => HtmlRenderer(
         htmlData: json["htmlData"],
@@ -1123,11 +1230,11 @@ class InputOptions {
   });
 
   factory InputOptions.fromJson(Map<String, dynamic> json) => InputOptions(
-        autocomplete: autocompleteValues.map[json["autocomplete"]],
-        format: formatValues.map[json["format"]],
+        autocomplete: autocompleteValues.map[json["autocomplete"]]!,
+        format: formatValues.map[json["format"]]!,
         multi: json["multi"],
         range: json["range"],
-        textAlign: textAlignValues.map[json["textAlign"]],
+        textAlign: textAlignValues.map[json["textAlign"]]!,
       );
 
   Map<String, dynamic> toJson() => {
@@ -1173,7 +1280,7 @@ class Now {
 
   Now({this.type});
 
-  factory Now.fromJson(Map<String, dynamic> json) => Now(type: nowTypeValues.map[json["type"]]);
+  factory Now.fromJson(Map<String, dynamic> json) => Now(type: nowTypeValues.map[json["type"]]!);
 
   Map<String, dynamic> toJson() => {"type": nowTypeValues.reverse[type]};
 }
@@ -1239,30 +1346,9 @@ class TagOptionsTags {
       };
 }
 
-/// Manually crated because dart doesn't support union types
-/// Discriminator: Type
-/// Union classes: [Wizard], [Layout]
-sealed class RootLayout {
-  Map<String, dynamic> toJson();
-
-  factory RootLayout.fromJson(Map<String, dynamic> json) {
-    final type = layoutTypeEnumValues.map[json["type"]];
-    switch (type) {
-      case LayoutTypeEnum.WIZARD:
-        return Wizard.fromJson(json);
-      case LayoutTypeEnum.HORIZONTAL_LAYOUT:
-      case LayoutTypeEnum.VERTICAL_LAYOUT:
-      case LayoutTypeEnum.GROUP:
-        return Layout.fromJson(json);
-      default:
-        throw Exception("Unknown RootLayout type: $type");
-    }
-  }
-}
-
 ///Schema for the UI Schema
 class UiSchema {
-  RootLayout layout;
+  LayoutClass layout;
 
   ///Version of the UI Schema. Changes in a major version are backwards compatible. So a
   ///parser for version z.x must be compatible with all versions z.y where y is <=x.
@@ -1271,7 +1357,7 @@ class UiSchema {
   UiSchema({required this.layout, required this.version});
 
   factory UiSchema.fromJson(Map<String, dynamic> json) => UiSchema(
-        layout: RootLayout.fromJson(json["layout"]),
+        layout: LayoutClass.fromJson(json["layout"]),
         version: json["version"],
       );
 
@@ -1281,35 +1367,319 @@ class UiSchema {
       };
 }
 
-/// Manually crated because dart doesn't support union types
-/// Discriminator: Type
-/// Union classes: [Control], [Layout], [HtmlRenderer], [Divider], [Button], [Buttongroup]
-sealed class LayoutElement {
-  Map<String, dynamic> toJson();
+///The different layouts
+///
+///A wizard
+class LayoutClass {
+  List<LayoutElement>? elements;
 
-  ShowOnProperty? get showOn;
+  ///Additional options
+  LayoutOptionsClass? options;
 
-  factory LayoutElement.fromJson(Map<String, dynamic> json) {
-    final type = layoutElementTypeValues.map[json["type"]];
-    switch (type) {
-      case LayoutElementType.CONTROL:
-        return Control.fromJson(json);
-      case LayoutElementType.VERTICAL_LAYOUT:
-      case LayoutElementType.HORIZONTAL_LAYOUT:
-      case LayoutElementType.GROUP:
-        return Layout.fromJson(json);
-      case LayoutElementType.HTML:
-        return HtmlRenderer.fromJson(json);
-      case LayoutElementType.DIVIDER:
-        return Divider.fromJson(json);
-      case LayoutElementType.BUTTON:
-        return Button.fromJson(json);
-      case LayoutElementType.BUTTONGROUP:
-        return Buttongroup.fromJson(json);
-      case null:
-        throw Exception("Unknown LayoutElement type: null");
-    }
-  }
+  ///Show field depending on value of other field
+  ShowOnProperty? showOn;
+  LayoutTypeEnum type;
+  List<Layout>? pages;
+
+  LayoutClass({
+    this.elements,
+    this.options,
+    this.showOn,
+    required this.type,
+    this.pages,
+  });
+
+  factory LayoutClass.fromJson(Map<String, dynamic> json) => LayoutClass(
+        elements: json["elements"] == null
+            ? []
+            : List<LayoutElement>.from(
+                json["elements"]!.map((x) => LayoutElement.fromJson(x)),
+              ),
+        options: json["options"] == null ? null : LayoutOptionsClass.fromJson(json["options"]),
+        showOn: json["showOn"] == null ? null : ShowOnProperty.fromJson(json["showOn"]),
+        type: layoutTypeEnumValues.map[json["type"]]!,
+        pages: json["pages"] == null ? [] : List<Layout>.from(json["pages"]!.map((x) => Layout.fromJson(x))),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "elements": elements == null ? [] : List<dynamic>.from(elements!.map((x) => x.toJson())),
+        "options": options?.toJson(),
+        "showOn": showOn?.toJson(),
+        "type": layoutTypeEnumValues.reverse[type],
+        "pages": pages == null ? [] : List<dynamic>.from(pages!.map((x) => x.toJson())),
+      };
+}
+
+///The elements of the layout
+///
+///Different types of layout elements
+///
+///Used to put a button into the form
+///
+///Used to group buttons
+///
+///Contains a form element, e. g. a text input
+///
+///inserts a simple divider
+///
+///The different layouts
+///
+///Some HTML to be rendered in the form
+class LayoutElement {
+  TheButtonsType? buttonType;
+
+  ///Options for the button
+  ///
+  ///Gives multiple options to configure the element
+  ///
+  ///Additional options
+  LayoutElementOptions? options;
+
+  ///Show field depending on value of other field
+  ShowOnProperty? showOn;
+
+  ///The buttons text
+  String? text;
+  LayoutElementType? type;
+
+  ///The buttons in the button group
+  List<Button>? buttons;
+
+  ///A json pointer referring to the form element in the forms json schema
+  String? scope;
+  List<LayoutElement>? elements;
+  String? htmlData;
+
+  LayoutElement({
+    this.buttonType,
+    this.options,
+    this.showOn,
+    this.text,
+    this.type,
+    this.buttons,
+    this.scope,
+    this.elements,
+    this.htmlData,
+  });
+
+  factory LayoutElement.fromJson(Map<String, dynamic> json) => LayoutElement(
+        buttonType: theButtonsTypeValues.map[json["buttonType"]]!,
+        options: json["options"] == null ? null : LayoutElementOptions.fromJson(json["options"]),
+        showOn: json["showOn"] == null ? null : ShowOnProperty.fromJson(json["showOn"]),
+        text: json["text"],
+        type: layoutElementTypeValues.map[json["type"]]!,
+        buttons: json["buttons"] == null ? [] : List<Button>.from(json["buttons"]!.map((x) => Button.fromJson(x))),
+        scope: json["scope"],
+        elements: json["elements"] == null
+            ? []
+            : List<LayoutElement>.from(
+                json["elements"]!.map((x) => LayoutElement.fromJson(x)),
+              ),
+        htmlData: json["htmlData"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "buttonType": theButtonsTypeValues.reverse[buttonType],
+        "options": options?.toJson(),
+        "showOn": showOn?.toJson(),
+        "text": text,
+        "type": layoutElementTypeValues.reverse[type],
+        "buttons": buttons == null ? [] : List<dynamic>.from(buttons!.map((x) => x.toJson())),
+        "scope": scope,
+        "elements": elements == null ? [] : List<dynamic>.from(elements!.map((x) => x.toJson())),
+        "htmlData": htmlData,
+      };
+}
+
+///Options for the button
+///
+///Gives multiple options to configure the element
+///
+///Additional options
+class LayoutElementOptions {
+  ///The layout's CSS classes
+  ///
+  ///The Controls CSS classes
+  String? cssClass;
+
+  ///Specifies that the form-data should not be validated on submission
+  bool? formnovalidate;
+
+  ///Options that are passed to the submit function. This will not change the behaviour of
+  ///VueJsonForm itself, but can bes used by the application/the webcomponent to change the
+  ///behaviour of the submit function.
+  SubmitOptions? submitOptions;
+
+  ///Different color variants
+  ColorVariants? variant;
+
+  ///Display the buttons vertical
+  bool? vertical;
+
+  ///The accepted File Types
+  String? acceptedFileType;
+
+  ///Will be appended to field
+  String? append;
+
+  ///Specifies what should be autocompleted by the browser. Possible values are taken from
+  ///https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete#values
+  Autocomplete? autocomplete;
+
+  ///Allows to override UI options and ShowOn for all descendant controls of this control. The
+  ///key is the scope of the descendant control. Options will be merged.
+  Map<String, DescendantControlOverrides>? descendantControlOverrides;
+
+  ///Disables the field
+  bool? disabled;
+
+  ///If this is an array of upload fields, display as a single Multi-Upload field instead
+  bool? displayAsSingleUploadField;
+
+  ///If set to true, the field will be marked as required even if it is not required by the
+  ///schema
+  bool? forceRequired;
+
+  ///Format for string fields
+  Format? format;
+
+  ///Help text popover
+  OptionsHelp? help;
+
+  ///Sets the visibility of the field to hidden. For example useful in combination with a
+  ///DateTime field with default:"$now" to create a hidden timestamp.
+  bool? hidden;
+
+  ///Defines whether the fields label is shown
+  ///
+  ///Adds a label for groups (only for type=Group)
+  dynamic label;
+
+  ///Maximum file size in bytes per file. If file using a multi file upload, this needs to be
+  ///set on the array that is the multi file upload.
+  double? maxFileSize;
+
+  ///If set true, textarea will be shown instead of textfield.
+  ///Alternatively can be set to the number of wanted lines
+  dynamic multi;
+
+  ///Will be shown as placeholder in form fields, if supported by field
+  String? placeholder;
+
+  ///Will be appended to field
+  String? postHtml;
+
+  ///Will be prepended to field (before the label)
+  String? preHtml;
+
+  ///Will be prepended to field
+  String? prepend;
+
+  ///If set true, a range input will be shown instead of a text input
+  bool? range;
+
+  ///Will be rendered as tags-Field
+  OptionsTags? tags;
+
+  ///Set the text-align of input fields
+  TextAlign? textAlign;
+
+  ///Adds a description for a group (only for type=Group)
+  String? description;
+
+  LayoutElementOptions({
+    this.cssClass,
+    this.formnovalidate,
+    this.submitOptions,
+    this.variant,
+    this.vertical,
+    this.acceptedFileType,
+    this.append,
+    this.autocomplete,
+    this.descendantControlOverrides,
+    this.disabled,
+    this.displayAsSingleUploadField,
+    this.forceRequired,
+    this.format,
+    this.help,
+    this.hidden,
+    this.label,
+    this.maxFileSize,
+    this.multi,
+    this.placeholder,
+    this.postHtml,
+    this.preHtml,
+    this.prepend,
+    this.range,
+    this.tags,
+    this.textAlign,
+    this.description,
+  });
+
+  factory LayoutElementOptions.fromJson(Map<String, dynamic> json) => LayoutElementOptions(
+        cssClass: json["cssClass"],
+        formnovalidate: json["formnovalidate"],
+        submitOptions: json["submitOptions"] == null ? null : SubmitOptions.fromJson(json["submitOptions"]),
+        variant: colorVariantsValues.map[json["variant"]]!,
+        vertical: json["vertical"],
+        acceptedFileType: json["acceptedFileType"],
+        append: json["append"],
+        autocomplete: autocompleteValues.map[json["autocomplete"]]!,
+        descendantControlOverrides: Map.from(json["descendantControlOverrides"]!).map(
+          (k, v) => MapEntry<String, DescendantControlOverrides>(
+            k,
+            DescendantControlOverrides.fromJson(v),
+          ),
+        ),
+        disabled: json["disabled"],
+        displayAsSingleUploadField: json["displayAsSingleUploadField"],
+        forceRequired: json["forceRequired"],
+        format: formatValues.map[json["format"]]!,
+        help: json["help"] == null ? null : OptionsHelp.fromJson(json["help"]),
+        hidden: json["hidden"],
+        label: json["label"],
+        maxFileSize: json["maxFileSize"]?.toDouble(),
+        multi: json["multi"],
+        placeholder: json["placeholder"],
+        postHtml: json["postHtml"],
+        preHtml: json["preHtml"],
+        prepend: json["prepend"],
+        range: json["range"],
+        tags: json["tags"] == null ? null : OptionsTags.fromJson(json["tags"]),
+        textAlign: textAlignValues.map[json["textAlign"]]!,
+        description: json["description"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "cssClass": cssClass,
+        "formnovalidate": formnovalidate,
+        "submitOptions": submitOptions?.toJson(),
+        "variant": colorVariantsValues.reverse[variant],
+        "vertical": vertical,
+        "acceptedFileType": acceptedFileType,
+        "append": append,
+        "autocomplete": autocompleteValues.reverse[autocomplete],
+        "descendantControlOverrides": Map.from(
+          descendantControlOverrides!,
+        ).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
+        "disabled": disabled,
+        "displayAsSingleUploadField": displayAsSingleUploadField,
+        "forceRequired": forceRequired,
+        "format": formatValues.reverse[format],
+        "help": help?.toJson(),
+        "hidden": hidden,
+        "label": label,
+        "maxFileSize": maxFileSize,
+        "multi": multi,
+        "placeholder": placeholder,
+        "postHtml": postHtml,
+        "preHtml": preHtml,
+        "prepend": prepend,
+        "range": range,
+        "tags": tags?.toJson(),
+        "textAlign": textAlignValues.reverse[textAlign],
+        "description": description,
+      };
 }
 
 enum LayoutElementType {
@@ -1334,8 +1704,42 @@ final layoutElementTypeValues = EnumValues({
   "VerticalLayout": LayoutElementType.VERTICAL_LAYOUT,
 });
 
+///Additional options
+class LayoutOptionsClass {
+  ///The layout's CSS classes
+  String? cssClass;
+
+  ///Adds a description for a group (only for type=Group)
+  String? description;
+
+  ///Adds a label for groups (only for type=Group)
+  String? label;
+  List<String>? pageTitles;
+
+  LayoutOptionsClass({
+    this.cssClass,
+    this.description,
+    this.label,
+    this.pageTitles,
+  });
+
+  factory LayoutOptionsClass.fromJson(Map<String, dynamic> json) => LayoutOptionsClass(
+        cssClass: json["cssClass"],
+        description: json["description"],
+        label: json["label"],
+        pageTitles: json["pageTitles"] == null ? [] : List<String>.from(json["pageTitles"]!.map((x) => x)),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "cssClass": cssClass,
+        "description": description,
+        "label": label,
+        "pageTitles": pageTitles == null ? [] : List<dynamic>.from(pageTitles!.map((x) => x)),
+      };
+}
+
 ///The different layouts
-class Layout implements LayoutElement, RootLayout {
+class Layout {
   List<LayoutElement> elements;
 
   ///Additional options
@@ -1413,7 +1817,7 @@ final layoutTypeEnumValues = EnumValues({
 });
 
 ///A wizard
-class Wizard implements RootLayout {
+class Wizard {
   ///Additional options
   WizardOptions? options;
   List<Layout> pages;

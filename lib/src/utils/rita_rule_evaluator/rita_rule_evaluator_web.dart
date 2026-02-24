@@ -14,6 +14,9 @@ class RitaRuleEvaluator {
   Map<String, ui.ShowOnProperty> ritaRules = {};
   static const String jsBundlePath = 'packages/flutter_json_forms/assets/js/rita-core.js';
 
+  // Results storage (global scope only)
+  final Map<String, bool> _results = {};
+
   RitaRuleEvaluator._();
 
   static RitaRuleEvaluator create() => RitaRuleEvaluator._();
@@ -121,7 +124,19 @@ class RitaRuleEvaluator {
       final result = await evaluate(rule.id!, dataJson);
       results[rule.id!] = result;
     }
+    _results.clear();
+    _results.addAll(results);
     return results;
+  }
+
+  /// Get cached result for a rule
+  bool? getResult(String ruleId) {
+    return _results[ruleId];
+  }
+
+  /// Clear all results
+  void clearResults() {
+    _results.clear();
   }
 
   void dispose() {
@@ -129,5 +144,6 @@ class RitaRuleEvaluator {
     _initialized = false;
     _jsLoaded = false;
     ritaRules.clear();
+    _results.clear();
   }
 }

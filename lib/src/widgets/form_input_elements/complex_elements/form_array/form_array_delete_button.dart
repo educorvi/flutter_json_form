@@ -8,6 +8,7 @@ class FormArrayDeleteButton extends StatelessWidget {
   final int itemId;
   final String tooltip;
   final void Function(int index) onRemove;
+  final Key? testKey;
 
   const FormArrayDeleteButton({
     super.key,
@@ -18,6 +19,7 @@ class FormArrayDeleteButton extends StatelessWidget {
     required this.itemId,
     required this.tooltip,
     required this.onRemove,
+    this.testKey,
   });
 
   @override
@@ -27,6 +29,7 @@ class FormArrayDeleteButton extends StatelessWidget {
       child: Tooltip(
         message: tooltip,
         child: FilledButton.tonal(
+          key: testKey,
           onPressed: canRemove ? () => onRemove(index) : null,
           style: FilledButton.styleFrom(
             padding: EdgeInsets.zero,

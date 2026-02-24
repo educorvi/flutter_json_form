@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/process_form_values.dart';
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
-import 'package:flutter_json_forms/src/utils/show_on.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
 import 'package:flutter_json_forms/src/widgets/constants.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_text.dart';
@@ -10,6 +9,8 @@ import 'package:flutter_json_forms/src/widgets/ui_layout_elements/form_layout_fa
 import 'package:flutter_json_forms/src/widgets/form_elements/form_loader.dart';
 import 'package:flutter_json_forms/src/utils/utils.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
+import 'package:flutter_json_forms/src/utils/show_on.dart';
+import 'package:flutter_json_forms/src/utils/visibility_manager.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -109,20 +110,9 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
   /// Rita Rule Evaluator
   late final RitaRuleEvaluator ritaRuleEvaluator;
-  final Map<String, bool> _ritaDependencies = {};
-  // bool _ritaInitialized = false;
 
-  /// Storage for Rita rule results with array indices
-  /// Key format: "ruleId|selfIndicesJson" -> bool result
-  final Map<String, bool> _ritaArrayDependencies = {};
-
-  /// Revision counter to track when Rita dependencies change
-  /// This helps FutureBuilder know when to re-evaluate array elements
-  int _ritaDependenciesRevision = 0;
-
-  /// Revision counter to track when form is reset
-  /// This helps array fields know when to re-initialize their items
-  int _formResetRevision = 0;
+  /// Visibility Manager
+  late final VisibilityManager visibilityManager;
 
   /// return true if the widget is in the loading state (the validation is not finished yet
   bool get isLoading {
@@ -201,6 +191,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   @override
   void dispose() {
     ritaRuleEvaluator.dispose();
+    visibilityManager.dispose();
     super.dispose();
   }
 
@@ -209,6 +200,21 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     // Use Future.microtask to yield control back to the UI thread
     await Future.microtask(() {
       ritaRuleEvaluator = RitaRuleEvaluator.create();
+
+      // Create visibility manager for array-specific evaluations
+      visibilityManager = VisibilityManager(
+        ritaEvaluator: ritaRuleEvaluator,
+        buildPayloadJson: _buildRitaPayloadJson,
+      );
+
+      // Listen to visibility changes and trigger rebuild
+      visibilityManager.changes.addListener(() {
+        if (mounted) {
+          safeSetState(() {
+            // Array evaluation completed, trigger rebuild
+          });
+        }
+      });
     });
   }
 
@@ -284,17 +290,14 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
       _showOnDependencies,
     );
     _logger.fine('Initial Rita payload: $processed');
-    final ritaDependencies = await ritaRuleEvaluator.evaluateAll(
+    await ritaRuleEvaluator.evaluateAll(
       jsonEncode(
         toEncodable(processed),
       ),
     );
 
     safeSetState(() {
-      _ritaDependencies.clear();
-      _ritaDependencies.addAll(ritaDependencies);
-      _ritaDependenciesRevision++;
-      // _ritaInitialized = true;
+      // Rita evaluator manages its own state now
     });
   }
 
@@ -374,14 +377,8 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
     safeSetState(() {
       _showOnDependencies = initShowOnDependencies(jsonSchemaModel.properties, null);
-      _ritaDependencies.clear();
-      _ritaDependenciesRevision++;
-      _formResetRevision++; // Increment reset counter for array fields
-      // if (formData.isNotEmpty && resetFormData) {
-      //   _customResetPatch();
-      // } else {
-      //   _formKey.currentState?.reset();
-      // }
+      ritaRuleEvaluator.clearResults();
+      visibilityManager.clearArrayResults();
       resetPatch();
     });
   }
@@ -515,9 +512,6 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
         onFormSubmitSaveCallback: widget.onFormSubmitSaveCallback,
         onFormRequestCallback: widget.onFormRequestCallback,
         showOnDependencies: _showOnDependencies,
-        ritaDependencies: _ritaDependencies,
-        ritaDependenciesRevision: _ritaDependenciesRevision,
-        formResetRevision: _formResetRevision,
         jsonSchemaModel: jsonSchemaModel,
         ritaEvaluator: ritaRuleEvaluator,
         setValueForShowOn: setValueForShowOn,
@@ -534,8 +528,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
             saveAndValidate(focusOnInvalid: focusOnInvalid, autoScrollWhenFocusOnInvalid: autoScrollWhenFocusOnInvalid),
         reset: reset,
         getFormValues: () => instantValue,
-        storeRitaArrayResult: _storeRitaArrayResult,
-        elementShown: isElementShownWithRita,
+        elementShown: _isElementShown,
         child: generateForm(uiSchemaModel!.layout),
       ),
     );
@@ -609,25 +602,24 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     // Update the showOn dependencies
     setValueForShowOn(scope, value);
 
-    // Evaluate Rita rules with the updated dependencies
+    // Evaluate global Rita rules with the updated dependencies
     _logger.finer('Evaluating Rita rules for updated dependencies');
     final processed = processFormValues(
       _showOnDependencies,
     );
     _logger.finer('Rita payload after value change: $processed');
-    final ritaDependencies = await ritaRuleEvaluator.evaluateAll(
+    await ritaRuleEvaluator.evaluateAll(
       jsonEncode(
         toEncodable(processed),
       ),
     );
 
-    // Update UI
-    safeSetState(() {
-      _ritaDependencies.clear();
-      _ritaDependencies.addAll(ritaDependencies);
-      _ritaDependenciesRevision++;
-    });
-    _logger.config('Updated ${ritaDependencies.length} Rita dependencies');
+    // Re-evaluate array-specific rules with fresh data (keeps old values until done)
+    await visibilityManager.reEvaluateAll();
+
+    // Update UI once - all evaluations complete, no jumping!
+    safeSetState(() {});
+    _logger.config('Updated Rita dependencies');
   }
 
   /// gets a value for a showOn condition
@@ -636,6 +628,38 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   /// it doesn't matter if the path starts with a # or not
   dynamic checkValueForShowOn(String path) {
     return _showOnDependencies[getPathWithProperties(path)];
+  }
+
+  /// Check if an element should be shown based on showOn conditions
+  /// Delegates to show_on.dart implementation with array-aware Rita handling
+  bool _isElementShown({
+    required ui.ShowOnProperty? showOn,
+    Map<String, int>? selfIndices,
+    required bool? parentIsShown,
+  }) {
+    _logger.finest('Checking visibility for showOn rule ${showOn?.id} with selfIndices: $selfIndices');
+
+    return isElementShown(
+      parentIsShown: parentIsShown,
+      showOn: showOn,
+      getRitaResult: () {
+        if (showOn?.rule == null || showOn?.id == null) return null;
+
+        // Array-specific Rita rule
+        if (selfIndices != null && selfIndices.isNotEmpty) {
+          final result = visibilityManager.getArrayResult(showOn!.id!, selfIndices);
+          _logger.finest('Array Rita result for ${showOn.id} with $selfIndices: $result');
+          // If not cached yet, return null so it shows optimistically
+          return result;
+        }
+
+        // Global Rita rule
+        final result = ritaRuleEvaluator.getResult(showOn!.id!);
+        _logger.finest('Global Rita result for ${showOn.id}: $result');
+        return result;
+      },
+      checkValueForShowOn: checkValueForShowOn,
+    );
   }
 
   /// sets a value for a showOn condition
@@ -670,51 +694,11 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     return path.split('/').last;
   }
 
-  /// Generate a key for Rita array dependencies that includes selfIndices
-  String _generateRitaArrayKey(String ruleId, Map<String, int>? selfIndices) {
-    if (selfIndices == null || selfIndices.isEmpty) {
-      return ruleId;
-    }
-    final sortedIndices = Map.fromEntries(selfIndices.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
-    final indicesJson = jsonEncode(sortedIndices);
-    return '$ruleId|$indicesJson';
-  }
-
-  /// Store Rita rule result for array elements with selfIndices
-  void _storeRitaArrayResult(String ruleId, Map<String, int>? selfIndices, bool result) {
-    final key = _generateRitaArrayKey(ruleId, selfIndices);
-    _ritaArrayDependencies[key] = result;
-  }
-
-  /// Get Rita rule result for array elements with selfIndices
-  bool? _getRitaArrayResult(String ruleId, Map<String, int>? selfIndices) {
-    final key = _generateRitaArrayKey(ruleId, selfIndices);
-    return _ritaArrayDependencies[key];
-  }
-
-  /// Check if an element with Rita rules is shown (handles both global and array-specific rules)
-  bool isElementShownWithRita({required ui.ShowOnProperty? showOn, Map<String, int>? selfIndices, required bool? parentIsShown}) {
-    if (parentIsShown == false) return false;
-    if (showOn == null) return true;
-
-    if (showOn.rule != null && showOn.id != null) {
-      // For array elements with selfIndices, check the array-specific storage
-      if (selfIndices != null && selfIndices.isNotEmpty) {
-        final result = _getRitaArrayResult(showOn.id!, selfIndices);
-        if (result != null) {
-          return result;
-        }
-      }
-      // Fall back to global Rita dependencies
-      return _ritaDependencies[showOn.id!] == true;
-    }
-
-    // Fallback: classic showOn evaluation using existing utility
-    return isElementShown(
-      parentIsShown: parentIsShown,
-      showOn: showOn,
-      ritaDependencies: _ritaDependencies,
-      checkValueForShowOn: checkValueForShowOn,
-    );
+  String _buildRitaPayloadJson(Map<String, int>? selfIndices) {
+    final evalData = {
+      r"$selfIndices": selfIndices ?? <String, int>{},
+      ...processFormValues(_showOnDependencies),
+    };
+    return jsonEncode(toEncodable(evalData));
   }
 }

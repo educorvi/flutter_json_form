@@ -1,27 +1,14 @@
 import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'data/base_data.dart';
+import 'base_data.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import '../test_utils.dart';
+import '../../utils/test_utils.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Base Form Test', () {
     group('Json Schema Test', () {
-      // setUpAll(() async {
-      //   await pumpForm(tester, BaseData.jsonSchema);
-      // });
-
-      // bool _isPumped = false;
-
-      // Future<void> ensurePumped(WidgetTester tester) async {
-      //   if (!_isPumped) {
-      //     await pumpForm(tester, jsonSchema: BaseData.jsonSchema);
-      //     _isPumped = true;
-      //   }
-      // }
-
       Future<void> init(WidgetTester tester) async {
         await pumpForm(tester, jsonSchema: BaseData.jsonSchema);
       }
@@ -42,9 +29,9 @@ void main() {
         /// THEN
         // field titles get generated from schema titles and property names
         expect(find.formFieldText('Name'), findsOneWidget);
-        expect(find.formFieldText('Newsletter Json Title'), findsOneWidget);
-        expect(find.formFieldText('email'), findsOneWidget);
-        expect(find.formFieldText('timeMissingInUiSchema'), findsOneWidget);
+        expect(find.formFieldText('Newsletter'), findsOneWidget);
+        expect(find.formFieldText('Email'), findsOneWidget);
+        expect(find.formFieldText('TimeMissingInUiSchema'), findsOneWidget);
         // input fields get generated from schema types
         expect(find.byType(FormBuilderTextField), findsNWidgets(2));
         expect(find.byType(FormBuilderSwitch), findsOneWidget);
@@ -69,14 +56,14 @@ void main() {
         /// THEN
         expect(isTextFieldRequired(tester, 'Name'), isTrue); // required
         expect(isTextFieldRequired(tester, 'Newsletter Json Title'), isFalse); // not required
-        expect(isTextFieldRequired(tester, 'email'), isTrue); // required
-        expect(isTextFieldRequired(tester, 'timeMissingInUiSchema'), isFalse); // not required
+        expect(isTextFieldRequired(tester, 'Email'), isTrue); // required
+        expect(isTextFieldRequired(tester, 'TimeMissingInUiSchema'), isFalse); // not required
       });
 
       testWidgets('Follows a11y guidelines', (tester) async {
         await checkAccessibilityGuidelines(
           tester,
-          (tester) => pumpForm(tester, jsonSchema: BaseData.jsonSchema),
+          (tester) => init(tester),
         );
       });
     });
@@ -86,7 +73,7 @@ void main() {
         await pumpForm(tester, jsonSchema: BaseData.jsonSchema, uiSchema: BaseData.uiSchema);
       }
 
-      testWidgets('Form loads successfully', (tester) async {
+      testWidgets('Form header loads successfully', (tester) async {
         /// GIVEN
         await init(tester);
 
@@ -100,11 +87,11 @@ void main() {
         await init(tester);
 
         /// THEN
-        // filed titles get generated from schema titles and property names
+        // field titles get generated from schema titles and property names
         expect(find.formFieldText('Name'), findsOneWidget);
-        expect(find.formFieldText('Sign up for newsletter'), findsOneWidget);
-        expect(find.formFieldText('email'), findsOneWidget);
-        expect(find.formFieldText('elementMissingInUiSchema'), findsNothing); // element missing in ui schema is not shown
+        expect(find.formFieldText('Newsletter'), findsOneWidget);
+        expect(find.formFieldText('Email'), findsOneWidget);
+        expect(find.formFieldText('ElementMissingInUiSchema'), findsNothing); // element missing in ui schema is not shown
         // input fields get generated from schema types
         expect(find.byType(FormBuilderTextField), findsNWidgets(2));
         expect(find.byType(FormBuilderSwitch), findsOneWidget);
@@ -124,12 +111,12 @@ void main() {
 
       testWidgets('Required fields are marked correctly', (tester) async {
         /// GIVEN
-        await pumpForm(tester, jsonSchema: BaseData.jsonSchema, uiSchema: BaseData.uiSchema);
+        await init(tester);
 
         /// THEN
         expect(isTextFieldRequired(tester, 'Name'), isTrue); // required
-        expect(isTextFieldRequired(tester, 'Sign up for newsletter'), isFalse); // not required
-        expect(isTextFieldRequired(tester, 'email'), isTrue); // required
+        expect(isTextFieldRequired(tester, 'Newsletter'), isFalse); // not required
+        expect(isTextFieldRequired(tester, 'Email'), isTrue); // required
       });
 
       testWidgets("Simple ShowOn Rule is working", (tester) async {
@@ -137,7 +124,7 @@ void main() {
         await init(tester);
 
         /// THEN
-        expect(isWidgetCrossFadeVisible(tester, find.formFieldText('email')), isTrue); // shown
+        expectShowOnVisible(tester, find.formFieldText('Email')); // shown
 
         /// WHEN
         final switchFinder = find.byType(FormBuilderSwitch);
@@ -146,7 +133,7 @@ void main() {
         await tester.pumpAndSettle();
 
         /// THEN
-        expect(isWidgetCrossFadeVisible(tester, find.formFieldText('email')), isFalse); // email is now hidden
+        expectShowOnHidden(tester, find.formFieldText('Email')); // email is now hidden
       });
 
       testWidgets('Follows a11y guidelines', (tester) async {
@@ -154,6 +141,7 @@ void main() {
         final SemanticsHandle handle = tester.ensureSemantics();
         await init(tester);
 
+        // THEN
         // Checks that tappable nodes have a minimum size of 48 by 48 pixels
         // for Android.
         await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
@@ -171,19 +159,11 @@ void main() {
         // await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
-    });
 
-    testWidgets('Follows a11y guidelines', (tester) async {
-      await checkAccessibilityGuidelines(
-        tester,
-        (tester) => pumpForm(
-          tester,
-          jsonSchema: BaseData.jsonSchema,
-          uiSchema: BaseData.uiSchema,
-        ),
-      );
+      testWidgets('Follows a11y guidelines', (tester) async {
+        await checkAccessibilityGuidelines(tester, (tester) => init(tester));
+      });
     });
-
     // TODO add testing for dynamic data as well and check commented out contrast. Also create reusable function. Maybe it isn`t good to just use these ui and json schemas for accessabilty as they were created for another puprose. Dont knpow yet if they are sufficient Or: use these test and also add dedicated accessibilty tests
   });
 }

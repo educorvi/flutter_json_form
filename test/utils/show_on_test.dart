@@ -17,7 +17,6 @@ ui.LayoutElement makeElement(String? id, {List<ui.LayoutElement>? elements, Map<
             elements: elements,
           )
         : ui.Control(
-            type: ui.ControlType.CONTROL,
             scope: id != null ? '/properties/$id' : "",
             showOn: id != null ? makeShowOn(id) : null,
             options: overrides != null ? ui.Options(formattingOptions: ui.ControlFormattingOptions(descendantControlOverrides: overrides)) : null,

@@ -97,3 +97,20 @@ Color colorForVariant(ui.BaseVariants? variant, BuildContext context) {
       return Theme.of(context).colorScheme.primary;
   }
 }
+
+class LayoutHeaderScope extends InheritedWidget {
+  const LayoutHeaderScope({
+    super.key,
+    required this.hasHeader,
+    required super.child,
+  });
+
+  final bool hasHeader;
+
+  static LayoutHeaderScope? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<LayoutHeaderScope>();
+  }
+
+  @override
+  bool updateShouldNotify(LayoutHeaderScope oldWidget) => hasHeader != oldWidget.hasHeader;
+}

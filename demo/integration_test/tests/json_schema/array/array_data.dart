@@ -1,6 +1,8 @@
+import 'package:json_schema/json_schema.dart';
+
 class ArrayData {
   // Simple array of strings
-  static final jsonSchemaSimpleArray = {
+  static final jsonSchemaSimpleArray = JsonSchema.create({
     "type": "object",
     "properties": {
       "tags": {
@@ -9,21 +11,24 @@ class ArrayData {
         "default": ["defaultTag"]
       }
     }
-  };
+  });
 
-  static final uiSchemaSimpleArray = {
-    "version": "2.0",
-    "layout": {
-      "type": "Group",
-      "options": {"label": "Tags"},
-      "elements": [
-        {"type": "Control", "scope": "#/properties/tags"}
-      ]
+  // simple array with minItems and maxItems
+  static final jsonSchemaArrayWithMinMax = JsonSchema.create({
+    "type": "object",
+    "properties": {
+      "tags": {
+        "type": "array",
+        "items": {"type": "string"},
+        "minItems": 2,
+        "maxItems": 4,
+        "default": ["tag1"]
+      }
     }
-  };
+  });
 
   // Array of objects
-  static final jsonSchemaArrayOfObjects = {
+  static final jsonSchemaArrayOfObjects = JsonSchema.create({
     "type": "object",
     "properties": {
       "people": {
@@ -40,21 +45,10 @@ class ArrayData {
         ]
       }
     }
-  };
-
-  static final uiSchemaArrayOfObjects = {
-    "version": "2.0",
-    "layout": {
-      "type": "Group",
-      "options": {"label": "People"},
-      "elements": [
-        {"type": "Control", "scope": "#/properties/people"}
-      ]
-    }
-  };
+  });
 
   // Array of arrays
-  static final jsonSchemaArrayOfArrays = {
+  static final jsonSchemaArrayOfArrays = JsonSchema.create({
     "type": "object",
     "properties": {
       "matrix": {
@@ -70,23 +64,10 @@ class ArrayData {
         ]
       }
     }
-  };
+  });
 
-  static final uiSchemaArrayOfArrays = {
-    "version": "2.0",
-    "layout": {
-      "type": "Group",
-      "options": {"label": "Matrix"},
-      "elements": [
-        {"type": "Control", "scope": "#/properties/matrix"}
-      ]
-    }
-  };
-}
-
-class NestedArrayData {
   // Array of objects with nested arrays
-  static final jsonSchemaNestedArray = {
+  static final jsonSchemaNestedArray = JsonSchema.create({
     "type": "object",
     "properties": {
       "groups": {
@@ -110,16 +91,5 @@ class NestedArrayData {
         ]
       }
     }
-  };
-
-  static final uiSchemaNestedArray = {
-    "version": "2.0",
-    "layout": {
-      "type": "Group",
-      "options": {"label": "Groups"},
-      "elements": [
-        {"type": "Control", "scope": "#/properties/groups"}
-      ]
-    }
-  };
+  });
 }

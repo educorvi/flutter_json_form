@@ -15,6 +15,9 @@ class RitaRuleEvaluator {
   bool _disposed = false;
   static final _logger = FormLogger.ritaEvaluator;
 
+  // Results storage (global scope only)
+  final Map<String, bool> _results = {};
+
   RitaRuleEvaluator._(this.jsRuntime);
 
   static RitaRuleEvaluator create() {
@@ -125,7 +128,20 @@ class RitaRuleEvaluator {
       final result = await evaluate(rule.id!, dataJson);
       results[rule.id!] = result;
     }
+    _results.clear();
+    _results.addAll(results);
+
     return results;
+  }
+
+  /// Get cached result for a rule
+  bool? getResult(String ruleId) {
+    return _results[ruleId];
+  }
+
+  /// Clear all results
+  void clearResults() {
+    _results.clear();
   }
 
   Future<void> dispose() async {
@@ -133,16 +149,8 @@ class RitaRuleEvaluator {
     _initialized = false;
     _disposed = true;
     ritaRules.clear();
-    // _ritaCompleter?.completeError('Disposed');
-    // _ritaCompleter = null;
+    _results.clear();
     jsRuntime.clearXhrPendingCalls();
     jsRuntime.dispose();
-    // If this method exists and cleans up timers/resources
   }
-
-  // Future<void> evaluateAll(String dataJson) async {
-  //   _ritaDependencies = await _evaluateAll(dataJson);
-  // }
-
-  // Map<String, bool> get ritaDependencies => _ritaDependencies;
 }

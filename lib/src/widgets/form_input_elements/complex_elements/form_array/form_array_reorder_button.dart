@@ -14,7 +14,9 @@ class FormArrayReorderButton extends StatelessWidget {
     required this.index,
     required this.label,
     required this.canReorder,
+    this.testKey,
   });
+  final Key? testKey;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +27,7 @@ class FormArrayReorderButton extends StatelessWidget {
         child: ReorderableDragStartListener(
           index: index,
           child: FilledButton.tonal(
+            key: testKey,
             onPressed: canReorder ? () {} : null,
             style: FilledButton.styleFrom(
               padding: EdgeInsets.zero,
