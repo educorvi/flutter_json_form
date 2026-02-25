@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_text.dart';

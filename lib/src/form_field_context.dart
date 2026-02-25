@@ -61,7 +61,7 @@ class FormFieldContext {
       type = null;
     }
     placeholder = options?.formattingOptions?.placeholder;
-    enabled = true;
+    enabled = options?.formattingOptions?.disabled == true ? false : true;
   }
 
   /// Factory method to create FormFieldContext from FormContext and form element parameters

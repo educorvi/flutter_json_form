@@ -20,34 +20,35 @@ class LayoutFactory {
 
     switch (item) {
       case ui.Button():
-        return FormButton(button: item);
+        child = FormButton(button: item);
+        break;
       case ui.Buttongroup():
-        return FormButtonGroup(buttonGroup: item);
+        child = FormButtonGroup(buttonGroup: item);
+        break;
       case ui.Control():
-        child = FormControl(
+        return FormControl(
           control: item,
           nestingLevel: nestingLevel,
           isShownFromParent: isShownFromParent,
         );
       case ui.Divider():
         child = FormDivider(divider: item);
+        break;
       case ui.Layout():
         child = FormLayout.fromLayout(
           layout: item,
           nestingLevel: nestingLevel,
           isShownFromParent: isShownFromParent,
         );
+        break;
       case ui.HtmlRenderer():
         child = FormHtml(htmlRenderer: item);
+        break;
     }
 
     // why is this needed? All primitive fields already have showOnWrapper. Maybe we remove the primitive field wrappers or add this logic at a better place since root layout elements don't get show and css logic here
     return Builder(
       builder: (context) {
-        if (child is FormControl) {
-          return child;
-        }
-
         final formContext = FormContext.of(context)!;
         final isVisible = formContext.elementShown(
           showOn: item.showOn,

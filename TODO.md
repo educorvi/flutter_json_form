@@ -1,21 +1,21 @@
 
 # Priority
-- [ ] Array options (addButtonText)
-- [ ] FieldUploadOptions (maxfilesize, displayAsSingleUploadfield, acceptedfiletype)
+- [x] Array options (addButtonText)
+- [x] FieldUploadOptions (maxfilesize, displayAsSingleUploadfield, acceptedfiletype)
 
 
-- [ ] Async creation or check why it takes so long until widget is rendered initially
+- [x] Async creation or check why it takes so long until widget is rendered initially
 
-- [ ] don't render * for required but other image
-- [ ] check for # and not # paths. I think weather the path starts with # or not, it is internally stored without. So the checks in some functions for # should be removed / if this is not possible, every place where a function want to work with a path which has # has to trim it first
-- [ ] check for arrays in arrays and objects, there could still be errors
+- [x] don't render * for required but other image
+- [x] check for # and not # paths. I think weather the path starts with # or not, it is internally stored without. So the checks in some functions for # should be removed / if this is not possible, every place where a function want to work with a path which has # has to trim it first
+- [x] check for arrays in arrays and objects, there could still be errors
 - [x] array elements cant be moved right now
 - [x] strange state management
 - [x] support append text
 - [ ] showOn error: When field is dependent of a value of another field which is not shown, the other field is still shown. But the filed should not be shown
 - [x] Space between fields when they are not shown. There is space rendered which is not needed (workaround, dont use .separate builder, but this should be used, elements which are not shown should just not be rendered)
 - [ ] support simple css parsing to allow small adjustments to the design of e.g. Groups
-- [ ] Support Rendering of form submit, print etc. buttons (and provide a toggle option to render them)
+- [x] Support Rendering of form submit, print etc. buttons (and provide a toggle option to render them)
 
 
 # Theming
@@ -55,9 +55,16 @@
 - forceRequired in ui schema
 
 
-Morgen:
 - showon einheitlich machen. Aktuell vertielt für nicht showon zentral, fpr schowon vertielt auf fieldwrapper, object, array enum usw. Lieber zentrla und schauen ob es geht, parent Is Visible zentral machen.
 - Array und Object Refactoring,
 - forceRequired umsetzen, akutell sollte required mit dme is visible zeug im validotr umgesetzt sein, da forcerequired an einer zentralen Stelle mitaufnehmen
 - Array und Object State management mit initial value, reporting mit on save etc ein für alle mal sauber machen
-- 
+
+
+Open:
+- [ ] showOn error: When field is dependent of a value of another field which is not shown, the other field is still shown. But the filed should not be 
+- [ ] Demo App Custom upload is buggy and cant be cleaned or reloaded with new data when changed
+- [ ] Implement new uiSchema Options: optionFilters, disable button
+- [ ] Implement Josn Schema Validation
+- [ ] Implement custom widget theming (first some parts of the widgets can be set but also whole rendering components like text boxes can be set. Also padding can be set for objects and arrays but also custom elements for rendering)
+- [ ] Run tests faster by first allowing them to run as widget tests by defining the test as references and then calling them in widget and integration tests and also by defining a main function which calls all tests at once so the emulator only has to build once significantly speeding up the test execution

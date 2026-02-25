@@ -101,6 +101,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
   /// The dependencies of the form fields which are dependent on other fields
   Map<String, dynamic> _showOnDependencies = {};
+  Map<String, dynamic>? _processedShowOnValues;
 
   /// The values which will get submitted
   /// They are not the same as the form data as some fields are e.g. not shown and therefore not submitted but should still be stored (_showOnDependencies)
@@ -271,6 +272,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     // Initialize ShowOnDependencies
     await Future.microtask(() {
       _showOnDependencies = initShowOnDependencies(jsonSchemaModel.properties, formData);
+      _refreshProcessedShowOnValues();
       _logger.fine('Initialized showOn dependencies: $_showOnDependencies');
     });
 
@@ -286,9 +288,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     // Initialize Rita rules bundle and evaluate
     await ritaRuleEvaluator.initializeWithBundle();
 
-    final processed = processFormValues(
-      _showOnDependencies,
-    );
+    final processed = _ensureProcessedShowOnValues();
     _logger.fine('Initial Rita payload: $processed');
     await ritaRuleEvaluator.evaluateAll(
       jsonEncode(
@@ -377,6 +377,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
     safeSetState(() {
       _showOnDependencies = initShowOnDependencies(jsonSchemaModel.properties, null);
+      _refreshProcessedShowOnValues();
       ritaRuleEvaluator.clearResults();
       visibilityManager.clearArrayResults();
       resetPatch();
@@ -518,7 +519,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
         checkValueForShowOn: checkValueForShowOn,
         isRequired: (path) => _isRequired(jsonSchemaModel, path),
         getFullFormData: () {
-          final data = processFormValues(_showOnDependencies);
+          final data = _ensureProcessedShowOnValues();
           _logger.finest('getFullFormData payload: $data');
           return data;
         },
@@ -604,9 +605,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
 
     // Evaluate global Rita rules with the updated dependencies
     _logger.finer('Evaluating Rita rules for updated dependencies');
-    final processed = processFormValues(
-      _showOnDependencies,
-    );
+    final processed = _refreshProcessedShowOnValues();
     _logger.finer('Rita payload after value change: $processed');
     await ritaRuleEvaluator.evaluateAll(
       jsonEncode(
@@ -626,8 +625,14 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   /// [path] the path of the object in the json schema
   /// returns the value if it is set, otherwise null
   /// it doesn't matter if the path starts with a # or not
-  dynamic checkValueForShowOn(String path) {
-    return _showOnDependencies[getPathWithProperties(path)];
+  dynamic checkValueForShowOn(String path, {Map<String, int>? selfIndices}) {
+    final normalizedPath = getPathWithProperties(path);
+    final processedValues = _ensureProcessedShowOnValues();
+    return resolveShowOnValue(
+      processedValues,
+      normalizedPath,
+      selfIndices: selfIndices,
+    );
   }
 
   /// Check if an element should be shown based on showOn conditions
@@ -658,7 +663,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
         _logger.finest('Global Rita result for ${showOn.id}: $result');
         return result;
       },
-      checkValueForShowOn: checkValueForShowOn,
+      checkValueForShowOn: (path) => checkValueForShowOn(path, selfIndices: selfIndices),
     );
   }
 
@@ -667,11 +672,9 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   /// [value] the value to set
   /// it doesn't matter if the path starts with a # or not
   void setValueForShowOn(String path, dynamic value) {
-    if (path.startsWith("#")) {
-      _showOnDependencies[path.substring(1)] = value;
-    } else {
-      _showOnDependencies[path] = value;
-    }
+    final normalizedPath = getPathWithProperties(path);
+    _showOnDependencies[normalizedPath] = value;
+    _invalidateProcessedShowOnValues();
   }
 
   /// checks if a field is required
@@ -694,10 +697,23 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     return path.split('/').last;
   }
 
+  Map<String, dynamic> _refreshProcessedShowOnValues() {
+    _processedShowOnValues = processFormValues(_showOnDependencies);
+    return _processedShowOnValues!;
+  }
+
+  Map<String, dynamic> _ensureProcessedShowOnValues() {
+    return _processedShowOnValues ?? _refreshProcessedShowOnValues();
+  }
+
+  void _invalidateProcessedShowOnValues() {
+    _processedShowOnValues = null;
+  }
+
   String _buildRitaPayloadJson(Map<String, int>? selfIndices) {
     final evalData = {
       r"$selfIndices": selfIndices ?? <String, int>{},
-      ...processFormValues(_showOnDependencies),
+      ..._ensureProcessedShowOnValues(),
     };
     return jsonEncode(toEncodable(evalData));
   }

@@ -31,5 +31,7 @@ formatter:
   page_width: 150
 
 analyzer:
+  errors:
+    depend_on_referenced_packages: ignore
   exclude:
     - "**.g.dart"

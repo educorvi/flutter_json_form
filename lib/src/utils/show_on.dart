@@ -1,6 +1,7 @@
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/utils/logger.dart';
 import 'package:flutter_json_forms/src/utils/data/ui_schema_extensions.dart';
+import 'package:flutter_json_forms/src/utils/utils.dart';
 
 bool isElementShown({
   bool? parentIsShown,
@@ -107,4 +108,87 @@ List<ui.ShowOnProperty> collectRitaRules(List<ui.LayoutElement> elements) {
     }
   }
   return rules;
+}
+
+/// Resolves a normalized schema [path] against the provided [processedValues]
+/// map (output of `processFormValues`) while honoring [selfIndices] for array
+/// descendants.
+dynamic resolveShowOnValue(
+  Map<String, dynamic> processedValues,
+  String normalizedPath, {
+  Map<String, int>? selfIndices,
+}) {
+  if (normalizedPath.isEmpty) {
+    return processedValues;
+  }
+
+  final segments = _extractDataPathSegments(normalizedPath, selfIndices: selfIndices);
+  dynamic current = processedValues;
+
+  for (final segment in segments) {
+    if (segment is String) {
+      if (current is Map) {
+        current = current[segment];
+      } else {
+        return null;
+      }
+    } else if (segment is int) {
+      if (current is List && segment >= 0 && segment < current.length) {
+        current = current[segment];
+      } else {
+        return null;
+      }
+    }
+
+    if (current == null) {
+      return null;
+    }
+  }
+
+  return current;
+}
+
+List<dynamic> _extractDataPathSegments(String normalizedPath, {Map<String, int>? selfIndices}) {
+  if (normalizedPath.isEmpty) {
+    return const [];
+  }
+
+  final parts = normalizedPath.split('/');
+  final segments = <dynamic>[];
+  final normalizedIndices = selfIndices == null
+      ? const <String, int>{}
+      : {
+          for (final entry in selfIndices.entries) getPathWithProperties(entry.key): entry.value,
+        };
+
+  String schemaScope = '';
+  for (int i = 0; i < parts.length; i++) {
+    final part = parts[i];
+    if (part.isEmpty) continue;
+
+    if (part == 'properties') {
+      if (i + 1 < parts.length) {
+        final propertyName = parts[++i];
+        schemaScope = '$schemaScope/properties/$propertyName';
+        segments.add(propertyName);
+      }
+    } else if (part == 'items') {
+      int? index;
+      if (i + 1 < parts.length) {
+        index = int.tryParse(parts[i + 1]);
+        if (index != null) {
+          i++;
+        }
+      }
+
+      index ??= normalizedIndices[schemaScope];
+      if (index != null) {
+        segments.add(index);
+      }
+
+      schemaScope = '$schemaScope/items';
+    }
+  }
+
+  return segments;
 }

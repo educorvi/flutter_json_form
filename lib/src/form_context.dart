@@ -11,7 +11,7 @@ class FormContext extends InheritedWidget {
   final JsonSchema jsonSchemaModel;
   final RitaRuleEvaluator ritaEvaluator;
   final Function(String, dynamic) setValueForShowOn;
-  final Function(String) checkValueForShowOn;
+  final dynamic Function(String path, {Map<String, int>? selfIndices}) checkValueForShowOn;
   final Function(String) isRequired;
   final Map<String, dynamic> Function()? getFullFormData;
   final Function(String, dynamic) onFormValueSaved;
