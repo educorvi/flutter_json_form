@@ -1,6 +1,7 @@
 import 'package:json_schema/json_schema.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
-import '../../../utils/test_utils.dart';
+
+import '../../utils/test_utils.dart';
 
 class UiSchemaLayoutData {
   static final jsonSchema = JsonSchema.create({

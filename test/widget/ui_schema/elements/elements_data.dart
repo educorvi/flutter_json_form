@@ -1,7 +1,7 @@
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:json_schema/json_schema.dart';
 
-import '../../../utils/test_utils.dart';
+import '../../utils/test_utils.dart';
 
 class UiSchemaElementsData {
   static const _htmlHeadline = 'Welcome to the layout elements demo';

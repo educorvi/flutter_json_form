@@ -8,6 +8,10 @@ import 'dart:convert';
 
 /// Common testing utilities for Flutter JSON Forms integration tests
 
+void ensureWidgetTestBinding() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+}
+
 Future<void> pumpForm(WidgetTester tester,
     {required JsonSchema jsonSchema,
     ui.UiSchema? uiSchema,
@@ -32,7 +36,25 @@ Future<void> pumpForm(WidgetTester tester,
     ),
   ));
 
+  await tester.pump();
+  await _waitForFormToRender(tester);
   await tester.pumpAndSettle();
+}
+
+Future<void> _waitForFormToRender(WidgetTester tester, {Duration timeout = const Duration(seconds: 10)}) async {
+  final finder = find.byType(FlutterJsonForm);
+  expect(finder, findsOneWidget, reason: 'FlutterJsonForm should be present in the widget tree.');
+  final step = const Duration(milliseconds: 50);
+  var elapsed = Duration.zero;
+  while (elapsed < timeout) {
+    final state = tester.state<FlutterJsonFormState>(finder);
+    if (!state.isLoading) {
+      return;
+    }
+    await tester.pump(step);
+    elapsed += step;
+  }
+  throw FlutterError('Timed out waiting for FlutterJsonForm to finish loading after ${timeout.inSeconds}s');
 }
 
 /// Taps a form field, enters text, and waits for the widget tree to settle.

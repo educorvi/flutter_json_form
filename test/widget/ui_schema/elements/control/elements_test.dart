@@ -11,14 +11,13 @@ import 'package:flutter_json_forms/src/widgets/form_input_elements/primitive_ele
 import 'package:flutter_json_forms/src/widgets/form_input_elements/primitive_elements/form_segmented_control_field.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../../utils/test_utils.dart';
+import '../../../utils/test_utils.dart';
 import 'elements_data.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  ensureWidgetTestBinding();
 
   group('Enum option controls', () {
     testWidgets('enum titles replace option labels', (tester) async {
@@ -367,6 +366,7 @@ Future<void> _setArraySwitchValue(WidgetTester tester, String arrayProperty, Str
   }
 
   final switchFinder = find.descendant(of: controlFinder, matching: find.byType(Switch));
+  await tester.ensureVisible(switchFinder);
   await tester.tap(switchFinder);
   await tester.pumpAndSettle();
   expect(fieldState.value, value);

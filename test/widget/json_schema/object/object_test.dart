@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../utils/test_utils.dart';
 import 'object_data.dart';
-import '../../../utils/test_utils.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  ensureWidgetTestBinding();
 
   group('Object Form Tests', () {
     testWidgets('Object is rendered correctly', (tester) async {

@@ -1,7 +1,7 @@
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:json_schema/json_schema.dart';
 
-import '../../../utils/test_utils.dart';
+import '../../utils/test_utils.dart';
 
 class WizardTestData {
   static const stepTitles = ['Personal Info', 'Additional Details', 'Review & Submit'];

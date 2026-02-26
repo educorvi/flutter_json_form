@@ -1,6 +1,6 @@
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 
-import '../../../../../utils/test_utils.dart';
+import '../../../../utils/test_utils.dart';
 
 class UiSchemaControlObjectData {
   // UI schema referencing the whole object

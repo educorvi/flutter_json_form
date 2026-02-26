@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 
-import '../../../utils/test_utils.dart';
+import '../../utils/test_utils.dart';
 import 'elements_data.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  ensureWidgetTestBinding();
 
   group('UI Schema Element Tests', () {
     testWidgets('HTML renderer renders markup and respects showOn rules', (tester) async {

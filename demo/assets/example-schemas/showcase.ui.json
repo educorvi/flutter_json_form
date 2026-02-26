@@ -2,6 +2,10 @@
   "$schema": "../../schemas/ui/ui.schema.json",
   "version": "2.0",
   "layout": {
+    "options": {
+      "label": "Showcase Form",
+      "description": "This form shows various functions and features of Flutter Json Forms."
+    },
     "type": "VerticalLayout",
     "elements": [
       {

@@ -1,12 +1,12 @@
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
-import '../../utils/test_utils.dart';
+
+import '../utils/test_utils.dart';
 import 'elements_data.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  ensureWidgetTestBinding();
 
   group('Primitive Json Schema Elements Form Tests', () {
     testWidgets('Primitive json schema elements are rendered correctly', (tester) async {

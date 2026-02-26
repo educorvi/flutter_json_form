@@ -1,11 +1,10 @@
-import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'base_data.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import '../../utils/test_utils.dart';
+import '../utils/test_utils.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  ensureWidgetTestBinding();
 
   group('Base Form Test', () {
     group('Json Schema Test', () {

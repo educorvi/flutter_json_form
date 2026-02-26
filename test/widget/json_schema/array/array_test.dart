@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../../../utils/locators/array_locators.dart';
-import 'array_data.dart';
-import '../../../utils/test_utils.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import '../../utils/locators/array_locators.dart';
+import '../../utils/test_utils.dart';
+import 'array_data.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  ensureWidgetTestBinding();
 
   group('Array Form Tests', () {
     testWidgets('Simple array is rendered and default value is present', (tester) async {
@@ -105,6 +104,9 @@ void main() {
 
       // THEN: Should render people array with one person from default value
       expect(find.formFieldText('People'), findsOneWidget);
+      final formBuilderState = tester.state<FormBuilderState>(find.byType(FormBuilder));
+      expect(formBuilderState.instantValue[scopePath(['people', 0, 'firstName'])], 'John');
+      expect(formBuilderState.instantValue[scopePath(['people', 0, 'lastName'])], 'Doe');
       expect(find.text('John'), findsOneWidget);
       expect(find.text('Doe'), findsOneWidget);
 

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 
-import '../../../utils/test_utils.dart';
+import '../../utils/test_utils.dart';
 import 'wizard_data.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  ensureWidgetTestBinding();
 
   group('Wizard layout', () {
     testWidgets('renders wizard and shows the first step by default', (tester) async {

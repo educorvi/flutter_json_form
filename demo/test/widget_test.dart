@@ -6,7 +6,7 @@ import 'package:flutter_json_forms_demo/main.dart';
 void main() {
   group('Flutter Json Forms Demo App', () {
     testWidgets('Showcase is present in the form selector dropdown', (WidgetTester tester) async {
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(const FlutterJsonFormsDemo());
       // Find the dropdown menu
       final dropdownFinder = find.byType(DropdownMenu<FormFile>);
       expect(dropdownFinder, findsOneWidget);
@@ -21,7 +21,7 @@ void main() {
     });
 
     testWidgets('Form selector dropdown works and can select another form', (WidgetTester tester) async {
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(const FlutterJsonFormsDemo());
       // Find the form selector dropdown
       final dropdownFinder = find.byType(DropdownMenu<FormFile>);
       expect(dropdownFinder, findsOneWidget);
@@ -39,7 +39,7 @@ void main() {
     });
 
     testWidgets('Custom file upload buttons for JSON and UI schema are present', (WidgetTester tester) async {
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(const FlutterJsonFormsDemo());
       // Check for custom file upload buttons
       expect(find.text('JSON Schema'), findsOneWidget);
       expect(find.text('UI Schema'), findsOneWidget);

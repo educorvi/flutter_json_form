@@ -1,0 +1,329 @@
+name: Demo App
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  pull_request:
+    branches:
+      - "**"
+
+env:
+  PATH_TO_APP: demo
+  FLUTTER_VERSION: 3.38.3
+
+jobs:
+  #############################################
+  # Linting and formatting for demo and package
+  ##############################################
+  lint-demo:
+    name: Lint Demo App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Run flutter analyze
+        run: flutter analyze
+        working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Run flutter format check
+        run: dart format --set-exit-if-changed .
+        working-directory: ${{ env.PATH_TO_APP }}
+
+  lint-package:
+    name: Quality Checks Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Lint Package (Flutter Analyze)
+        run: make lint
+        working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Format Package (Dart Format)
+        run: make format
+        working-directory: ${{ env.PATH_TO_APP }}
+
+  #############################################
+  # Tests for demo and package
+  ##############################################
+  integration-test-ios:
+    if: false
+    name: "Integration Tests iOS (Demo and Package)"
+    needs: [lint-package, lint-demo]
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: futureware-tech/simulator-action@v3
+        with:
+          model: "iPhone 16"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_APP }}
+      - name: Install junitreport converter
+        run: |
+          dart pub global activate junitreport
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+        working-directory: ${{ env.PATH_TO_APP }}
+      - name: Run demo integration tests (iOS) with coverage
+        working-directory: .
+        run: make test-demo-integration-coverage
+      - name: Upload Integration Test Coverage (iOS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-ios-coverage
+          path: demo/coverage/integration/lcov.info
+      - name: Upload Integration Test Results (iOS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-ios-results
+          path: demo/build/test-results/integration/junit.xml
+      - name: Publish Integration Test Results (iOS)
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: demo/build/test-results/integration/junit.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  integration-test-android:
+    if: false
+    name: "Integration Tests Android (Demo and Package)"
+    runs-on: ubuntu-latest
+    needs: [lint-package, lint-demo]
+    steps:
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "11"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+
+      - name: Install Android SDK
+        uses: malinskiy/action-android/install-sdk@release/0.1.2
+      - run: echo $ANDROID_HOME
+      - run: sdkmanager --install "build-tools;30.0.3"
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_APP }}
+      - name: Install junitreport converter
+        run: |
+          dart pub global activate junitreport
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+        working-directory: ${{ env.PATH_TO_APP }}
+      - name: Run integration tests (Android)
+        uses: malinskiy/action-android/emulator-run-cmd@release/0.1.2
+        with:
+          cmd: |
+            cd $GITHUB_WORKSPACE
+            make test-demo-integration-coverage
+          api: 31
+          cmdOptions: -no-snapshot-save -noaudio -no-boot-anim -cores 2 -memory 3072 -no-window
+          tag: google_apis
+          abi: x86_64
+      - name: Upload Integration Test Coverage (Android)
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-android-coverage
+          path: demo/coverage/integration/lcov.info
+      - name: Upload Integration Test Results (Android)
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-android-results
+          path: demo/build/test-results/integration/junit.xml
+      - name: Publish Integration Test Results (Android)
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: demo/build/test-results/integration/junit.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # (cd $ {{ env.PATH_TO_APP }}; flutter test demo/integration_test/demo_test.dart)
+
+  integration-test-web:
+    name: "Integration Tests Web (Demo)"
+    needs: lint-demo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+
+      - name: Install package dependencies
+        run: flutter pub get
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Install ChromeDriver
+        uses: browser-actions/setup-chrome@v2
+        with:
+          install-chromedriver: true
+      - name: Verify ChromeDriver install
+        run: chromedriver --version
+
+      # - name: Install junitreport converter
+      #   run: |
+      #     dart pub global activate junitreport
+      #     echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+      #   working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Run demo integration test (Web)
+        run: |
+          chromedriver --port=4444 &
+          flutter drive --driver=test_driver/integration_test.dart --target=integration_test/tests/demo_test.dart -d web-server --dart-define=CI=true | tee output.log
+          # We have to check the output for failed tests matching the string "[E]"
+          output=$(<output.log)
+          if [[ "$output" =~ \[E\] ]]; then
+          # You will see "All tests passed." in the logs even when tests failed.
+          echo "All tests did not pass. Please check the logs for more information."
+          exit 1
+          fi
+        working-directory: ${{ env.PATH_TO_APP }}
+
+      # - name: Upload Integration Test Coverage (Web)
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: integration-web-coverage
+      #     path: demo/coverage/integration_web/lcov.info
+
+      - name: Upload Integration Test Results (Web)
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-web-results
+          path: demo/build/test-results/integration_web/junit.xml
+
+      - name: Publish Integration Test Results (Web)
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: demo/build/test-results/integration_web/junit.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-web:
+    name: "Build Web"
+    needs: integration-test-web
+    # Only deploy on version tags
+    # if : startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Build app for web
+        run: flutter build web --base-href "${{ steps.pages.outputs.base_path }}/"
+        working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.PATH_TO_APP }}/build/web
+
+  ######################################################
+  # Release Package and deploy demo app to GitHub Pages
+  ######################################################
+
+  # deploy demo app to GitHub Pages after successful tests and build
+  deploy-demo:
+    name: Deploy Demo App to GitHub Pages
+    needs:
+      [
+        build-web,
+        integration-test-web,
+        integration-test-android,
+        integration-test-ios,
+      ]
+    # Only deploy when main branch builds succeed
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Publish to pub.dev only on tag pushes after successful tests
+  publish:
+    name: Publish Package to pub.dev
+    needs: [
+        integration-test-web,
+        integration-test-android,
+        integration-test-ios,
+      ] # Only run after lint, unit test, and widget test jobs succeed
+    if: startsWith(github.ref, 'refs/tags/v') # Only run on version tags
+    permissions:
+      id-token: write # Required for authentication using OIDC
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    # with:
+    #   working-directory: .
