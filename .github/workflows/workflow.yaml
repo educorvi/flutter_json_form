@@ -194,7 +194,7 @@ jobs:
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
       - name: Run demo integration tests (iOS) with coverage
         working-directory: .
-        run: make test-demo-integration-coverage
+        run: make test-integration-coverage
       - name: Upload Integration Test Coverage (iOS)
         uses: actions/upload-artifact@v4
         with:
@@ -206,7 +206,7 @@ jobs:
           name: integration-ios-results
           path: demo/build/test-results/integration/junit.xml
       - name: Publish Integration Test Results (iOS)
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action/macos@v2
         with:
           files: demo/build/test-results/integration/junit.xml
         env:
@@ -241,7 +241,7 @@ jobs:
           cache: true
 
       - name: Install Android SDK
-        uses: malinskiy/action-android/install-sdk@release/0.1.2
+        uses: malinskiy/action-android/install-sdk@release/0.1.7
       - run: echo $ANDROID_HOME
       - run: sdkmanager --install "build-tools;30.0.3"
       - name: Install package dependencies
@@ -257,9 +257,7 @@ jobs:
       - name: Run integration tests (Android)
         uses: malinskiy/action-android/emulator-run-cmd@release/0.1.2
         with:
-          cmd: |
-            cd $GITHUB_WORKSPACE
-            make test-demo-integration-coverage
+          cmd: make test-integration-coverage
           api: 31
           cmdOptions: -no-snapshot-save -noaudio -no-boot-anim -cores 2 -memory 3072 -no-window
           tag: google_apis
@@ -327,6 +325,7 @@ jobs:
           echo "All tests did not pass. Please check the logs for more information."
           exit 1
           fi
+        working-directory: ${{ env.PATH_TO_DEMO }}
 
       # - name: Upload Integration Test Coverage (Web)
       #   uses: actions/upload-artifact@v4
