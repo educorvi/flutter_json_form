@@ -1,4 +1,4 @@
-name: Demo App
+name: Workflow
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
       - "**"
 
 env:
-  PATH_TO_APP: demo
+  PATH_TO_DEMO: demo
   FLUTTER_VERSION: 3.38.3
 
 jobs:
@@ -32,17 +32,15 @@ jobs:
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
 
-      - name: Install dependencies
+      - name: Install demo dependencies
         run: flutter pub get
-        working-directory: ${{ env.PATH_TO_APP }}
+        working-directory: ${{ env.PATH_TO_DEMO }}
 
       - name: Run flutter analyze
-        run: flutter analyze
-        working-directory: ${{ env.PATH_TO_APP }}
+        run: make lint-demo
 
       - name: Run flutter format check
-        run: dart format --set-exit-if-changed .
-        working-directory: ${{ env.PATH_TO_APP }}
+        run: dart format-demo
 
   lint-package:
     name: Quality Checks Package
@@ -58,17 +56,14 @@ jobs:
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
 
-      - name: Install dependencies
+      - name: Install package dependencies
         run: flutter pub get
-        working-directory: ${{ env.PATH_TO_APP }}
 
       - name: Lint Package (Flutter Analyze)
         run: make lint
-        working-directory: ${{ env.PATH_TO_APP }}
 
       - name: Format Package (Dart Format)
         run: make format
-        working-directory: ${{ env.PATH_TO_APP }}
 
   #############################################
   # Tests for demo and package
@@ -88,14 +83,16 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
-      - name: Install dependencies
+      - name: Install package dependencies
         run: flutter pub get
-        working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Install demo dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_DEMO }}
       - name: Install junitreport converter
         run: |
           dart pub global activate junitreport
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-        working-directory: ${{ env.PATH_TO_APP }}
       - name: Run demo integration tests (iOS) with coverage
         working-directory: .
         run: make test-demo-integration-coverage
@@ -148,14 +145,16 @@ jobs:
         uses: malinskiy/action-android/install-sdk@release/0.1.2
       - run: echo $ANDROID_HOME
       - run: sdkmanager --install "build-tools;30.0.3"
-      - name: Install dependencies
+      - name: Install package dependencies
         run: flutter pub get
-        working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Install demo dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_DEMO }}
       - name: Install junitreport converter
         run: |
           dart pub global activate junitreport
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-        working-directory: ${{ env.PATH_TO_APP }}
       - name: Run integration tests (Android)
         uses: malinskiy/action-android/emulator-run-cmd@release/0.1.2
         with:
@@ -202,9 +201,9 @@ jobs:
       - name: Install package dependencies
         run: flutter pub get
 
-      - name: Install dependencies
+      - name: Install demo dependencies
         run: flutter pub get
-        working-directory: ${{ env.PATH_TO_APP }}
+        working-directory: ${{ env.PATH_TO_DEMO }}
 
       - name: Install ChromeDriver
         uses: browser-actions/setup-chrome@v2
@@ -217,7 +216,6 @@ jobs:
       #   run: |
       #     dart pub global activate junitreport
       #     echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-      #   working-directory: ${{ env.PATH_TO_APP }}
 
       - name: Run demo integration test (Web)
         run: |
@@ -230,7 +228,6 @@ jobs:
           echo "All tests did not pass. Please check the logs for more information."
           exit 1
           fi
-        working-directory: ${{ env.PATH_TO_APP }}
 
       # - name: Upload Integration Test Coverage (Web)
       #   uses: actions/upload-artifact@v4
@@ -272,18 +269,21 @@ jobs:
         id: pages
         uses: actions/configure-pages@v5
 
-      - name: Install dependencies
+      - name: Install package dependencies
         run: flutter pub get
-        working-directory: ${{ env.PATH_TO_APP }}
+
+      - name: Install demo dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_DEMO }}
 
       - name: Build app for web
         run: flutter build web --base-href "${{ steps.pages.outputs.base_path }}/"
-        working-directory: ${{ env.PATH_TO_APP }}
+        working-directory: ${{ env.PATH_TO_DEMO }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ env.PATH_TO_APP }}/build/web
+          path: ${{ env.PATH_TO_DEMO }}/build/web
 
   ######################################################
   # Release Package and deploy demo app to GitHub Pages
