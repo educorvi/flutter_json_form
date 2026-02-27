@@ -241,7 +241,7 @@ jobs:
           cache: true
 
       - name: Install Android SDK
-        uses: malinskiy/action-android/install-sdk@release/0.1.7
+        uses: malinskiy/action-android/install-sdk@release/0.1.2
       - run: echo $ANDROID_HOME
       - run: sdkmanager --install "build-tools;30.0.3"
       - name: Install package dependencies
