@@ -110,12 +110,12 @@ jobs:
           name: unit-test-coverage
           path: coverage/unit/lcov.info
 
-      - name: Upload Unit Test Console Logs
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: unit-test-console-logs
-          path: build/test-results/unit/test-output.log
+      # - name: Upload Unit Test Console Logs
+      #   uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: unit-test-console-logs
+      #     path: build/test-results/unit/test-output.log
 
       - name: Upload Unit Test Results
         uses: actions/upload-artifact@v4
@@ -192,12 +192,12 @@ jobs:
           name: widget-test-coverage
           path: coverage/widget/lcov.info
 
-      - name: Upload Widget Test Console Logs
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: widget-test-console-logs
-          path: build/test-results/widget/test-output.log
+      # - name: Upload Widget Test Console Logs
+      #   uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: widget-test-console-logs
+      #     path: build/test-results/widget/test-output.log
 
       - name: Upload Widget Test Results
         uses: actions/upload-artifact@v4
@@ -248,19 +248,19 @@ jobs:
 
       - name: Run integration tests (iOS) with coverage
         working-directory: .
-        run: make test-integration-coverage
+        run: make test-integration
       - name: Upload Integration Test Coverage (iOS)
         uses: actions/upload-artifact@v4
         with:
           name: integration-ios-coverage
           path: demo/coverage/integration/lcov.info
 
-      - name: Upload Integration Test Console Logs (iOS)
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: integration-ios-console-logs
-          path: demo/build/test-results/integration/console-output.log
+      # - name: Upload Integration Test Console Logs (iOS)
+      #   uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: integration-ios-console-logs
+      #     path: demo/build/test-results/integration/console-output.log
 
       - name: Upload Integration Test Results (iOS)
         uses: actions/upload-artifact@v4
@@ -332,7 +332,7 @@ jobs:
       - name: Run integration tests (Android)
         uses: malinskiy/action-android/emulator-run-cmd@release/0.1.2
         with:
-          cmd: make test-integration-coverage
+          cmd: make test-integration
           api: 31
           cmdOptions: -no-snapshot-save -noaudio -no-boot-anim -cores 2 -memory 3072 -no-window
           tag: google_apis
@@ -344,12 +344,12 @@ jobs:
           name: integration-android-coverage
           path: demo/coverage/integration/lcov.info
 
-      - name: Upload Integration Test Console Logs (Android)
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: integration-android-console-logs
-          path: demo/build/test-results/integration/console-output.log
+      # - name: Upload Integration Test Console Logs (Android)
+      #   uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: integration-android-console-logs
+      #     path: demo/build/test-results/integration/console-output.log
 
       - name: Upload Integration Test Results (Android)
         uses: actions/upload-artifact@v4
@@ -389,6 +389,10 @@ jobs:
 
       - name: Install demo dependencies
         run: flutter pub get
+        working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Generate localizations for demo
+        run: flutter gen-l10n
         working-directory: ${{ env.PATH_TO_DEMO }}
 
       - name: Install ChromeDriver

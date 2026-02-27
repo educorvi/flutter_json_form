@@ -9,6 +9,13 @@ SHELL := /bin/bash
 	test-demo-integration test-demo-integration-coverage \
 	test-package-integration test-package-integration-coverage
 
+install:
+	flutter pub get
+	cd demo && flutter pub get && cd -
+
+run-demo:
+	cd demo && flutter run && cd -
+
 # Formatting
 format-package:
 	dart format --set-exit-if-changed .
@@ -38,7 +45,6 @@ test-package-unit-coverage:
 	@if [ "$$CI" = "true" ]; then \
 	  set -o pipefail -x; \
 	  flutter test --coverage --coverage-path=coverage/unit/lcov.info --machine test/unit \
-	    | tee build/test-results/unit/test-output.log \
 	    | tojunit --output build/test-results/unit/junit.xml; \
 	else \
 	  flutter test --coverage --coverage-path=coverage/unit/lcov.info test/unit; \
@@ -68,7 +74,6 @@ test-package-widget-coverage:
 	if [ "$$CI" = "true" ]; then \
 	  set -o pipefail -x; \
 	  flutter test --coverage --coverage-path=coverage/widget/lcov.info --machine test/widget \
-	    | tee build/test-results/widget/test-output.log \
 	    | tojunit --output build/test-results/widget/junit.xml; \
 	else \
 	  flutter test --coverage --coverage-path=coverage/widget/lcov.info test/widget; \
@@ -90,7 +95,6 @@ test-demo-integration-coverage:
 	  if [ "$$CI" = "true" ]; then \
 	    set -o pipefail -x; \
 	    flutter test --coverage --coverage-path=coverage/integration/lcov.info --machine integration_test/tests/demo_test.dart --dart-define=CI=true \
-	      | tee build/test-results/integration/test-output.log \
 	      | tojunit --output build/test-results/integration/junit.xml; \
 	  else \
 	    flutter test --coverage --coverage-path=coverage/integration/lcov.info integration_test/tests/demo_test.dart --dart-define=CI=true; \
@@ -106,7 +110,6 @@ test-package-integration-coverage:
 	  if [ "$$CI" = "true" ]; then \
 	    set -o pipefail -x; \
 	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info --machine integration_test/tests/widget_suite_test.dart \
-	      | tee build/test-results/package_integration/test-output.log \
 	      | tojunit --output build/test-results/package_integration/junit.xml; \
 	  else \
 	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info integration_test/tests/widget_suite_test.dart; \
@@ -121,7 +124,6 @@ test-integration-coverage:
 	  if [ "$$CI" = "true" ]; then \
 	    set -o pipefail -x; \
 	    flutter test --coverage --coverage-path=coverage/integration/lcov.info --machine integration_test/tests --dart-define=CI=true \
-	      | tee build/test-results/integration/test-output.log \
 	      | tojunit --output build/test-results/integration/junit.xml; \
 	  else \
 	    flutter test --coverage --coverage-path=coverage/integration/lcov.info integration_test/tests --dart-define=CI=true; \
