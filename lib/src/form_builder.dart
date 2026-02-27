@@ -181,17 +181,6 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
       _logger.info('Form initialization completed successfully');
     } catch (e, stackTrace) {
       _logger.severe('Form initialization failed', e, stackTrace);
-      // Also print to ensure it shows in CI logs
-      // ignore: avoid_print
-      print('══════════════════════════════════════════════════════════════');
-      // ignore: avoid_print
-      print('FLUTTER JSON FORM INITIALIZATION FAILED');
-      // ignore: avoid_print
-      print('Error: $e');
-      // ignore: avoid_print
-      print('Stack trace: $stackTrace');
-      // ignore: avoid_print
-      print('══════════════════════════════════════════════════════════════');
 
       safeSetState(() {
         _initializationError = e.toString();

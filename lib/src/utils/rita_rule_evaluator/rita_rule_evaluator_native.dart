@@ -33,9 +33,9 @@ class RitaRuleEvaluator {
 
     _logger.fine('Initializing Rita evaluator with JS bundle');
     try {
-      _logger.finer('Loading Rita JS bundle from $jsBundlePath');
+      _logger.finest('Loading Rita JS bundle from $jsBundlePath');
       final jsBundle = await _loadJsBundle();
-      _logger.finer('Loaded Rita JS bundle (${jsBundle.length} chars)');
+      _logger.finest('Loaded Rita JS bundle (${jsBundle.length} chars)');
       jsRuntime.evaluate(jsBundle);
       _logger.fine('Rita JS bundle loaded and evaluated');
 
@@ -44,7 +44,7 @@ class RitaRuleEvaluator {
         _ritaCompleter?.complete(args);
       });
 
-      _logger.finer('Registering Rita helper functions in JS runtime');
+      _logger.finest('Registering Rita helper functions in JS runtime');
 
       String jsEval = '''
         var ritaEvaluators = {};
@@ -72,14 +72,14 @@ class RitaRuleEvaluator {
         }
       ''';
       jsRuntime.evaluate(jsEval);
-      _logger.finer('Helper functions registered');
+      _logger.finest('Helper functions registered');
 
       final rulesCleaned = <Map<String, dynamic>>[];
       for (final rule in ritaRules.values) {
         rulesCleaned.add({"id": rule.id, "comment": rule.comment ?? "", "rule": rule.rule});
       }
       final rita = jsonEncode({"\$schema": "../../src/schema/schema.json", "rules": rulesCleaned});
-      _logger.finer('Registering ${rulesCleaned.length} Rita rules');
+      _logger.finest('Registering ${rulesCleaned.length} Rita rules');
       jsRuntime.evaluate('registerRitaRules($rita);');
 
       _logger.fine('Rita evaluator initialized with ${ritaRules.length} rules');
@@ -173,9 +173,9 @@ class RitaRuleEvaluator {
     Exception? lastException;
     for (final path in pathsToTry) {
       try {
-        _logger.fine('Attempting to load Rita bundle from: $path');
+        _logger.finest('Attempting to load Rita bundle from: $path');
         final bundle = await rootBundle.loadString(path).timeout(const Duration(seconds: 2));
-        _logger.fine('✓ Successfully loaded Rita bundle from: $path (${bundle.length} chars)');
+        _logger.finest('✓ Successfully loaded Rita bundle from: $path (${bundle.length} chars)');
         return bundle;
       } catch (e) {
         lastException = e is Exception ? e : Exception(e.toString());
@@ -186,9 +186,9 @@ class RitaRuleEvaluator {
 
     // If all rootBundle attempts failed, try file system as last resort (for local dev)
     try {
-      _logger.fine('Attempting file system fallback');
+      _logger.finest('Attempting file system fallback');
       final result = await _loadBundleFromFile();
-      _logger.fine('✓ Loaded from file system');
+      _logger.finest('✓ Loaded from file system');
       return result;
     } catch (e) {
       _logger.severe(
@@ -206,9 +206,9 @@ class RitaRuleEvaluator {
   Future<String> _loadBundleFromFile() async {
     final localPath = jsBundlePath.replaceFirst('packages/flutter_json_forms/', '');
     final file = File(localPath);
-    _logger.finer('Attempting Rita bundle file fallback at ${file.path}');
+    _logger.finest('Attempting Rita bundle file fallback at ${file.path}');
     if (file.existsSync()) {
-      _logger.fine('Loaded Rita bundle from file system fallback at ${file.path}');
+      _logger.finest('Loaded Rita bundle from file system fallback at ${file.path}');
       return file.readAsStringSync();
     }
     throw Exception('File not found at ${file.path}');
