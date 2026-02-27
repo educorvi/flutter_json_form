@@ -1,5 +1,7 @@
 # Simple Flutter helper targets
 
+SHELL := /bin/bash
+
 .PHONY: format-package format-demo format-all lint-package lint-demo lint-all \
 	test-package-unit test-package-unit-coverage \
 	test-package-widget test-package-widget-coverage \
@@ -34,9 +36,10 @@ test-package-unit:
 test-package-unit-coverage:
 	mkdir -p coverage/unit build/test-results/unit
 	@if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
-	  bash -o pipefail -c "flutter test --coverage --coverage-path=coverage/unit/lcov.info --machine test/unit \
+	  set -o pipefail -x; \
+	  flutter test --coverage --coverage-path=coverage/unit/lcov.info --machine test/unit \
 	    | tee build/test-results/unit/flutter.json \
-	    | tojunit --output build/test-results/unit/junit.xml"; \
+	    | tojunit --output build/test-results/unit/junit.xml; \
 	else \
 	  flutter test --coverage --coverage-path=coverage/unit/lcov.info test/unit; \
 	fi
@@ -47,9 +50,10 @@ test-package-widget:
 test-package-widget-coverage:
 	mkdir -p coverage/widget build/test-results/widget
 	@if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
-	  bash -o pipefail -c "flutter test --coverage --coverage-path=coverage/widget/lcov.info --machine test/widget \
+	  set -o pipefail -x; \
+	  flutter test --coverage --coverage-path=coverage/widget/lcov.info --machine test/widget \
 	    | tee build/test-results/widget/flutter.json \
-	    | tojunit --output build/test-results/widget/junit.xml"; \
+	    | tojunit --output build/test-results/widget/junit.xml; \
 	else \
 	  flutter test --coverage --coverage-path=coverage/widget/lcov.info test/widget; \
 	fi
@@ -68,9 +72,10 @@ test-demo-integration-coverage:
 	cd demo && \
 	  mkdir -p coverage/integration build/test-results/integration && \
 	  if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
-	    bash -o pipefail -c "flutter test --coverage --coverage-path=coverage/integration/lcov.info --machine integration_test/tests/demo_test.dart --dart-define=CI=true \
+	    set -o pipefail -x; \
+	    flutter test --coverage --coverage-path=coverage/integration/lcov.info --machine integration_test/tests/demo_test.dart --dart-define=CI=true \
 	      | tee build/test-results/integration/flutter.json \
-	      | tojunit --output build/test-results/integration/junit.xml"; \
+	      | tojunit --output build/test-results/integration/junit.xml; \
 	  else \
 	    flutter test --coverage --coverage-path=coverage/integration/lcov.info integration_test/tests/demo_test.dart --dart-define=CI=true; \
 	  fi && cd -
@@ -83,9 +88,10 @@ test-package-integration-coverage:
 	cd demo && \
 	  mkdir -p coverage/package_integration build/test-results/package_integration && \
 	  if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
-	    bash -o pipefail -c "flutter test --coverage --coverage-path=coverage/package_integration/lcov.info --machine integration_test/tests/widget_suite_test.dart \
+	    set -o pipefail -x; \
+	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info --machine integration_test/tests/widget_suite_test.dart \
 	      | tee build/test-results/package_integration/flutter.json \
-	      | tojunit --output build/test-results/package_integration/junit.xml"; \
+	      | tojunit --output build/test-results/package_integration/junit.xml; \
 	  else \
 	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info integration_test/tests/widget_suite_test.dart; \
 	  fi && cd -
@@ -94,9 +100,10 @@ test-integration-coverage:
 	cd demo && \
 	  mkdir -p coverage/integration build/test-results/integration && \
 	  if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
-	    bash -o pipefail -c "flutter test --coverage --coverage-path=coverage/integration/lcov.info --machine integration_test/tests --dart-define=CI=true \
+	    set -o pipefail -x; \
+	    flutter test --coverage --coverage-path=coverage/integration/lcov.info --machine integration_test/tests --dart-define=CI=true \
 	      | tee build/test-results/integration/flutter.json \
-	      | tojunit --output build/test-results/integration/junit.xml"; \
+	      | tojunit --output build/test-results/integration/junit.xml; \
 	  else \
 	    flutter test --coverage --coverage-path=coverage/integration/lcov.info integration_test/tests --dart-define=CI=true; \
 	  fi && cd -
