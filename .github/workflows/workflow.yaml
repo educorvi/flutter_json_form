@@ -168,12 +168,12 @@ jobs:
       - name: Run widget tests (no coverage)
         run: make test-package-widget
         env:
-          LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/bundle/lib/libquickjs_c_bridge_plugin.so"
+          LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
 
       - name: Run widget tests with coverage
         run: make test-package-widget-coverage
         env:
-          LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/bundle/lib/libquickjs_c_bridge_plugin.so"
+          LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
 
       - name: Upload Widget Test Coverage
         uses: actions/upload-artifact@v4
