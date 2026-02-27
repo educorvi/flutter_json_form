@@ -391,8 +391,19 @@ jobs:
         run: flutter pub get
         working-directory: ${{ env.PATH_TO_DEMO }}
 
-      - name: Generate localizations for demo
+      - name: Generate demo localizations
         run: flutter gen-l10n
+        working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Verify demo localizations
+        run: |
+          set -euo pipefail
+          echo "Listing generated localization files"
+          ls -la lib/l10n
+          echo "Showing first 40 lines of app_localizations.dart"
+          head -n 40 lib/l10n/app_localizations.dart || true
+          echo "File checksum (helps detect stale cache)"
+          sha256sum lib/l10n/app_localizations.dart
         working-directory: ${{ env.PATH_TO_DEMO }}
 
       - name: Install ChromeDriver
@@ -409,14 +420,36 @@ jobs:
 
       - name: Run demo integration test (Web)
         run: |
+          set -o pipefail
+
+          echo "Flutter version:"
+          flutter --version
+          echo "Configured devices:"
+          flutter devices
+          echo "Verifying localization artifacts before running tests"
+          if [[ ! -f lib/l10n/app_localizations.dart ]]; then
+            echo "lib/l10n/app_localizations.dart is missing"
+            find lib -maxdepth 3 -type f -name 'app_localizations*.dart'
+            exit 42
+          fi
+          ls -la lib/l10n
+
           chromedriver --port=4444 &
-          flutter drive --driver=test_driver/integration_test.dart --target=integration_test/tests/demo_test.dart -d web-server --dart-define=CI=true | tee output.log
-          # We have to check the output for failed tests matching the string "[E]"
-          output=$(<output.log)
-          if [[ "$output" =~ \[E\] ]]; then
-          # You will see "All tests passed." in the logs even when tests failed.
-          echo "All tests did not pass. Please check the logs for more information."
-          exit 1
+          CHROMEDRIVER_PID=$!
+          trap "kill $CHROMEDRIVER_PID" EXIT
+
+          flutter drive --driver=test_driver/integration_test.dart --target=integration_test/tests/demo_test.dart -d web-server --dart-define=CI=true --verbose-system-logs | tee output.log
+          status=$?
+
+          if [[ $status -ne 0 ]]; then
+            echo "flutter drive exited with status $status"
+            tail -n 200 output.log || true
+            exit $status
+          fi
+
+          if grep -q "\[E\]" output.log; then
+            echo "All tests did not pass. Please check the logs for more information."
+            exit 1
           fi
         working-directory: ${{ env.PATH_TO_DEMO }}
 
