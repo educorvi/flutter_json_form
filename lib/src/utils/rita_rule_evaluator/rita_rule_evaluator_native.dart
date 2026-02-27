@@ -177,7 +177,7 @@ class RitaRuleEvaluator {
         final bundle = await rootBundle.loadString(path).timeout(const Duration(seconds: 2));
         _logger.fine('✓ Successfully loaded Rita bundle from: $path (${bundle.length} chars)');
         return bundle;
-      } catch (e, stackTrace) {
+      } catch (e) {
         lastException = e is Exception ? e : Exception(e.toString());
         _logger.warning('✗ Failed to load from $path: ${e.runtimeType} - $e');
         // Continue to next path
