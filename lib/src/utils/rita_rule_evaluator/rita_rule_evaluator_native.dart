@@ -162,41 +162,43 @@ class RitaRuleEvaluator {
     jsRuntime.dispose();
   }
 
-  // TODO
+  // TODO: very hacky as with direct tests in the repo, paths differ
   Future<String> _loadJsBundle() async {
-    // Try the package path first (when used as a dependency)
-    try {
-      return await rootBundle.loadString(jsBundlePath).timeout(const Duration(seconds: 1));
-    } on TimeoutException catch (timeout) {
-      _logger.warning('Timed out loading Rita bundle from $jsBundlePath, trying alternative path', timeout);
-    } on FlutterError catch (error) {
-      _logger.warning('Failed to load Rita bundle from $jsBundlePath, trying alternative path', error);
+    // List of paths to try in order
+    final pathsToTry = [
+      jsBundlePath, // 'packages/flutter_json_forms/assets/js/rita-core.js' (when used as dependency)
+      'assets/js/rita-core.js', // When running tests from package root
+    ];
+
+    for (final path in pathsToTry) {
+      try {
+        _logger.finer('Attempting to load Rita bundle from: $path');
+        final bundle = await rootBundle.loadString(path).timeout(const Duration(seconds: 2));
+        _logger.fine('Successfully loaded Rita bundle from: $path (${bundle.length} chars)');
+        return bundle;
+      } catch (e) {
+        _logger.finer('Failed to load from $path: ${e.runtimeType} - $e');
+        // Continue to next path
+      }
     }
 
-    // Try without package prefix (when running tests from package root)
-    const alternativePath = 'assets/js/rita-core.js';
+    // If all rootBundle attempts failed, try file system as last resort (for local dev)
     try {
-      _logger.finer('Trying alternative asset path: $alternativePath');
-      return await rootBundle.loadString(alternativePath).timeout(const Duration(seconds: 1));
-    } on TimeoutException catch (timeout) {
-      _logger.warning('Timed out loading Rita bundle from $alternativePath, falling back to file system', timeout);
-    } on FlutterError catch (error) {
-      _logger.warning('Failed to load Rita bundle from $alternativePath, falling back to file system', error);
+      return await _loadBundleFromFile();
+    } catch (e) {
+      throw FlutterError('Unable to load Rita JS bundle from any source. Tried paths: ${pathsToTry.join(", ")}. '
+          'Last error: $e');
     }
-
-    // Final fallback: try file system
-    return _loadBundleFromFile();
   }
 
-  // TODO
   Future<String> _loadBundleFromFile() async {
     final localPath = jsBundlePath.replaceFirst('packages/flutter_json_forms/', '');
     final file = File(localPath);
     _logger.finer('Attempting Rita bundle file fallback at ${file.path}');
     if (file.existsSync()) {
-      _logger.finer('Loaded Rita bundle from file system fallback at ${file.path}');
+      _logger.fine('Loaded Rita bundle from file system fallback at ${file.path}');
       return file.readAsStringSync();
     }
-    throw FlutterError('Unable to load Rita bundle from assets or file system. Looked for ${file.path}');
+    throw Exception('File not found at ${file.path}');
   }
 }
