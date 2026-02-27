@@ -115,7 +115,7 @@ jobs:
         if: always()
         with:
           name: unit-test-console-logs
-          path: build/test-results/unit/console-output.log
+          path: build/test-results/unit/test-output.log
 
       - name: Upload Unit Test Results
         uses: actions/upload-artifact@v4
@@ -179,12 +179,12 @@ jobs:
       # - name: Run widget tests
       #   run: make test-package-widget
       #   env:
-      #     LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
+      #     LIBQUICKJSC_TEST_PATH: "$ {{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
 
       - name: Run widget tests with coverage
         run: make test-package-widget-coverage
         env:
-          LIBQUICKJSC_TEST_PATH: "$ {{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
+          LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
 
       - name: Upload Widget Test Coverage
         uses: actions/upload-artifact@v4
@@ -197,7 +197,7 @@ jobs:
         if: always()
         with:
           name: widget-test-console-logs
-          path: build/test-results/widget/console-output.log
+          path: build/test-results/widget/test-output.log
 
       - name: Upload Widget Test Results
         uses: actions/upload-artifact@v4
