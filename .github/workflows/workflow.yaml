@@ -147,6 +147,10 @@ jobs:
           dart pub global activate junitreport
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
 
+      # Run widget tests once without coverage to get human-readable logs
+      - name: Run widget tests (no coverage)
+        run: make test-package-widget
+
       - name: Run widget tests with coverage
         run: make test-package-widget-coverage
 
