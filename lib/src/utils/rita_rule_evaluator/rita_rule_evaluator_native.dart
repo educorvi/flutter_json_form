@@ -164,15 +164,28 @@ class RitaRuleEvaluator {
 
   // TODO
   Future<String> _loadJsBundle() async {
+    // Try the package path first (when used as a dependency)
     try {
       return await rootBundle.loadString(jsBundlePath).timeout(const Duration(seconds: 1));
     } on TimeoutException catch (timeout) {
-      _logger.warning('Timed out loading Rita bundle from assets, falling back to file system', timeout);
-      return _loadBundleFromFile();
+      _logger.warning('Timed out loading Rita bundle from $jsBundlePath, trying alternative path', timeout);
     } on FlutterError catch (error) {
-      _logger.warning('Failed to load Rita bundle from assets, falling back to file system', error);
-      return _loadBundleFromFile();
+      _logger.warning('Failed to load Rita bundle from $jsBundlePath, trying alternative path', error);
     }
+
+    // Try without package prefix (when running tests from package root)
+    const alternativePath = 'assets/js/rita-core.js';
+    try {
+      _logger.finer('Trying alternative asset path: $alternativePath');
+      return await rootBundle.loadString(alternativePath).timeout(const Duration(seconds: 1));
+    } on TimeoutException catch (timeout) {
+      _logger.warning('Timed out loading Rita bundle from $alternativePath, falling back to file system', timeout);
+    } on FlutterError catch (error) {
+      _logger.warning('Failed to load Rita bundle from $alternativePath, falling back to file system', error);
+    }
+
+    // Final fallback: try file system
+    return _loadBundleFromFile();
   }
 
   // TODO
