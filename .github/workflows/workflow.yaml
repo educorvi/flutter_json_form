@@ -151,6 +151,14 @@ jobs:
         run: flutter build linux --debug
         working-directory: ${{ env.PATH_TO_DEMO }}
 
+      - name: Verify and find native library location
+        run: |
+          echo "Searching for libquickjs_c_bridge_plugin.so..."
+          find ${{ env.PATH_TO_DEMO }}/build -name "libquickjs_c_bridge_plugin.so" -type f || echo "Not found in build directory"
+          echo "Listing demo/build/linux structure:"
+          ls -la ${{ env.PATH_TO_DEMO }}/build/linux/ || echo "No linux directory"
+          find ${{ env.PATH_TO_DEMO }}/build/linux -type f -name "*.so" 2>/dev/null || echo "No .so files found"
+
       - name: Install junitreport converter
         run: |
           dart pub global activate junitreport
