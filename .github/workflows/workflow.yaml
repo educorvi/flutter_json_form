@@ -135,12 +135,21 @@ jobs:
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
 
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libglu1-mesa ninja-build clang cmake pkg-config
+
       - name: Install package dependencies
         run: flutter pub get
 
-      # - name: Install demo dependencies
-      #   run: flutter pub get
-      #   working-directory: ${{ env.PATH_TO_DEMO }}
+      - name: Install demo dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Build Linux desktop app to compile native libraries
+        run: flutter build linux --debug
+        working-directory: ${{ env.PATH_TO_DEMO }}
 
       - name: Install junitreport converter
         run: |
@@ -150,9 +159,13 @@ jobs:
       # Run widget tests once without coverage to get human-readable logs
       - name: Run widget tests (no coverage)
         run: make test-package-widget
+        env:
+          LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/bundle/lib/libquickjs_c_bridge_plugin.so"
 
       - name: Run widget tests with coverage
-        run: flutter test test/widget
+        run: make test-package-widget-coverage
+        env:
+          LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/bundle/lib/libquickjs_c_bridge_plugin.so"
 
       - name: Upload Widget Test Coverage
         uses: actions/upload-artifact@v4

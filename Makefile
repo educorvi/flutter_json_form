@@ -45,11 +45,27 @@ test-package-unit-coverage:
 	fi
 
 test-package-widget:
+	@# Check if LIBQUICKJSC_TEST_PATH is set, if not and we're not on macOS, try to set it
+	@if [ -z "$$LIBQUICKJSC_TEST_PATH" ] && [ "$$(uname)" = "Linux" ]; then \
+	  if [ ! -f "demo/build/linux/x64/debug/bundle/lib/libquickjs_c_bridge_plugin.so" ]; then \
+	    echo "Building Linux desktop app to compile native libraries..."; \
+	    cd demo && flutter pub get && flutter build linux --debug && cd ..; \
+	  fi; \
+	  export LIBQUICKJSC_TEST_PATH="$$PWD/demo/build/linux/x64/debug/bundle/lib/libquickjs_c_bridge_plugin.so"; \
+	fi; \
 	flutter test test/widget
 
 test-package-widget-coverage:
-	mkdir -p coverage/widget build/test-results/widget
-	@if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
+	@# Check if LIBQUICKJSC_TEST_PATH is set, if not and we're not on macOS, try to set it
+	@if [ -z "$$LIBQUICKJSC_TEST_PATH" ] && [ "$$(uname)" = "Linux" ]; then \
+	  if [ ! -f "demo/build/linux/x64/debug/bundle/lib/libquickjs_c_bridge_plugin.so" ]; then \
+	    echo "Building Linux desktop app to compile native libraries..."; \
+	    cd demo && flutter pub get && flutter build linux --debug && cd ..; \
+	  fi; \
+	  export LIBQUICKJSC_TEST_PATH="$$PWD/demo/build/linux/x64/debug/bundle/lib/libquickjs_c_bridge_plugin.so"; \
+	fi; \
+	mkdir -p coverage/widget build/test-results/widget; \
+	if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
 	  set -o pipefail -x; \
 	  flutter test --coverage --coverage-path=coverage/widget/lcov.info --machine test/widget \
 	    | tee build/test-results/widget/flutter.json \
