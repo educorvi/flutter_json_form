@@ -170,24 +170,36 @@ class RitaRuleEvaluator {
       'assets/js/rita-core.js', // When running tests from package root
     ];
 
+    Exception? lastException;
     for (final path in pathsToTry) {
       try {
-        _logger.finer('Attempting to load Rita bundle from: $path');
+        _logger.fine('Attempting to load Rita bundle from: $path');
         final bundle = await rootBundle.loadString(path).timeout(const Duration(seconds: 2));
-        _logger.fine('Successfully loaded Rita bundle from: $path (${bundle.length} chars)');
+        _logger.fine('✓ Successfully loaded Rita bundle from: $path (${bundle.length} chars)');
         return bundle;
-      } catch (e) {
-        _logger.finer('Failed to load from $path: ${e.runtimeType} - $e');
+      } catch (e, stackTrace) {
+        lastException = e is Exception ? e : Exception(e.toString());
+        _logger.warning('✗ Failed to load from $path: ${e.runtimeType} - $e');
         // Continue to next path
       }
     }
 
     // If all rootBundle attempts failed, try file system as last resort (for local dev)
     try {
-      return await _loadBundleFromFile();
+      _logger.fine('Attempting file system fallback');
+      final result = await _loadBundleFromFile();
+      _logger.fine('✓ Loaded from file system');
+      return result;
     } catch (e) {
-      throw FlutterError('Unable to load Rita JS bundle from any source. Tried paths: ${pathsToTry.join(", ")}. '
-          'Last error: $e');
+      _logger.severe(
+        '✗ Unable to load Rita JS bundle from any source.\n'
+        'Attempted asset paths: ${pathsToTry.join(", ")}\n'
+        'File system fallback also failed.\n'
+        'Last error: $lastException',
+      );
+      throw FlutterError('Unable to load Rita JS bundle from any source. '
+          'Tried paths: ${pathsToTry.join(", ")}. '
+          'Last error: $lastException');
     }
   }
 
