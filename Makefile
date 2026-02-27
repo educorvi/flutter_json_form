@@ -65,11 +65,15 @@ test-package-widget-coverage:
 	  export LIBQUICKJSC_TEST_PATH="$$PWD/demo/build/linux/x64/debug/bundle/lib/libquickjs_c_bridge_plugin.so"; \
 	fi; \
 	mkdir -p coverage/widget build/test-results/widget; \
-	if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
+	if [ "$$CI" = "true" ]; then \
 	  set -o pipefail -x; \
-	  flutter test --coverage --coverage-path=coverage/widget/lcov.info --machine test/widget \
-	    | tee build/test-results/widget/flutter.json \
-	    | tojunit --output build/test-results/widget/junit.xml; \
+	  flutter test --coverage --coverage-path=coverage/widget/lcov.info test/widget \
+	    | tee build/test-results/widget/console-output.log; \
+	  if command -v tojunit >/dev/null; then \
+	    echo "Generating JUnit XML report..."; \
+	    flutter test --machine test/widget 2>/dev/null \
+	      | tojunit --output build/test-results/widget/junit.xml || echo "JUnit generation failed, continuing..."; \
+	  fi; \
 	else \
 	  flutter test --coverage --coverage-path=coverage/widget/lcov.info test/widget; \
 	fi
@@ -87,11 +91,15 @@ test-demo-integration:
 test-demo-integration-coverage:
 	cd demo && \
 	  mkdir -p coverage/integration build/test-results/integration && \
-	  if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
+	  if [ "$$CI" = "true" ]; then \
 	    set -o pipefail -x; \
-	    flutter test --coverage --coverage-path=coverage/integration/lcov.info --machine integration_test/tests/demo_test.dart --dart-define=CI=true \
-	      | tee build/test-results/integration/flutter.json \
-	      | tojunit --output build/test-results/integration/junit.xml; \
+	    flutter test --coverage --coverage-path=coverage/integration/lcov.info integration_test/tests/demo_test.dart --dart-define=CI=true \
+	      | tee build/test-results/integration/console-output.log; \
+	    if command -v tojunit >/dev/null; then \
+	      echo "Generating JUnit XML report..."; \
+	      flutter test --machine integration_test/tests/demo_test.dart --dart-define=CI=true 2>/dev/null \
+	        | tojunit --output build/test-results/integration/junit.xml || echo "JUnit generation failed, continuing..."; \
+	    fi; \
 	  else \
 	    flutter test --coverage --coverage-path=coverage/integration/lcov.info integration_test/tests/demo_test.dart --dart-define=CI=true; \
 	  fi && cd -
@@ -103,23 +111,34 @@ test-package-integration:
 test-package-integration-coverage:
 	cd demo && \
 	  mkdir -p coverage/package_integration build/test-results/package_integration && \
-	  if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
+	  if [ "$$CI" = "true" ]; then \
 	    set -o pipefail -x; \
-	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info --machine integration_test/tests/widget_suite_test.dart \
-	      | tee build/test-results/package_integration/flutter.json \
-	      | tojunit --output build/test-results/package_integration/junit.xml; \
+	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info integration_test/tests/widget_suite_test.dart \
+	      | tee build/test-results/package_integration/console-output.log; \
+	    if command -v tojunit >/dev/null; then \
+	      echo "Generating JUnit XML report..."; \
+	      flutter test --machine integration_test/tests/widget_suite_test.dart 2>/dev/null \
+	        | tojunit --output build/test-results/package_integration/junit.xml || echo "JUnit generation failed, continuing..."; \
+	    fi; \
 	  else \
 	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info integration_test/tests/widget_suite_test.dart; \
 	  fi && cd -
 
+test-integration:
+	cd demo && flutter test integration_test/tests && cd -
+
 test-integration-coverage:
 	cd demo && \
 	  mkdir -p coverage/integration build/test-results/integration && \
-	  if [ "$$CI" = "true" ] && command -v tojunit >/dev/null; then \
+	  if [ "$$CI" = "true" ]; then \
 	    set -o pipefail -x; \
-	    flutter test --coverage --coverage-path=coverage/integration/lcov.info --machine integration_test/tests --dart-define=CI=true \
-	      | tee build/test-results/integration/flutter.json \
-	      | tojunit --output build/test-results/integration/junit.xml; \
+	    flutter test --coverage --coverage-path=coverage/integration/lcov.info integration_test/tests --dart-define=CI=true \
+	      | tee build/test-results/integration/console-output.log; \
+	    if command -v tojunit >/dev/null; then \
+	      echo "Generating JUnit XML report..."; \
+	      flutter test --machine integration_test/tests --dart-define=CI=true 2>/dev/null \
+	        | tojunit --output build/test-results/integration/junit.xml || echo "JUnit generation failed, continuing..."; \
+	    fi; \
 	  else \
 	    flutter test --coverage --coverage-path=coverage/integration/lcov.info integration_test/tests --dart-define=CI=true; \
 	  fi && cd -

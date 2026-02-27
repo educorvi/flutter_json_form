@@ -98,14 +98,17 @@ jobs:
           dart pub global activate junitreport
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
 
-      - name: Run unit tests with coverage
-        run: make test-package-unit-coverage
+      - name: Run unit tests
+        run: make test-package-unit
 
-      - name: Upload Unit Test Coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-coverage
-          path: coverage/unit/lcov.info
+      # - name: Run unit tests with coverage
+      #   run: make test-package-unit-coverage
+
+      # - name: Upload Unit Test Coverage
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: unit-test-coverage
+      #     path: coverage/unit/lcov.info
 
       - name: Upload Unit Test Results
         uses: actions/upload-artifact@v4
@@ -135,6 +138,7 @@ jobs:
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
 
+      # In order for flutter_js to be testable on linux platform in widget tests, we need to first build our app for linux to compile the native libraries, which are then loaded during widget tests. This is a bit of a workaround but allows us to run widget tests for flutter_js on CI.
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
@@ -165,21 +169,28 @@ jobs:
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
 
       # Run widget tests once without coverage to get human-readable logs
-      - name: Run widget tests (no coverage)
+      - name: Run widget tests
         run: make test-package-widget
         env:
           LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
 
-      - name: Run widget tests with coverage
-        run: make test-package-widget-coverage
-        env:
-          LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
+      # - name: Run widget tests with coverage
+      #   run: make test-package-widget-coverage
+      #   env:
+      #     LIBQUICKJSC_TEST_PATH: "$ {{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
 
-      - name: Upload Widget Test Coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: widget-test-coverage
-          path: coverage/widget/lcov.info
+      # - name: Upload Widget Test Coverage
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: widget-test-coverage
+      #     path: coverage/widget/lcov.info
+
+      # - name: Upload Widget Test Console Logs (iOS)
+      #   uses: actions/upload-artifact@v4
+      #   if : always()
+      #   with:
+      #     name: widget-test-console-logs
+      #     path: build/test-results/widget/console-output.log
 
       - name: Upload Widget Test Results
         uses: actions/upload-artifact@v4
@@ -223,14 +234,27 @@ jobs:
         run: |
           dart pub global activate junitreport
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-      - name: Run demo integration tests (iOS) with coverage
+
+      - name: Run integration tests (iOS)
         working-directory: .
-        run: make test-integration-coverage
-      - name: Upload Integration Test Coverage (iOS)
-        uses: actions/upload-artifact@v4
-        with:
-          name: integration-ios-coverage
-          path: demo/coverage/integration/lcov.info
+        run: make test-integration
+
+      # - name: Run integration tests (iOS) with coverage
+      #   working-directory: .
+      #   run: make test-integration-coverage
+      # - name: Upload Integration Test Coverage (iOS)
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: integration-ios-coverage
+      #     path: demo/coverage/integration/lcov.info
+
+      # - name: Upload Integration Test Console Logs (iOS)
+      #   uses: actions/upload-artifact@v4
+      #   if : always()
+      #   with:
+      #     name: integration-ios-console-logs
+      #     path: demo/build/test-results/integration/console-output.log
+
       - name: Upload Integration Test Results (iOS)
         uses: actions/upload-artifact@v4
         with:
@@ -292,16 +316,34 @@ jobs:
       - name: Run integration tests (Android)
         uses: malinskiy/action-android/emulator-run-cmd@release/0.1.2
         with:
-          cmd: make test-integration-coverage
+          cmd: make test-integration
           api: 31
           cmdOptions: -no-snapshot-save -noaudio -no-boot-anim -cores 2 -memory 3072 -no-window
           tag: google_apis
           abi: x86_64
-      - name: Upload Integration Test Coverage (Android)
-        uses: actions/upload-artifact@v4
-        with:
-          name: integration-android-coverage
-          path: demo/coverage/integration/lcov.info
+
+      # - name: Run integration tests (Android)
+      #   uses: malinskiy/action-android/emulator-run-cmd@release/0.1.2
+      #   with:
+      #     cmd: make test-integration-coverage
+      #     api: 31
+      #     cmdOptions: -no-snapshot-save -noaudio -no-boot-anim -cores 2 -memory 3072 -no-window
+      #     tag: google_apis
+      #     abi: x86_64
+
+      # - name: Upload Integration Test Coverage (Android)
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: integration-android-coverage
+      #     path: demo/coverage/integration/lcov.info
+
+      # - name: Upload Integration Test Console Logs (Android)
+      #   uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: integration-android-console-logs
+      #     path: demo/build/test-results/integration/console-output.log
+
       - name: Upload Integration Test Results (Android)
         uses: actions/upload-artifact@v4
         with:
