@@ -180,8 +180,7 @@ void expectWidgetNextTo(WidgetTester tester, Finder firstFinder, Finder secondFi
   expect(
     firstOffset,
     lessThan(secondOffset),
-    reason:
-        'Expected \\${firstFinder.toString()} to appear to the left of \\${secondFinder.toString()} within a $dxTolerance px tolerance (dx delta: ${dxDelta.toStringAsFixed(2)})',
+    reason: 'Expected \\${firstFinder.toString()} to appear to the left of \\${secondFinder.toString()} within a $dxTolerance px tolerance',
   );
   // Check that their y positions are aligned within margin
   expect(
