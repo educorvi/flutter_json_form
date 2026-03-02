@@ -144,7 +144,6 @@ String upperName(String name) => name[0].toUpperCase() + name.substring(1);
 /// Layout Checks
 
 const crossAxisToleranceMargin = 30.0;
-const horizontalPositionTolerance = 30.0;
 
 /// Expects that the widget found by [upperFinder] is above the widget found by [lowerFinder], and that they are horizontally aligned within a margin
 void expectWidgetAbove(WidgetTester tester, Finder upperFinder, Finder lowerFinder, {double dxMargin = crossAxisToleranceMargin}) {
@@ -173,14 +172,13 @@ void expectWidgetsInVerticalOrder(WidgetTester tester, List<Finder> orderedFinde
 }
 
 /// Expects that the widget found by [firstFinder] is to the left of the widget found by [secondFinder], and that they are vertically aligned within a margin
-void expectWidgetNextTo(WidgetTester tester, Finder firstFinder, Finder secondFinder,
-    {double dyMargin = crossAxisToleranceMargin, double dxTolerance = horizontalPositionTolerance}) {
+void expectWidgetNextTo(WidgetTester tester, Finder firstFinder, Finder secondFinder, {double dyMargin = crossAxisToleranceMargin}) {
   final firstOffset = tester.getTopLeft(firstFinder);
   final secondOffset = tester.getTopLeft(secondFinder);
   expect(
-    firstOffset,
-    lessThan(secondOffset),
-    reason: 'Expected \\${firstFinder.toString()} to appear to the left of \\${secondFinder.toString()} within a $dxTolerance px tolerance',
+    firstOffset.dx,
+    lessThan(secondOffset.dx),
+    reason: 'Expected \\${firstFinder.toString()} to appear to the left of \\${secondFinder.toString()}',
   );
   // Check that their y positions are aligned within margin
   expect(
