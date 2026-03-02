@@ -407,14 +407,16 @@ jobs:
       #   working-directory: ${{ env.PATH_TO_DEMO }}
 
       - name: Install Chrome & ChromeDriver
+        id: setup-chrome
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: 146
           install-chromedriver: true
+
       - name: Verify Chrome & ChromeDriver install
         run: |
-          google-chrome --version
-          chromedriver --version
+          "${{ steps.setup-chrome.outputs.chrome-path }}" --version
+          "${{ steps.setup-chrome.outputs.chromedriver-path }}" --version
 
       # - name: Install junitreport converter
       #   run: |
@@ -436,20 +438,17 @@ jobs:
       - name: Run demo integration test (Web)
         run: |
           set -o pipefail
-
           chromedriver --port=4444 &
           CHROMEDRIVER_PID=$!
           trap "kill $CHROMEDRIVER_PID" EXIT
-
-          flutter drive --driver=test_driver/integration_test.dart --target=integration_test/tests/demo_test.dart -d web-server --dart-define=CI=true --verbose-system-logs | tee output.log
+          CHROME_EXECUTABLE="${{ steps.setup-chrome.outputs.chrome-path }}" \
+            flutter drive --driver=test_driver/integration_test.dart --target=integration_test/tests/demo_test.dart -d web-server --dart-define=CI=true --verbose-system-logs | tee output.log
           status=$?
-
           if [[ $status -ne 0 ]]; then
             echo "flutter drive exited with status $status"
             tail -n 200 output.log || true
             exit $status
           fi
-
           if ! grep -q "All tests passed." output.log; then
             echo "All tests did not pass. Please check the logs for more information."
             exit 1
