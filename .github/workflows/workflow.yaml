@@ -9,8 +9,8 @@ on:
   pull_request:
     branches:
       - "**"
-  # Allow manual runs so integration tests can be triggered explicitly
-  workflow_dispatch:
+  # # Allow manual runs so integration tests can be triggered explicitly
+  # workflow_dispatch:
 
 env:
   PATH_TO_DEMO: demo
@@ -438,11 +438,11 @@ jobs:
       - name: Run demo integration test (Web)
         run: |
           set -o pipefail
+          export CHROME_EXECUTABLE="${{ steps.setup-chrome.outputs.chrome-path }}"
           chromedriver --port=4444 &
           CHROMEDRIVER_PID=$!
           trap "kill $CHROMEDRIVER_PID" EXIT
-          CHROME_EXECUTABLE="${{ steps.setup-chrome.outputs.chrome-path }}" \
-            flutter drive --driver=test_driver/integration_test.dart --target=integration_test/tests/demo_test.dart -d web-server --dart-define=CI=true --verbose-system-logs | tee output.log
+          flutter drive --driver=test_driver/integration_test.dart --target=integration_test/tests/demo_test.dart -d web-server --dart-define=CI=true --verbose-system-logs | tee output.log
           status=$?
           if [[ $status -ne 0 ]]; then
             echo "flutter drive exited with status $status"
