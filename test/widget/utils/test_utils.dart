@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/widgets/form_elements/form_field_text.dart';
