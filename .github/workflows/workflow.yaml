@@ -418,6 +418,11 @@ jobs:
           "${{ steps.setup-chrome.outputs.chrome-path }}" --version
           "${{ steps.setup-chrome.outputs.chromedriver-path }}" --version
 
+      - name: Symlink Chrome for Testing as system Chrome
+        run: |
+          sudo mv /opt/google/chrome/chrome /opt/google/chrome/chrome.bak || true
+          sudo ln -sf "${{ steps.setup-chrome.outputs.chrome-path }}" /opt/google/chrome/chrome
+
       # - name: Install junitreport converter
       #   run: |
       #     dart pub global activate junitreport
@@ -438,7 +443,6 @@ jobs:
       - name: Run demo integration test (Web)
         run: |
           set -o pipefail
-          export CHROME_EXECUTABLE="${{ steps.setup-chrome.outputs.chrome-path }}"
           chromedriver --port=4444 &
           CHROMEDRIVER_PID=$!
           trap "kill $CHROMEDRIVER_PID" EXIT

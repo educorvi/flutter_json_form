@@ -57,8 +57,8 @@ void main() {
         uiSchema: UiSchemaElementsData.buttonGroupHorizontalUiSchema,
       );
 
-      final primary = find.text('Primary Action');
-      final secondary = find.text('Secondary Action');
+      final primary = find.text('First');
+      final secondary = find.text('Second');
 
       // THEN: buttons start hidden
       expectShowOnHidden(tester, primary);

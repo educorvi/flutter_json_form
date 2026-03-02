@@ -143,8 +143,8 @@ String upperName(String name) => name[0].toUpperCase() + name.substring(1);
 
 /// Layout Checks
 
-const crossAxisToleranceMargin = 40.0;
-const horizontalPositionTolerance = 24.0;
+const crossAxisToleranceMargin = 30.0;
+const horizontalPositionTolerance = 30.0;
 
 /// Expects that the widget found by [upperFinder] is above the widget found by [lowerFinder], and that they are horizontally aligned within a margin
 void expectWidgetAbove(WidgetTester tester, Finder upperFinder, Finder lowerFinder, {double dxMargin = crossAxisToleranceMargin}) {
@@ -177,10 +177,9 @@ void expectWidgetNextTo(WidgetTester tester, Finder firstFinder, Finder secondFi
     {double dyMargin = crossAxisToleranceMargin, double dxTolerance = horizontalPositionTolerance}) {
   final firstOffset = tester.getTopLeft(firstFinder);
   final secondOffset = tester.getTopLeft(secondFinder);
-  final dxDelta = secondOffset.dx - firstOffset.dx;
   expect(
-    dxDelta,
-    greaterThan(-dxTolerance),
+    firstOffset,
+    lessThan(secondOffset),
     reason:
         'Expected \\${firstFinder.toString()} to appear to the left of \\${secondFinder.toString()} within a $dxTolerance px tolerance (dx delta: ${dxDelta.toStringAsFixed(2)})',
   );

@@ -116,8 +116,8 @@ class UiSchemaElementsData {
 
   static List<ui.Button> _groupButtons() {
     return [
-      ui.Button(buttonType: ui.TheButtonsType.SUBMIT, text: 'Primary Action'),
-      ui.Button(buttonType: ui.TheButtonsType.RESET, text: 'Secondary Action'),
+      ui.Button(buttonType: ui.TheButtonsType.SUBMIT, text: 'First'),
+      ui.Button(buttonType: ui.TheButtonsType.RESET, text: 'Second'),
     ];
   }
 
