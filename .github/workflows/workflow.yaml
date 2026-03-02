@@ -188,6 +188,7 @@ jobs:
 
       - name: Upload Widget Test Coverage
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: widget-test-coverage
           path: coverage/widget/lcov.info
@@ -201,12 +202,14 @@ jobs:
 
       - name: Upload Widget Test Results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: widget-test-results
           path: build/test-results/widget/junit.xml
 
       - name: Publish Widget Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
         with:
           files: build/test-results/widget/junit.xml
         env:
