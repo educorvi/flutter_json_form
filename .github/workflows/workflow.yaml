@@ -225,7 +225,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: futureware-tech/simulator-action@v3
         with:
-          model: "iPhone 16"
+          model: "iPhone 16 Plus"
       - uses: subosito/flutter-action@v2
         with:
           channel: "master"
@@ -384,27 +384,27 @@ jobs:
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
 
-      - name: Install package dependencies
-        run: flutter pub get
+      # - name: Install package dependencies
+      #   run: flutter pub get
 
-      - name: Install demo dependencies
-        run: flutter pub get
-        working-directory: ${{ env.PATH_TO_DEMO }}
+      # - name: Install demo dependencies
+      #   run: flutter pub get
+      #   working-directory: ${{ env.PATH_TO_DEMO }}
 
-      - name: Generate demo localizations
-        run: flutter gen-l10n
-        working-directory: ${{ env.PATH_TO_DEMO }}
+      # - name: Generate demo localizations
+      #   run: flutter gen-l10n
+      #   working-directory: ${{ env.PATH_TO_DEMO }}
 
-      - name: Verify demo localizations
-        run: |
-          set -euo pipefail
-          echo "Listing generated localization files"
-          ls -la lib/l10n
-          echo "Showing first 40 lines of app_localizations.dart"
-          head -n 40 lib/l10n/app_localizations.dart || true
-          echo "File checksum (helps detect stale cache)"
-          sha256sum lib/l10n/app_localizations.dart
-        working-directory: ${{ env.PATH_TO_DEMO }}
+      # - name: Verify demo localizations
+      #   run: |
+      #     set -euo pipefail
+      #     echo "Listing generated localization files"
+      #     ls -la lib/l10n
+      #     echo "Showing first 40 lines of app_localizations.dart"
+      #     head -n 40 lib/l10n/app_localizations.dart || true
+      #     echo "File checksum (helps detect stale cache)"
+      #     sha256sum lib/l10n/app_localizations.dart
+      #   working-directory: ${{ env.PATH_TO_DEMO }}
 
       - name: Install ChromeDriver
         uses: browser-actions/setup-chrome@v2
@@ -418,21 +418,21 @@ jobs:
       #     dart pub global activate junitreport
       #     echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
 
+      # echo "Flutter version:"
+      # flutter --version
+      # echo "Configured devices:"
+      # flutter devices
+      # echo "Verifying localization artifacts before running tests"
+      # if [[ ! -f lib/l10n/app_localizations.dart ]]; then
+      #   echo "lib/l10n/app_localizations.dart is missing"
+      #   find lib -maxdepth 3 -type f -name 'app_localizations*.dart'
+      #   exit 42
+      # fi
+      # ls -la lib/l10n
+
       - name: Run demo integration test (Web)
         run: |
           set -o pipefail
-
-          echo "Flutter version:"
-          flutter --version
-          echo "Configured devices:"
-          flutter devices
-          echo "Verifying localization artifacts before running tests"
-          if [[ ! -f lib/l10n/app_localizations.dart ]]; then
-            echo "lib/l10n/app_localizations.dart is missing"
-            find lib -maxdepth 3 -type f -name 'app_localizations*.dart'
-            exit 42
-          fi
-          ls -la lib/l10n
 
           chromedriver --port=4444 &
           CHROMEDRIVER_PID=$!
@@ -447,7 +447,7 @@ jobs:
             exit $status
           fi
 
-          if grep -q "\[E\]" output.log; then
+          if ! grep -q "All tests passed." output.log; then
             echo "All tests did not pass. Please check the logs for more information."
             exit 1
           fi

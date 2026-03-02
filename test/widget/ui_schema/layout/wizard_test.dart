@@ -24,16 +24,14 @@ void main() {
       await _pumpWizard(tester);
 
       // WHEN: the user tries to advance without completing the step
-      await tester.tap(_nextButtonFinder());
-      await tester.pumpAndSettle();
+      await tapAndEnsureVisible(tester, _nextButtonFinder());
 
       // THEN: the wizard should stay on the current step
       expect(_ageField, findsNothing, reason: 'Should remain on first step when it is invalid');
 
       // WHEN: the user completes the first step and advances
       await enterTextAndSettle(tester, _firstNameField, _validFirstName);
-      await tester.tap(_nextButtonFinder());
-      await tester.pumpAndSettle();
+      await tapAndEnsureVisible(tester, _nextButtonFinder());
 
       // THEN: the next step becomes visible
       expect(_ageField, findsOneWidget, reason: 'Should advance after the step validates');
@@ -49,8 +47,7 @@ void main() {
       await enterTextAndSettle(tester, _emailField, _validEmail);
       await enterTextAndSettle(tester, _notesField, 'Ready to verify');
 
-      await tester.tap(_submitButtonFinder());
-      await tester.pumpAndSettle();
+      await tapAndEnsureVisible(tester, _submitButtonFinder());
 
       // THEN: submitted values should contain the provided data
       expect(submittedValues, isNotNull, reason: 'Submit callback should receive form values');
@@ -70,12 +67,10 @@ void main() {
       expect(_emailField, findsOneWidget);
 
       // WHEN: the user navigates back and edits previous input
-      await tester.tap(_backButtonFinder());
-      await tester.pumpAndSettle();
+      await tapAndEnsureVisible(tester, _backButtonFinder());
 
       await enterTextAndSettle(tester, _ageField, '45');
-      await tester.tap(_nextButtonFinder());
-      await tester.pumpAndSettle();
+      await tapAndEnsureVisible(tester, _nextButtonFinder());
 
       // THEN: the wizard returns to the final step with updated data
       expect(_emailField, findsOneWidget, reason: 'Should return to step three after editing step two');
@@ -167,19 +162,16 @@ Future<void> _completeFirstTwoSteps(WidgetTester tester) async {
 
 Future<void> _fillFirstStepAndContinue(WidgetTester tester, {String name = _validFirstName}) async {
   await enterTextAndSettle(tester, _firstNameField, name);
-  await tester.tap(_nextButtonFinder());
-  await tester.pumpAndSettle();
+  await tapAndEnsureVisible(tester, _nextButtonFinder());
 }
 
 Future<void> _fillSecondStepAndContinue(WidgetTester tester, {String age = _validAge}) async {
   await enterTextAndSettle(tester, _ageField, age);
-  await tester.tap(_nextButtonFinder());
-  await tester.pumpAndSettle();
+  await tapAndEnsureVisible(tester, _nextButtonFinder());
 }
 
 Future<void> _tapStep(WidgetTester tester, String title) async {
-  await tester.tap(find.text(title).first);
-  await tester.pumpAndSettle();
+  await tapAndEnsureVisible(tester, find.text(title).first);
 }
 
 Finder _field(String property) => find.byKey(ValueKey(scopePath([property])));

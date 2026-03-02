@@ -6,7 +6,7 @@ FROM --platform=linux/amd64 debian:bookworm-slim
 
 # --- Env ---
 ENV FLUTTER_SDK_ROOT=/usr/lib/flutter
-ENV FLUTTER_SDK_VERSION=3.27.1-stable
+ENV FLUTTER_SDK_VERSION=3.38.3-stable
 
 # Android SDK environment variables
 ENV ANDROID_HOME=/opt/android-sdk
@@ -20,17 +20,37 @@ ENV DEBIAN_FRONTEND=noninteractive
 # --- Packages ---
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y \
-    watchman wget unzip zip curl git-all xz-utils \
+    watchman wget unzip zip curl gnupg git-all xz-utils \
     libglu1-mesa openjdk-17-jdk ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# --- Google Chrome & ChromeDriver ---
+RUN install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor --yes -o /etc/apt/keyrings/google-linux.gpg && \
+    chmod 644 /etc/apt/keyrings/google-linux.gpg && \
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-linux.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list >/dev/null && \
+    apt-get update && \
+    apt-get install -y google-chrome-stable && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    CHROME_VERSION=$(google-chrome --version | awk '{print $3}'); \
+    CHROME_MAJOR=${CHROME_VERSION%%.*}; \
+    DRIVER_VERSION=$(curl -fsSL https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_MAJOR}); \
+    curl -fsSL https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip -o /tmp/chromedriver.zip; \
+    unzip -q /tmp/chromedriver.zip -d /tmp; \
+    mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver; \
+    chmod +x /usr/local/bin/chromedriver; \
+    rm -rf /tmp/chromedriver.zip /tmp/chromedriver-linux64
+
+ENV CHROME_EXECUTABLE=/usr/bin/google-chrome
+ENV CHROMEDRIVER=/usr/local/bin/chromedriver
 
 # Java
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
-# Git config
-# RUN git config --global --add safe.directory /usr/lib/flutter && \
-#     git config --global user.name "${GIT_USERNAME}" && \
-#     git config --global user.email ${GIT_EMAIL}
+# Git config (ensure flutter repo is trusted when running as root during build)
+RUN git config --global --add safe.directory /usr/lib/flutter
 
 # --- Flutter SDK ---
 RUN mkdir -p ${FLUTTER_SDK_ROOT} && \
