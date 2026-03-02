@@ -106,6 +106,7 @@ jobs:
 
       - name: Upload Unit Test Coverage
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: unit-test-coverage
           path: coverage/unit/lcov.info
@@ -119,12 +120,14 @@ jobs:
 
       - name: Upload Unit Test Results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: unit-test-results
           path: build/test-results/unit/junit.xml
 
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
         with:
           files: build/test-results/unit/junit.xml
         env:
@@ -267,11 +270,13 @@ jobs:
 
       - name: Upload Integration Test Results (iOS)
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: integration-ios-results
           path: demo/build/test-results/integration/junit.xml
       - name: Publish Integration Test Results (iOS)
         uses: EnricoMi/publish-unit-test-result-action/macos@v2
+        if: always()
         with:
           files: demo/build/test-results/integration/junit.xml
         env:
@@ -343,6 +348,7 @@ jobs:
 
       - name: Upload Integration Test Coverage (Android)
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: integration-android-coverage
           path: demo/coverage/integration/lcov.info
@@ -356,11 +362,13 @@ jobs:
 
       - name: Upload Integration Test Results (Android)
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: integration-android-results
           path: demo/build/test-results/integration/junit.xml
       - name: Publish Integration Test Results (Android)
         uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
         with:
           files: demo/build/test-results/integration/junit.xml
         env:

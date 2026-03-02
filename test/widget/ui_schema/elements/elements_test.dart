@@ -79,8 +79,8 @@ void main() {
         uiSchema: UiSchemaElementsData.buttonGroupVerticalUiSchema,
       );
 
-      final primary = find.text('Primary Action');
-      final secondary = find.text('Secondary Action');
+      final primary = find.text('First');
+      final secondary = find.text('Second');
 
       // WHEN: the toggle is enabled
       await _toggleShow(tester);
