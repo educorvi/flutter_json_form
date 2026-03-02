@@ -33,6 +33,8 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
+          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
       - name: Install demo dependencies
         run: flutter pub get
@@ -57,6 +59,8 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
+          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
       - name: Install package dependencies
         run: flutter pub get
@@ -147,6 +151,8 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
+          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
       # In order for flutter_js to be testable on linux platform in widget tests, we need to first build our app for linux to compile the native libraries, which are then loaded during widget tests. This is a bit of a workaround but allows us to run widget tests for flutter_js on CI.
       - name: Install Linux dependencies
@@ -237,6 +243,9 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
+          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+
       - name: Install package dependencies
         run: flutter pub get
 
@@ -251,6 +260,20 @@ jobs:
       # - name: Run integration tests (iOS)
       #   working-directory: .
       #   run: make test-integration
+
+      - name: Cache Flutter build artifacts (iOS)
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+            demo/build
+            demo/.dart_tool
+            ~/Library/Developer/Xcode/DerivedData
+          key: flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-${{ github.sha }}
+          restore-keys: |
+            flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-
+            flutter-build-${{ github.job }}-${{ runner.os }}-
 
       - name: Run integration tests (iOS) with coverage
         working-directory: .
@@ -299,7 +322,7 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v2
@@ -313,11 +336,12 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
+          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
-      - name: Install Android SDK
-        uses: malinskiy/action-android/install-sdk@release/0.1.2
-      - run: echo $ANDROID_HOME
-      - run: sdkmanager --install "build-tools;30.0.3"
+      - name: Setup Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Install package dependencies
         run: flutter pub get
 
@@ -328,23 +352,52 @@ jobs:
         run: |
           dart pub global activate junitreport
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-      # - name: Run integration tests (Android)
-      #   uses: malinskiy/action-android/emulator-run-cmd@release/0.1.2
-      #   with:
-      #     cmd: make test-integration
-      #     api: 31
-      #     cmdOptions: -no-snapshot-save -noaudio -no-boot-anim -cores 2 -memory 3072 -no-window
-      #     tag: google_apis
-      #     abi: x86_64
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api-31
+
+      - name: Cache Flutter build artifacts (Android)
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+            demo/build
+            demo/.dart_tool
+          key: flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-${{ github.sha }}
+          restore-keys: |
+            flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-
+            flutter-build-${{ github.job }}-${{ runner.os }}-
+
+      - name: Create AVD snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7_pro
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
 
       - name: Run integration tests (Android)
-        uses: malinskiy/action-android/emulator-run-cmd@release/0.1.2
+        uses: reactivecircus/android-emulator-runner@v2
         with:
-          cmd: make test-integration
-          api: 31
-          cmdOptions: -no-snapshot-save -noaudio -no-boot-anim -cores 2 -memory 3072 -no-window
-          tag: google_apis
-          abi: x86_64
+          api-level: 31
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7_pro
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: make test-integration
 
       - name: Upload Integration Test Coverage (Android)
         uses: actions/upload-artifact@v4
@@ -394,6 +447,8 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
+          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
       # - name: Install package dependencies
       #   run: flutter pub get
@@ -433,6 +488,19 @@ jobs:
         run: |
           sudo mv /opt/google/chrome/chrome /opt/google/chrome/chrome.bak || true
           sudo ln -sf "${{ steps.setup-chrome.outputs.chrome-path }}" /opt/google/chrome/chrome
+
+      - name: Cache Flutter build artifacts (Web Tests)
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+            demo/build
+            demo/.dart_tool
+          key: flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-${{ github.sha }}
+          restore-keys: |
+            flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-
+            flutter-build-${{ github.job }}-${{ runner.os }}-
 
       # - name: Install junitreport converter
       #   run: |
@@ -510,6 +578,8 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
+          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
       - name: Setup Pages
         id: pages
@@ -521,6 +591,20 @@ jobs:
       - name: Install demo dependencies
         run: flutter pub get
         working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Cache Flutter build artifacts (Web Build)
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+            demo/build
+            demo/.dart_tool
+          key: flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-${{ github.sha }}
+          restore-keys: |
+            flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-
+            flutter-build-${{ github.job }}-${{ runner.os }}-
 
       - name: Build app for web
         run: flutter build web --base-href "${{ steps.pages.outputs.base_path }}/"
