@@ -406,12 +406,15 @@ jobs:
       #     sha256sum lib/l10n/app_localizations.dart
       #   working-directory: ${{ env.PATH_TO_DEMO }}
 
-      - name: Install ChromeDriver
+      - name: Install Chrome & ChromeDriver
         uses: browser-actions/setup-chrome@v2
         with:
+          chrome-version: 146
           install-chromedriver: true
-      - name: Verify ChromeDriver install
-        run: chromedriver --version
+      - name: Verify Chrome & ChromeDriver install
+        run: |
+          google-chrome --version
+          chromedriver --version
 
       # - name: Install junitreport converter
       #   run: |
