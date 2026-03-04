@@ -1,0 +1,266 @@
+name: Basic Tests
+
+on:
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+env:
+  PATH_TO_DEMO: demo
+  FLUTTER_VERSION: 3.38.3
+
+jobs:
+  #############################################
+  # Linting and formatting for demo and package
+  ##############################################
+  lint-demo:
+    name: Lint Demo App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+
+      - name: Install demo dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Run flutter analyze
+        run: make lint-demo
+
+      - name: Run flutter format check
+        run: make format-demo
+
+  lint-package:
+    name: Lint Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+
+      - name: Install package dependencies
+        run: flutter pub get
+
+      - name: Lint Package (Flutter Analyze)
+        run: make lint-package
+
+      - name: Format Package (Dart Format)
+        run: make format-package
+
+  #############################################
+  # Tests for demo and package
+  ##############################################
+
+  unit-test-package:
+    name: Unit Test Package
+    needs: [lint-package]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+
+      - name: Install package dependencies
+        run: flutter pub get
+
+      - name: Install demo dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Install junitreport converter
+        run: |
+          dart pub global activate junitreport
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+      - name: Run unit tests with coverage
+        run: make test-package-unit-coverage
+
+      - name: Upload Unit Test Coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-coverage
+          path: coverage/unit/lcov.info
+
+      - name: Upload Unit Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results
+          path: build/test-results/unit/junit.xml
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: build/test-results/unit/junit.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  widget-test-package:
+    name: Widget Test Package
+    needs: [lint-package]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+
+      # In order for flutter_js to be testable on linux platform in widget tests, we need to first build our app for linux to compile the native libraries, which are then loaded during widget tests. This is a bit of a workaround but allows us to run widget tests for flutter_js on CI.
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libglu1-mesa ninja-build clang cmake pkg-config
+
+      - name: Install package dependencies
+        run: flutter pub get
+
+      - name: Install demo dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Build Linux desktop app to compile native libraries
+        run: flutter build linux --debug
+        working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Verify and find native library location
+        run: |
+          echo "Searching for libquickjs_c_bridge_plugin.so..."
+          find ${{ env.PATH_TO_DEMO }}/build -name "libquickjs_c_bridge_plugin.so" -type f || echo "Not found in build directory"
+          echo "Listing demo/build/linux structure:"
+          ls -la ${{ env.PATH_TO_DEMO }}/build/linux/ || echo "No linux directory"
+          find ${{ env.PATH_TO_DEMO }}/build/linux -type f -name "*.so" 2>/dev/null || echo "No .so files found"
+
+      - name: Install junitreport converter
+        run: |
+          dart pub global activate junitreport
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+      - name: Run widget tests with coverage
+        run: make test-package-widget-coverage
+        env:
+          LIBQUICKJSC_TEST_PATH: "${{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
+
+      - name: Upload Widget Test Coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: widget-test-coverage
+          path: coverage/widget/lcov.info
+      - name: Upload Widget Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: widget-test-results
+          path: build/test-results/widget/junit.xml
+
+      - name: Publish Widget Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: build/test-results/widget/junit.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  integration-test-web:
+    name: "Integration Tests Web (Demo)"
+    # Run automatically on PRs, main, and tags; allow manual via workflow_dispatch
+    needs: [lint-demo, lint-package]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+
+      - name: Cache Flutter build artifacts (Web Tests)
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+            demo/build
+            demo/.dart_tool
+          key: flutter-build-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+          restore-keys: |
+            flutter-build-${{ runner.os }}
+
+      - name: Install Chrome & ChromeDriver
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: 146
+          install-chromedriver: true
+
+      - name: Verify Chrome & ChromeDriver install
+        run: |
+          "${{ steps.setup-chrome.outputs.chrome-path }}" --version
+          "${{ steps.setup-chrome.outputs.chromedriver-path }}" --version
+
+      - name: Symlink Chrome for Testing as system Chrome
+        run: |
+          sudo mv /opt/google/chrome/chrome /opt/google/chrome/chrome.bak || true
+          sudo ln -sf "${{ steps.setup-chrome.outputs.chrome-path }}" /opt/google/chrome/chrome
+
+      - name: Run demo integration test (Web)
+        run: |
+          set -o pipefail
+          chromedriver --port=4444 &
+          CHROMEDRIVER_PID=$!
+          trap "kill $CHROMEDRIVER_PID" EXIT
+          flutter drive --driver=test_driver/integration_test.dart --target=integration_test/tests/demo_test.dart -d web-server --dart-define=CI=true --verbose-system-logs | tee output.log
+          status=$?
+          if [[ $status -ne 0 ]]; then
+            echo "flutter drive exited with status $status"
+            tail -n 200 output.log || true
+            exit $status
+          fi
+          if ! grep -q "All tests passed." output.log; then
+            echo "All tests did not pass. Please check the logs for more information."
+            exit 1
+          fi
+        working-directory: ${{ env.PATH_TO_DEMO }}
+  real-device-tests:
+    needs: [unit-test-package, widget-test-package, integration-test-web]
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/integration-tests-real-device.yaml
+    secrets: inherit

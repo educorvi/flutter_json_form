@@ -1,0 +1,82 @@
+name: Deploy Demo App
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  PATH_TO_DEMO: demo
+  FLUTTER_VERSION: 3.38.3
+
+jobs:
+  ######################################################
+  # Release Package and deploy demo app to GitHub Pages
+  ######################################################
+
+  build-web-demo:
+    name: "Build Web"
+    # Only build when main branch builds succeed
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "master"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
+          cache: true
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+
+      - name: Cache Flutter build artifacts (Web Build)
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+            demo/build
+            demo/.dart_tool
+          key: flutter-build-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+          restore-keys: |
+            flutter-build-${{ runner.os }}
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install package dependencies
+        run: flutter pub get
+
+      - name: Install demo dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Build app for web
+        run: flutter build web --base-href "${{ steps.pages.outputs.base_path }}/"
+        working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.PATH_TO_DEMO }}/build/web
+
+  # deploy demo app to GitHub Pages after successful tests and build
+  deploy-web-demo:
+    name: Deploy Demo App to GitHub Pages
+    needs: [build-web-demo]
+    # Only deploy when main branch builds succeed
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
