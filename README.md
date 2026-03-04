@@ -15,7 +15,7 @@ and the Flutter guide for
 
 A form renderer which automatically creates highly customizable forms based on json input. An Json schema as of [Draft-07](https://json-schema.org/draft-07) has to be provided for the structure of the form and an optional [Ui Schema](https://educorvi.github.io/vue-json-form/ui-schema/) can be set to customize the appearance of the form. This allows defining dynamic dependencies like the visibility of fields depending on the value of other fields.
 
-A [Demo](https://educorvi.github.io/flutter_json_form/) of the renderer exists to play around with the functionality and debug own schemas.
+A [Demo](https://educorvi.github.io/flutter_json_form/) of `flutter_json_form` exists to play around with the functionality and debug own schemas.
 
 ## Features
 
@@ -23,21 +23,30 @@ A [Demo](https://educorvi.github.io/flutter_json_form/) of the renderer exists t
 
 - Automatically create rich forms based on json schema ([Draft-07](https://json-schema.org/draft-07))
 - Customize the visual appearance and dynamic dependencies between form elements with an optional [Ui Schema](https://educorvi.github.io/vue-json-form/ui-schema/)
-- automatically handle form validation
-- resulting form data is represented in json based on json schema as well
-
-TODO: images
+- Automatically handles form validation based on the json schema
+- Submitted form data is represented in json for easy processing
 
 ### Theming
 
-- Image with default theme of form, then image with heavily customized theming
+The form elements are based on Material 3 widgets and therefore inherit theming from the app's theme like Icons, Font, Colors, Boarder etc.
+
+| | | |
+|---|---|---|
+| ![Alternative](doc/images/showcase_material.png) | ![Dependencies](doc/images/showcase_alternative.png) | ![Theming](doc/images/showcase_dark.png) |
+
+__Note__: In the future it is also planned to further customize element theming like array and object renderings which are currently hard coded widgets in the form renderer itself. It is planned to support this in different steps where you can first customize simple things like paddings of elements or the icon for specific elements but for more control you can also provide custom builder methods to render completely custom widgets. The same is planned for the elements itself by providing own widget builders for the different form elements like simple text fields, time pickers etc. where the renderer abstracts away the logic on when which element to load and things like onSaved callbacks but they can be further customized by the user.
 
 ### Dynamic dependencies
 
-- Simple dependency
-- dependency with multiple fields
-- within objects
-- within array elements
+A common use case for forms is to show or hide fields based on the value of other fields. This can be easily achieved by providing a Ui Schema with `showOn` conditions for the specific fields. The form renderer will then automatically evaluate these conditions and show or hide the fields accordingly. This also works for elements within objects and also array elements can have dependencies on other fields either within an array or outside of it.
+
+TODO demo:
+
+### And more...
+
+The form_renderer supports a variety of features like objects and array that can be nested within each other as often as needed, a variety of input elements like color pickers, time range pickers, file uploads and so on, a wizard mode to split the form into multiple steps and much more. The [demo](https://educorvi.github.io/flutter_json_form/) contains a lot of examples to play around with the functionality and test your own schemas.
+
+![Wizard](doc/images/wizard.png)
 
 ## Getting started
 
@@ -195,31 +204,21 @@ Example values for the `jsonSchema`, `uiSchema` and `formData` can be seen here:
 
 The formData can be set to prefill the form with existing data. If not provided, the form will be empty (except default values are set in the json schema). For more extensive examples, check the [example](./exampe) directory or the [demo application](TODO).
 
-## Additional information
+<!-- ## Additional information
 
 TODO: Tell users more about the package: where to find more information, how to
 contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+from the package authors, and more. -->
 
 ## Development
 
-In order to develop the package, you need to have [Flutter](https://flutter.dev/) installed on your machine. You can check if you have it installed by running `flutter doctor` in your terminal.
+To read more about the development process, check out the [development guide](./doc/development.md).
 
-The next step is to clone the repository to your local machine. Afterwards, open the project and run `flutter pub get` to install the dependencies.
+## Roadmap
 
-Afterwards, cd into the demo folder and run `flutter run` to start the demo application and play around with the form renderer.
-
-It is recommended to use an IDE like [Visual Studio Code](https://code.visualstudio.com/) or [Android Studio](https://developer.android.com/studio) for development and install the corresponding Flutter and Dart plugins.
-
-An Devcontainer configuration will be provided in the future to make it easier to get started with development.
-
-## Future features
+The following features are currently planned for the future:
 
 - appearance of form renderer elements like arrays objects and single elements can be easily themed by providing a custom Theme object
-- logic of the renderer can be further customized by providing callback functions
-
-
-## TODO
-
-- Accessibility Section
 - Customization: completely provide own widgets for the elements
+- logic of the renderer can be further customized by providing callback functions
+- ui schema is constantly expanded with more features to allow more customization of forms
