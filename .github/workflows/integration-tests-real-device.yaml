@@ -116,20 +116,20 @@ jobs:
           cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
           pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
-      - name: Setup Gradle cache
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Cache Flutter build artifacts (Android)
-        uses: actions/cache@v4
-        with:
-          path: |
-            build
-            .dart_tool
-            demo/build
-            demo/.dart_tool
-          key: flutter-build-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
-          restore-keys: |
-            flutter-build-${{ runner.os }}
+      #   - name: Cache Flutter build artifacts (Android)
+      #     uses: actions/cache@v4
+      #     with:
+      #       path: |
+      #         build
+      #         .dart_tool
+      #         demo/build
+      #         demo/.dart_tool
+      #       key: flutter-build-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+      #       restore-keys: |
+      #         flutter-build-${{ runner.os }}
 
       - name: Install package dependencies
         run: flutter pub get
