@@ -1,10 +1,12 @@
-name: Basic Tests
+name: Test and Release on Main
 
 on:
   push:
     branches:
       - "**"
+      - "!main"
   workflow_dispatch:
+  workflow_call:
 
 env:
   PATH_TO_DEMO: demo
@@ -259,6 +261,7 @@ jobs:
             exit 1
           fi
         working-directory: ${{ env.PATH_TO_DEMO }}
+
   real-device-tests:
     needs: [unit-test-package, widget-test-package, integration-test-web]
     if: github.ref == 'refs/heads/main'

@@ -3,6 +3,7 @@ name: Integration Tests Real Device
 on:
   pull_request:
     branches:
+      - "**"
       - "!release/*" # don't run on PRs targeting release branches as it already run when merging to main
   workflow_dispatch:
   workflow_call:
@@ -197,6 +198,7 @@ jobs:
           files: demo/build/test-results/integration/junit.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   deploy-demo-app:
     needs: [integration-test-ios, integration-test-android]
     if: github.ref == 'refs/heads/main'

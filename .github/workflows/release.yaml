@@ -20,6 +20,7 @@ jobs:
         run: npm ci
       - name: Run semantic release
         run: npx semantic-release
+
   # Publish to pub.dev only on tag pushes after successful tests
   publish-package:
     name: Publish Package to pub.dev
