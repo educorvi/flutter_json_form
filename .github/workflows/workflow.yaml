@@ -33,7 +33,7 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
           pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
       - name: Install demo dependencies
@@ -59,7 +59,7 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
           pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
       - name: Install package dependencies
@@ -102,9 +102,6 @@ jobs:
           dart pub global activate junitreport
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
 
-      # - name: Run unit tests
-      #   run: make test-package-unit
-
       - name: Run unit tests with coverage
         run: make test-package-unit-coverage
 
@@ -114,13 +111,6 @@ jobs:
         with:
           name: unit-test-coverage
           path: coverage/unit/lcov.info
-
-      # - name: Upload Unit Test Console Logs
-      #   uses: actions/upload-artifact@v4
-      #   if: always()
-      #   with:
-      #     name: unit-test-console-logs
-      #     path: build/test-results/unit/test-output.log
 
       - name: Upload Unit Test Results
         uses: actions/upload-artifact@v4
@@ -151,7 +141,7 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
           pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
       # In order for flutter_js to be testable on linux platform in widget tests, we need to first build our app for linux to compile the native libraries, which are then loaded during widget tests. This is a bit of a workaround but allows us to run widget tests for flutter_js on CI.
@@ -184,12 +174,6 @@ jobs:
           dart pub global activate junitreport
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
 
-      # Run widget tests once without coverage to get human-readable logs
-      # - name: Run widget tests
-      #   run: make test-package-widget
-      #   env:
-      #     LIBQUICKJSC_TEST_PATH: "$ {{ github.workspace }}/demo/build/linux/x64/debug/plugins/flutter_js/bundle/lib/libquickjs_c_bridge_plugin.so"
-
       - name: Run widget tests with coverage
         run: make test-package-widget-coverage
         env:
@@ -201,14 +185,6 @@ jobs:
         with:
           name: widget-test-coverage
           path: coverage/widget/lcov.info
-
-      # - name: Upload Widget Test Console Logs
-      #   uses: actions/upload-artifact@v4
-      #   if: always()
-      #   with:
-      #     name: widget-test-console-logs
-      #     path: build/test-results/widget/test-output.log
-
       - name: Upload Widget Test Results
         uses: actions/upload-artifact@v4
         if: always()
@@ -243,8 +219,21 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
           pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+
+      - name: Cache Flutter build artifacts (iOS)
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+            demo/build
+            demo/.dart_tool
+            ~/Library/Developer/Xcode/DerivedData
+          key: flutter-build-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+          restore-keys: |
+            flutter-build-${{ runner.os }}
 
       - name: Install package dependencies
         run: flutter pub get
@@ -257,39 +246,15 @@ jobs:
           dart pub global activate junitreport
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
 
-      # - name: Run integration tests (iOS)
-      #   working-directory: .
-      #   run: make test-integration
-
-      - name: Cache Flutter build artifacts (iOS)
-        uses: actions/cache@v4
-        with:
-          path: |
-            build
-            .dart_tool
-            demo/build
-            demo/.dart_tool
-            ~/Library/Developer/Xcode/DerivedData
-          key: flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-${{ github.sha }}
-          restore-keys: |
-            flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-
-            flutter-build-${{ github.job }}-${{ runner.os }}-
-
       - name: Run integration tests (iOS) with coverage
         working-directory: .
-        run: make test-integration
+        run: make test-integration-coverage
+
       - name: Upload Integration Test Coverage (iOS)
         uses: actions/upload-artifact@v4
         with:
           name: integration-ios-coverage
           path: demo/coverage/integration/lcov.info
-
-      # - name: Upload Integration Test Console Logs (iOS)
-      #   uses: actions/upload-artifact@v4
-      #   if: always()
-      #   with:
-      #     name: integration-ios-console-logs
-      #     path: demo/build/test-results/integration/console-output.log
 
       - name: Upload Integration Test Results (iOS)
         uses: actions/upload-artifact@v4
@@ -297,6 +262,7 @@ jobs:
         with:
           name: integration-ios-results
           path: demo/build/test-results/integration/junit.xml
+
       - name: Publish Integration Test Results (iOS)
         uses: EnricoMi/publish-unit-test-result-action/macos@v2
         if: always()
@@ -336,30 +302,11 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
           pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
 
       - name: Setup Gradle cache
         uses: gradle/actions/setup-gradle@v4
-
-      - name: Install package dependencies
-        run: flutter pub get
-
-      - name: Install demo dependencies
-        run: flutter pub get
-        working-directory: ${{ env.PATH_TO_DEMO }}
-      - name: Install junitreport converter
-        run: |
-          dart pub global activate junitreport
-          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-      - name: AVD cache
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-api-31
 
       - name: Cache Flutter build artifacts (Android)
         uses: actions/cache@v4
@@ -369,10 +316,30 @@ jobs:
             .dart_tool
             demo/build
             demo/.dart_tool
-          key: flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-${{ github.sha }}
+          key: flutter-build-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
           restore-keys: |
-            flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-
-            flutter-build-${{ github.job }}-${{ runner.os }}-
+            flutter-build-${{ runner.os }}
+
+      - name: Install package dependencies
+        run: flutter pub get
+
+      - name: Install demo dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PATH_TO_DEMO }}
+
+      - name: Install junitreport converter
+        run: |
+          dart pub global activate junitreport
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api-31
 
       - name: Create AVD snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -397,7 +364,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: make test-integration
+          script: make test-integration-coverage
 
       - name: Upload Integration Test Coverage (Android)
         uses: actions/upload-artifact@v4
@@ -406,19 +373,13 @@ jobs:
           name: integration-android-coverage
           path: demo/coverage/integration/lcov.info
 
-      # - name: Upload Integration Test Console Logs (Android)
-      #   uses: actions/upload-artifact@v4
-      #   if: always()
-      #   with:
-      #     name: integration-android-console-logs
-      #     path: demo/build/test-results/integration/console-output.log
-
       - name: Upload Integration Test Results (Android)
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: integration-android-results
           path: demo/build/test-results/integration/junit.xml
+
       - name: Publish Integration Test Results (Android)
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
@@ -426,7 +387,6 @@ jobs:
           files: demo/build/test-results/integration/junit.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  # (cd $ {{ env.PATH_TO_APP }}; flutter test demo/integration_test/demo_test.dart)
 
   integration-test-web:
     name: "Integration Tests Web (Demo)"
@@ -447,29 +407,26 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
           pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+
+      - name: Cache Flutter build artifacts (Web Tests)
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+            demo/build
+            demo/.dart_tool
+          key: flutter-build-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+          restore-keys: |
+            flutter-build-${{ runner.os }}
 
       # - name: Install package dependencies
       #   run: flutter pub get
 
       # - name: Install demo dependencies
       #   run: flutter pub get
-      #   working-directory: ${{ env.PATH_TO_DEMO }}
-
-      # - name: Generate demo localizations
-      #   run: flutter gen-l10n
-      #   working-directory: ${{ env.PATH_TO_DEMO }}
-
-      # - name: Verify demo localizations
-      #   run: |
-      #     set -euo pipefail
-      #     echo "Listing generated localization files"
-      #     ls -la lib/l10n
-      #     echo "Showing first 40 lines of app_localizations.dart"
-      #     head -n 40 lib/l10n/app_localizations.dart || true
-      #     echo "File checksum (helps detect stale cache)"
-      #     sha256sum lib/l10n/app_localizations.dart
       #   working-directory: ${{ env.PATH_TO_DEMO }}
 
       - name: Install Chrome & ChromeDriver
@@ -488,19 +445,6 @@ jobs:
         run: |
           sudo mv /opt/google/chrome/chrome /opt/google/chrome/chrome.bak || true
           sudo ln -sf "${{ steps.setup-chrome.outputs.chrome-path }}" /opt/google/chrome/chrome
-
-      - name: Cache Flutter build artifacts (Web Tests)
-        uses: actions/cache@v4
-        with:
-          path: |
-            build
-            .dart_tool
-            demo/build
-            demo/.dart_tool
-          key: flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-${{ github.sha }}
-          restore-keys: |
-            flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-
-            flutter-build-${{ github.job }}-${{ runner.os }}-
 
       # - name: Install junitreport converter
       #   run: |
@@ -578,8 +522,20 @@ jobs:
           channel: "master"
           flutter-version: "${{ env.FLUTTER_VERSION }}"
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
           pub-cache-key: flutter-pub-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+
+      - name: Cache Flutter build artifacts (Web Build)
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            .dart_tool
+            demo/build
+            demo/.dart_tool
+          key: flutter-build-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}
+          restore-keys: |
+            flutter-build-${{ runner.os }}
 
       - name: Setup Pages
         id: pages
@@ -591,20 +547,6 @@ jobs:
       - name: Install demo dependencies
         run: flutter pub get
         working-directory: ${{ env.PATH_TO_DEMO }}
-
-      - name: Cache Flutter build artifacts (Web Build)
-        if: always()
-        uses: actions/cache@v4
-        with:
-          path: |
-            build
-            .dart_tool
-            demo/build
-            demo/.dart_tool
-          key: flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-${{ github.sha }}
-          restore-keys: |
-            flutter-build-${{ github.job }}-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'demo/pubspec.lock') }}-
-            flutter-build-${{ github.job }}-${{ runner.os }}-
 
       - name: Build app for web
         run: flutter build web --base-href "${{ steps.pages.outputs.base_path }}/"
