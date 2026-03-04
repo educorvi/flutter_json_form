@@ -1,0 +1,30 @@
+{
+  "name": "Flutter Json Forms",
+  "dockerComposeFile": [
+    "docker-compose.yaml"
+  ],
+  "workspaceFolder": "/workspace",
+  "service": "dev",
+  "overrideCommand": true,
+  "remoteUser": "root",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.flutter",
+        "ms-vscode-remote.remote-containers"
+      ]
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "username": "vscode",
+      "uid": "automatic",
+      "gid": "automatic"
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "mounts": [
+    "source=${localEnv:HOME}/.android,target=/root/.android,type=bind,consistency=cached"
+  ]
+}

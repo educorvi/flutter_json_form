@@ -26,7 +26,12 @@ final localeNotifier = LocaleNotifier();
 late final Highlighter jsonLightHighlighter;
 late final Highlighter jsonDarkHighlighter;
 
-void main() async {
+Future<void> main() async {
+  await initializeDemoApp();
+  runApp(const FlutterJsonFormsDemo());
+}
+
+Future<void> initializeDemoApp() async {
   // Initialize logging for the Flutter JSON Forms package
   Logger.root.level = kDebugMode ? Level.FINE : Level.WARNING;
 
@@ -49,9 +54,6 @@ void main() async {
     accessibilityNotifier.loadEnabled(),
     localeNotifier.loadLocale(),
   ]);
-
-  runApp(const MyApp());
-  // setupDynamicJsonFormValidation();
 }
 
 /// Custom logging setup for the demo app
@@ -74,8 +76,8 @@ void _setupCustomLogging() {
   });
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class FlutterJsonFormsDemo extends StatelessWidget {
+  const FlutterJsonFormsDemo({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -131,11 +131,10 @@ class _FormObjectFieldState extends State<FormObjectField> {
 
   /// Gets the initial value for a child property, handling both top-level and nested objects
   dynamic _getChildInitialValue(String key) {
-    if (widget.formFieldContext.initialValue is! Map<String, dynamic>) {
+    final initialValue = widget.formFieldContext.initialValue;
+    if (initialValue is! Map) {
       return null;
     }
-
-    final Map<String, dynamic> initialValue = widget.formFieldContext.initialValue;
 
     // First try direct key access (for objects in arrays)
     if (initialValue.containsKey(key)) {

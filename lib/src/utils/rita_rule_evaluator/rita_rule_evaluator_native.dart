@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_js/extensions/xhr.dart';
 import 'package:flutter_js/flutter_js.dart' show getJavascriptRuntime, JavascriptRuntime;
@@ -31,7 +33,9 @@ class RitaRuleEvaluator {
 
     _logger.fine('Initializing Rita evaluator with JS bundle');
     try {
-      final jsBundle = await rootBundle.loadString(jsBundlePath);
+      _logger.finest('Loading Rita JS bundle from $jsBundlePath');
+      final jsBundle = await _loadJsBundle();
+      _logger.finest('Loaded Rita JS bundle (${jsBundle.length} chars)');
       jsRuntime.evaluate(jsBundle);
       _logger.fine('Rita JS bundle loaded and evaluated');
 
@@ -39,6 +43,8 @@ class RitaRuleEvaluator {
         _logger.fine('JS -> Dart message: $args (pending completer: ${_ritaCompleter != null})');
         _ritaCompleter?.complete(args);
       });
+
+      _logger.finest('Registering Rita helper functions in JS runtime');
 
       String jsEval = '''
         var ritaEvaluators = {};
@@ -66,12 +72,14 @@ class RitaRuleEvaluator {
         }
       ''';
       jsRuntime.evaluate(jsEval);
+      _logger.finest('Helper functions registered');
 
       final rulesCleaned = <Map<String, dynamic>>[];
       for (final rule in ritaRules.values) {
         rulesCleaned.add({"id": rule.id, "comment": rule.comment ?? "", "rule": rule.rule});
       }
       final rita = jsonEncode({"\$schema": "../../src/schema/schema.json", "rules": rulesCleaned});
+      _logger.finest('Registering ${rulesCleaned.length} Rita rules');
       jsRuntime.evaluate('registerRitaRules($rita);');
 
       _logger.fine('Rita evaluator initialized with ${ritaRules.length} rules');
@@ -152,5 +160,57 @@ class RitaRuleEvaluator {
     _results.clear();
     jsRuntime.clearXhrPendingCalls();
     jsRuntime.dispose();
+  }
+
+  // TODO: very hacky as with direct tests in the repo, paths differ
+  Future<String> _loadJsBundle() async {
+    // List of paths to try in order
+    final pathsToTry = [
+      jsBundlePath, // 'packages/flutter_json_forms/assets/js/rita-core.js' (when used as dependency)
+      'assets/js/rita-core.js', // When running tests from package root
+    ];
+
+    Exception? lastException;
+    for (final path in pathsToTry) {
+      try {
+        _logger.finest('Attempting to load Rita bundle from: $path');
+        final bundle = await rootBundle.loadString(path).timeout(const Duration(seconds: 2));
+        _logger.finest('✓ Successfully loaded Rita bundle from: $path (${bundle.length} chars)');
+        return bundle;
+      } catch (e) {
+        lastException = e is Exception ? e : Exception(e.toString());
+        _logger.warning('✗ Failed to load from $path: ${e.runtimeType} - $e');
+        // Continue to next path
+      }
+    }
+
+    // If all rootBundle attempts failed, try file system as last resort (for local dev)
+    try {
+      _logger.finest('Attempting file system fallback');
+      final result = await _loadBundleFromFile();
+      _logger.finest('✓ Loaded from file system');
+      return result;
+    } catch (e) {
+      _logger.severe(
+        '✗ Unable to load Rita JS bundle from any source.\n'
+        'Attempted asset paths: ${pathsToTry.join(", ")}\n'
+        'File system fallback also failed.\n'
+        'Last error: $lastException',
+      );
+      throw FlutterError('Unable to load Rita JS bundle from any source. '
+          'Tried paths: ${pathsToTry.join(", ")}. '
+          'Last error: $lastException');
+    }
+  }
+
+  Future<String> _loadBundleFromFile() async {
+    final localPath = jsBundlePath.replaceFirst('packages/flutter_json_forms/', '');
+    final file = File(localPath);
+    _logger.finest('Attempting Rita bundle file fallback at ${file.path}');
+    if (file.existsSync()) {
+      _logger.finest('Loaded Rita bundle from file system fallback at ${file.path}');
+      return file.readAsStringSync();
+    }
+    throw Exception('File not found at ${file.path}');
   }
 }
