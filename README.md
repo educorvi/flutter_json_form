@@ -40,8 +40,6 @@ __Note__: In the future it is also planned to further customize element theming 
 
 A common use case for forms is to show or hide fields based on the value of other fields. This can be easily achieved by providing a Ui Schema with `showOn` conditions for the specific fields. The form renderer will then automatically evaluate these conditions and show or hide the fields accordingly. This also works for elements within objects and also array elements can have dependencies on other fields either within an array or outside of it.
 
-TODO demo:
-
 ### And more...
 
 The form_renderer supports a variety of features like objects and array that can be nested within each other as often as needed, a variety of input elements like color pickers, time range pickers, file uploads and so on, a wizard mode to split the form into multiple steps and much more. The [demo](https://educorvi.github.io/flutter_json_form/) contains a lot of examples to play around with the functionality and test your own schemas.
@@ -202,7 +200,7 @@ Example values for the `jsonSchema`, `uiSchema` and `formData` can be seen here:
 
 </details>
 
-The formData can be set to prefill the form with existing data. If not provided, the form will be empty (except default values are set in the json schema). For more extensive examples, check the [example](./exampe) directory or the [demo application](TODO).
+The formData can be set to prefill the form with existing data. If not provided, the form will be empty (except default values are set in the json schema).
 
 <!-- ## Additional information
 
@@ -220,5 +218,5 @@ The following features are currently planned for the future:
 
 - appearance of form renderer elements like arrays objects and single elements can be easily themed by providing a custom Theme object
 - Customization: completely provide own widgets for the elements
-- logic of the renderer can be further customized by providing callback functions
+- logic of the renderer can be further customized by providing callback/mapper functions
 - ui schema is constantly expanded with more features to allow more customization of forms
