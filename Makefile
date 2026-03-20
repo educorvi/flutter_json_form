@@ -17,6 +17,7 @@ run-demo:
 	cd demo && flutter run && cd -
 
 # Formatting
+
 format-package:
 	dart format --set-exit-if-changed .
 
@@ -27,6 +28,7 @@ format-all: format-package format-demo
 
 
 # Linting
+
 lint-package:
 	flutter analyze
 
@@ -79,9 +81,25 @@ test-package-widget-coverage:
 	  flutter test --coverage --coverage-path=coverage/widget/lcov.info test/widget; \
 	fi
 
+# Runs the package widget suite with integration binding for visual debugging if desired
+test-package-integration:
+	cd demo && flutter test integration_test/tests/widget_suite_test.dart && cd -
+
+test-package-integration-coverage:
+	cd demo && \
+	  mkdir -p coverage/package_integration build/test-results/package_integration && \
+	  if [ "$$CI" = "true" ]; then \
+	    set -o pipefail -x; \
+	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info --machine integration_test/tests/widget_suite_test.dart \
+	      | tojunit --output build/test-results/package_integration/junit.xml; \
+	  else \
+	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info integration_test/tests/widget_suite_test.dart; \
+	  fi && cd -
+
 test-package-all:
 	$(MAKE) test-package-unit
 	$(MAKE) test-package-widget
+	$(MAKE) test-package-integration
 
 # Testing: Integration tests
 
@@ -100,20 +118,7 @@ test-demo-integration-coverage:
 	    flutter test --coverage --coverage-path=coverage/integration/lcov.info integration_test/tests/demo_test.dart --dart-define=CI=true; \
 	  fi && cd -
 
-# Runs the package widget suite with integration binding for visual debugging if desired
-test-package-integration:
-	cd demo && flutter test integration_test/tests/widget_suite_test.dart && cd -
-
-test-package-integration-coverage:
-	cd demo && \
-	  mkdir -p coverage/package_integration build/test-results/package_integration && \
-	  if [ "$$CI" = "true" ]; then \
-	    set -o pipefail -x; \
-	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info --machine integration_test/tests/widget_suite_test.dart \
-	      | tojunit --output build/test-results/package_integration/junit.xml; \
-	  else \
-	    flutter test --coverage --coverage-path=coverage/package_integration/lcov.info integration_test/tests/widget_suite_test.dart; \
-	  fi && cd -
+# Combined integration test
 
 test-integration:
 	cd demo && flutter test integration_test/tests && cd -
