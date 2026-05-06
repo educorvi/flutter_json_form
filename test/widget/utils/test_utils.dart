@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_text.dart';
+import 'package:flutter_json_forms/src/rendering/default_renderer/form_elements/form_field_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:json_schema/json_schema.dart';
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
-import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_layout.dart';
+import 'package:flutter_json_forms/src/widgets/elements/form_layout.dart';
 
 import '../../utils/test_utils.dart';
 import 'layout_data.dart';

@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_json_forms/src/form_field_context.dart';
+import 'package:flutter_json_forms/src/rendering/render_context.dart';
+import 'package:flutter_json_forms/src/rendering/renderer_scope.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
-import 'package:flutter_json_forms/src/widgets/form_input_elements/primitive_elements/form_dropdown_fields.dart';
-import 'package:flutter_json_forms/src/widgets/form_input_elements/primitive_elements/form_radio_group_field.dart';
-import 'package:flutter_json_forms/src/widgets/form_input_elements/primitive_elements/form_segmented_control_field.dart';
-import 'package:flutter_json_forms/src/widgets/constants.dart';
-import 'package:flutter_json_forms/src/widgets/form_input_elements/complex_elements/form_array/form_array_field.dart';
-import 'package:flutter_json_forms/src/widgets/form_input_elements/complex_elements/form_object_field.dart';
+import 'package:flutter_json_forms/src/rendering/default_renderer/constants.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:json_schema/json_schema.dart';
 
@@ -16,36 +12,26 @@ class PrimitiveEnumFieldFactory {
 
   /// Creates an enum field widget with optional custom widget builder
   static Widget createEnumField(
-    FormFieldContext context,
+    BuildContext buildContext,
+    RenderContext ctx,
     Widget Function(dynamic value, String label)? widgetBuilder,
   ) {
-    final values = context.jsonSchema.enumValues!;
-    final displayAs = context.options?.enumOptions?.displayAs;
+    final values = ctx.jsonSchema.enumValues!;
+    final displayAs = ctx.options?.enumOptions?.displayAs;
+    final renderer = RendererScope.of(buildContext);
 
     switch (displayAs) {
       case ui.DisplayAs.RADIOBUTTONS:
-        _logger.finest('Creating radio group field for ${context.scope}');
-        return FormRadioGroupField(
-          formFieldContext: context,
-          values: values,
-          optionBuilder: widgetBuilder,
-        );
+        _logger.finest('Creating radio group field for ${ctx.scope}');
+        return renderer.buildDataRadioGroupControl(buildContext, ctx, values);
       case ui.DisplayAs.SWITCHES:
       case ui.DisplayAs.BUTTONS:
-        _logger.finest('Creating segmented control field for ${context.scope}');
-        return FormSegmentedControlField(
-          formFieldContext: context,
-          values: values,
-          segmentBuilder: widgetBuilder,
-        );
+        _logger.finest('Creating segmented control field for ${ctx.scope}');
+        return renderer.buildDataSegmentedControl(buildContext, ctx, values);
       case ui.DisplayAs.SELECT:
       case null:
-        _logger.finest('Creating dropdown field for ${context.scope}');
-        return FormDropdownField(
-          formFieldContext: context,
-          values: values,
-          itemBuilder: widgetBuilder,
-        );
+        _logger.finest('Creating dropdown field for ${ctx.scope}');
+        return renderer.buildDataDropdownControl(buildContext, ctx, values);
     }
   }
 }
@@ -57,9 +43,10 @@ class ComplexEnumFieldFactory {
 
   /// Builds a widget to display an enum value
   static Widget buildEnumValueWidget(
+    BuildContext buildContext,
     dynamic value,
     String label,
-    FormFieldContext parentContext,
+    RenderContext parentCtx,
   ) {
     // For primitives, just show the label
     if (value == null || value is String || value is num || value is bool) {
@@ -68,12 +55,12 @@ class ComplexEnumFieldFactory {
 
     // For objects, use the FormObjectField
     if (value is Map) {
-      return _buildObjectEnumWidget(value, label, parentContext);
+      return _buildObjectEnumWidget(buildContext, value, label, parentCtx);
     }
 
     // For arrays, use FormArrayField
     if (value is List) {
-      return _buildArrayEnumWidget(value, label, parentContext);
+      return _buildArrayEnumWidget(buildContext, value, label, parentCtx);
     }
 
     // Fallback
@@ -82,9 +69,10 @@ class ComplexEnumFieldFactory {
 
   /// Builds a widget using FormObjectField for object enum values
   static Widget _buildObjectEnumWidget(
+    BuildContext buildContext,
     Map<dynamic, dynamic> objectValue,
     String label,
-    FormFieldContext parentContext,
+    RenderContext parentCtx,
   ) {
     try {
       final objectSchema = JsonSchema.create({
@@ -96,35 +84,37 @@ class ComplexEnumFieldFactory {
           ),
         ),
       });
-      final childContext = parentContext.createChildContext(
-        childScope: '${parentContext.scope}/enum_preview',
-        childId: '${parentContext.id}_enum_preview',
+      final childContext = parentCtx.createChildContext(
+        childScope: '${parentCtx.scope}/enum_preview',
+        childId: '${parentCtx.id}_enum_preview',
         childJsonSchema: objectSchema,
         childInitialValue: objectValue,
         childShowLabel: false,
         childRequired: false,
       );
-      _logger.finest('Creating object enum field for ${parentContext.scope}');
-      return _separateObjectBuilder(childContext);
+      _logger.finest('Creating object enum field for ${parentCtx.scope}');
+      return _separateObjectBuilder(buildContext, childContext);
     } catch (e) {
-      _logger.warning('Failed to create object enum field for ${parentContext.scope}: $e. Fallback to simple preview.');
+      _logger.warning('Failed to create object enum field for ${parentCtx.scope}: $e. Fallback to simple preview.');
       return _buildSimpleObjectPreview(objectValue, label);
     }
   }
 
-  static Widget _separateObjectBuilder(FormFieldContext childContext) {
+  static Widget _separateObjectBuilder(BuildContext buildContext, RenderContext childContext) {
+    final renderer = RendererScope.of(buildContext);
     return Padding(
       padding: const EdgeInsets.only(
           left: UIConstants.groupIndentation, bottom: UIConstants.verticalElementSpacing / 2, top: UIConstants.verticalElementSpacing / 2),
-      child: FormObjectField(formFieldContext: childContext),
+      child: renderer.buildDataObjectControl(buildContext, childContext),
     );
   }
 
   /// Builds a widget using FormArrayField for array enum values
   static Widget _buildArrayEnumWidget(
+    BuildContext buildContext,
     List<dynamic> arrayValue,
     String label,
-    FormFieldContext parentContext,
+    RenderContext parentCtx,
   ) {
     try {
       final itemSchema = arrayValue.isNotEmpty ? _inferSchemaForValue(arrayValue.first) : {'type': 'string'};
@@ -132,23 +122,24 @@ class ComplexEnumFieldFactory {
         'type': 'array',
         'items': itemSchema,
       });
-      final childContext = parentContext.createChildContext(
-        childScope: '${parentContext.scope}/enum_preview',
-        childId: '${parentContext.id}_enum_preview',
+      final childContext = parentCtx.createChildContext(
+        childScope: '${parentCtx.scope}/enum_preview',
+        childId: '${parentCtx.id}_enum_preview',
         childJsonSchema: arraySchema,
         childInitialValue: arrayValue,
         childShowLabel: false,
         childRequired: false,
       );
-      _logger.finest('Creating array enum field for ${parentContext.scope}');
-      return _separateArrayBuilder(label, childContext);
+      _logger.finest('Creating array enum field for ${parentCtx.scope}');
+      return _separateArrayBuilder(buildContext, label, childContext);
     } catch (e) {
-      _logger.warning('Failed to create array enum field for ${parentContext.scope}: $e. Fallback to simple preview.');
+      _logger.warning('Failed to create array enum field for ${parentCtx.scope}: $e. Fallback to simple preview.');
       return _buildSimpleArrayPreview(arrayValue, label);
     }
   }
 
-  static Widget _separateArrayBuilder(String label, FormFieldContext childContext) {
+  static Widget _separateArrayBuilder(BuildContext buildContext, String label, RenderContext childContext) {
+    final renderer = RendererScope.of(buildContext);
     return Padding(
       padding: const EdgeInsets.only(left: UIConstants.groupIndentation),
       child: Column(
@@ -157,7 +148,7 @@ class ComplexEnumFieldFactory {
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: UIConstants.verticalElementSpacing),
-          FormArrayField(formFieldContext: childContext),
+          renderer.buildDataArrayControl(buildContext, childContext),
         ],
       ),
     );
@@ -185,6 +176,7 @@ class ComplexEnumFieldFactory {
     return {'type': 'string'};
   }
 
+  ///TODO: ist this even needed? currently not part of rendering interface but should also not be really needed since objects can be rendered with default object rendering
   /// Fallback: Simple object preview without using FormObjectField
   /// just displays key-value pairs and has no additional functionality
   static Widget _buildSimpleObjectPreview(
@@ -215,6 +207,7 @@ class ComplexEnumFieldFactory {
     );
   }
 
+  /// TODO: is this needed? currently not part of rendering interface but should also not be really needed since arrays can be rendered with default array rendering
   /// Fallback: Simple array preview without using FormArrayField
   /// just displays item count and first few items
   static Widget _buildSimpleArrayPreview(

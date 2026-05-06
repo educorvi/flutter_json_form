@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_json_forms/flutter_json_forms.dart';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
-import 'package:flutter_json_forms/src/widgets/custom_form_input_fields/form_builder_segmented_button.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_help.dart';
-import 'package:flutter_json_forms/src/widgets/form_input_elements/complex_elements/form_array/form_array_field.dart';
-import 'package:flutter_json_forms/src/widgets/form_input_elements/primitive_elements/form_color_picker_field.dart';
-import 'package:flutter_json_forms/src/widgets/form_input_elements/primitive_elements/form_segmented_control_field.dart';
+import 'package:flutter_json_forms/src/rendering/default_renderer/custom_form_input_fields/form_builder_segmented_button.dart';
+import 'package:flutter_json_forms/src/rendering/default_renderer/form_elements/form_help.dart';
+import 'package:flutter_json_forms/src/rendering/default_renderer/data_elements/form_array/form_array_field.dart';
+import 'package:flutter_json_forms/src/rendering/default_renderer/data_elements/form_color_picker_field.dart';
+import 'package:flutter_json_forms/src/rendering/default_renderer/data_elements/form_segmented_control_field.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -74,7 +74,7 @@ void main() {
       );
 
       final segmentedControl = tester.widget<FormSegmentedControlField>(find.byType(FormSegmentedControlField));
-      expect(segmentedControl.formFieldContext.options?.enumOptions?.buttonVariant, ui.ColorVariants.OUTLINE_SECONDARY);
+      expect(segmentedControl.ctx.options?.enumOptions?.buttonVariant, ui.ColorVariants.OUTLINE_SECONDARY);
 
       final stackedBuilder = tester.widget<FormBuilderSegmentedButton<dynamic>>(
         find.byWidgetPredicate((widget) => widget is FormBuilderSegmentedButton<dynamic>),
