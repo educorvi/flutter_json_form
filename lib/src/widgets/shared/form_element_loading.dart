@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// TODO: should not be needed. Investigate when we get to the stae where we need this element and try to remove the need for it.
 /// A loading placeholder widget used when FormContext is temporarily unavailable
 /// during operations like reordering or complex rebuilds.
 class FormElementLoading extends StatelessWidget {

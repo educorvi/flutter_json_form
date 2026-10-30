@@ -1,4 +1,0 @@
-enum LayoutDirection {
-  vertical,
-  horizontal,
-}

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
-import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_control.dart';
-import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_button.dart';
-import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_button_group.dart';
-import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_divider.dart';
-import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_html.dart';
-import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_layout.dart';
-import 'package:flutter_json_forms/src/widgets/ui_layout_elements/elements/form_wizard.dart';
+import 'package:flutter_json_forms/src/widgets/elements/form_control.dart';
+import 'package:flutter_json_forms/src/widgets/elements/form_button.dart';
+import 'package:flutter_json_forms/src/widgets/elements/form_button_group.dart';
+import 'package:flutter_json_forms/src/widgets/elements/form_divider.dart';
+import 'package:flutter_json_forms/src/widgets/elements/form_html.dart';
+import 'package:flutter_json_forms/src/widgets/elements/form_layout.dart';
+import 'package:flutter_json_forms/src/widgets/elements/form_wizard.dart';
 import '../../models/ui_schema.g.dart' as ui;
-import 'package:flutter_json_forms/src/widgets/form_elements/form_visibility.dart';
+import 'package:flutter_json_forms/src/rendering/renderer_scope.dart';
 
 class LayoutFactory {
   static Widget generateLayoutElement(
@@ -49,13 +49,12 @@ class LayoutFactory {
     // why is this needed? All primitive fields already have showOnWrapper. Maybe we remove the primitive field wrappers or add this logic at a better place since root layout elements don't get show and css logic here
     return Builder(
       builder: (context) {
-        final formContext = FormContext.of(context)!;
-        final isVisible = formContext.elementShown(
+        final isVisible = FormContext.of(context)!.elementShown(
           showOn: item.showOn,
           parentIsShown: isShownFromParent,
           selfIndices: null,
         );
-        return buildAnimatedVisibility(child: child, isVisible: isVisible);
+        return RendererScope.of(context).buildVisibilityWrapper(context, child: child, isVisible: isVisible);
       },
     );
   }

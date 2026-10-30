@@ -15,6 +15,9 @@ and the Flutter guide for
 
 A form renderer which automatically creates highly customizable forms based on json input. An Json schema as of [Draft-07](https://json-schema.org/draft-07) has to be provided for the structure of the form and an optional [Ui Schema](https://educorvi.github.io/vue-json-form/ui-schema/) can be set to customize the appearance of the form. This allows defining dynamic dependencies like the visibility of fields depending on the value of other fields.
 
+> [!NOTE]
+> This package is currently in development and not yet published on pub.dev. It is also not stable yet and breaking changes can occur at any time.
+
 A [Demo](https://educorvi.github.io/flutter_json_form/) of `flutter_json_form` exists to play around with the functionality and debug own schemas.
 
 ## Features
@@ -28,13 +31,14 @@ A [Demo](https://educorvi.github.io/flutter_json_form/) of `flutter_json_form` e
 
 ### Theming
 
-The form elements are based on Material 3 widgets and therefore inherit theming from the app's theme like Icons, Font, Colors, Boarder etc.
+The form elements are based on Material 3 widgets and therefore inherit theming from the app's theme like Icons, Font, Colors, Borders etc.
 
 | | | |
 |---|---|---|
 | ![Alternative](doc/images/showcase_material.png) | ![Dependencies](doc/images/showcase_alternative.png) | ![Theming](doc/images/showcase_dark.png) |
 
-__Note__: In the future it is also planned to further customize element theming like array and object renderings which are currently hard coded widgets in the form renderer itself. It is planned to support this in different steps where you can first customize simple things like paddings of elements or the icon for specific elements but for more control you can also provide custom builder methods to render completely custom widgets. The same is planned for the elements itself by providing own widget builders for the different form elements like simple text fields, time pickers etc. where the renderer abstracts away the logic on when which element to load and things like onSaved callbacks but they can be further customized by the user.
+> [!NOTE]
+> In the future it is also planned to further customize element theming like array and object renderings which are currently hard coded widgets in the form renderer itself. It is planned to support this in different steps where you can first customize simple things like paddings of elements or the icon for specific elements but for more control you can also provide custom builder methods to render completely custom widgets. The same is planned for the elements itself by providing own widget builders for the different form elements like simple text fields, time pickers etc. where the renderer abstracts away the logic on when which element to load and things like onSaved callbacks but they can be further customized by the user.
 
 ### Dynamic dependencies
 

@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:flutter_json_forms/src/models/ui_schema.g.dart' as ui;
 import 'package:flutter_json_forms/src/process_form_values.dart';
+import 'package:flutter_json_forms/src/rendering/default_renderer/default_json_form_renderer.dart';
+import 'package:flutter_json_forms/src/rendering/json_form_renderer.dart';
+import 'package:flutter_json_forms/src/rendering/renderer_scope.dart';
 import 'package:flutter_json_forms/src/utils/rita_rule_evaluator/rita_rule_evaluator.dart';
 import 'package:flutter_json_forms/src/form_context.dart';
-import 'package:flutter_json_forms/src/widgets/constants.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_field_text.dart';
+import 'package:flutter_json_forms/src/rendering/default_renderer/constants.dart';
+import 'package:flutter_json_forms/src/rendering/default_renderer/form_elements/form_field_text.dart';
 import 'package:flutter_json_forms/src/widgets/ui_layout_elements/form_layout_factory.dart';
-import 'package:flutter_json_forms/src/widgets/form_elements/form_loader.dart';
 import 'package:flutter_json_forms/src/utils/utils.dart';
 import 'package:flutter_json_forms/src/utils/logger.dart';
 import 'package:flutter_json_forms/src/utils/show_on.dart';
@@ -64,6 +66,33 @@ class FlutterJsonForm extends StatefulWidget {
   /// [loadingWidget] is the widget displayed while the form is loading
   final Widget? loadingWidget;
 
+  /// The [renderer] controls how every form field is rendered.
+  ///
+  /// Supply a [DefaultJsonFormRenderer] with custom configuration, or pass a
+  /// fully custom [JsonFormRenderer] implementation, to override the built-in
+  /// Flutter Form Builder widgets:
+  ///
+  /// ```dart
+  /// FlutterJsonForm(
+  ///   renderer: DefaultJsonFormRenderer(
+  ///     colorPickerConfig: ColorPickerConfig(enableOpacity: true),
+  ///   ),
+  ///   ...
+  /// )
+  /// ```
+  ///
+  /// Defaults to [DefaultJsonFormRenderer] when not provided.
+  final JsonFormRenderer? renderer;
+
+  /// If `false`, schema and initialisation errors are silently ignored and the
+  /// form renders empty rather than showing a red error message.
+  ///
+  /// For field-level errors (invalid scope, unsupported type) also set
+  /// `showErrors: false` on [DefaultJsonFormRenderer].
+  ///
+  /// Defaults to `true`.
+  final bool showErrors;
+
   /// TODO: error widget
 
   const FlutterJsonForm({
@@ -77,6 +106,8 @@ class FlutterJsonForm extends StatefulWidget {
     this.onFormRequestCallback,
     this.showLoadingWidget = true,
     this.loadingWidget,
+    this.renderer,
+    this.showErrors = true,
   });
 
   @override
@@ -458,12 +489,14 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   /// Returns the form if there are no validation errors
   @override
   Widget build(BuildContext context) {
+    final renderer = widget.renderer ?? const DefaultJsonFormRenderer();
     if (isLoading) {
       if (!widget.showLoadingWidget) {
         return Container();
       }
-      return widget.loadingWidget ?? FormLoader();
+      return widget.loadingWidget ?? renderer.buildLoadingWidget(context);
     } else if (hasErrors) {
+      if (!widget.showErrors) return const SizedBox.shrink();
       late List<Widget> errorWidgets = [];
 
       if (_jsonSchemaValidationErrors != null && _jsonSchemaValidationErrors!.isNotEmpty) {
@@ -506,31 +539,34 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     }
   }
 
-  FormBuilder _getFormBuilder() {
-    return FormBuilder(
-      key: _formKey,
-      child: FormContext(
-        onFormSubmitSaveCallback: widget.onFormSubmitSaveCallback,
-        onFormRequestCallback: widget.onFormRequestCallback,
-        showOnDependencies: _showOnDependencies,
-        jsonSchemaModel: jsonSchemaModel,
-        ritaEvaluator: ritaRuleEvaluator,
-        setValueForShowOn: setValueForShowOn,
-        checkValueForShowOn: checkValueForShowOn,
-        isRequired: (path) => _isRequired(jsonSchemaModel, path),
-        getFullFormData: () {
-          final data = _ensureProcessedShowOnValues();
-          _logger.finest('getFullFormData payload: $data');
-          return data;
-        },
-        onFormValueSaved: _onFormValueSaved,
-        onFormValueChanged: _onFormValueChanged,
-        saveAndValidate: ({bool focusOnInvalid = true, bool autoScrollWhenFocusOnInvalid = false}) =>
-            saveAndValidate(focusOnInvalid: focusOnInvalid, autoScrollWhenFocusOnInvalid: autoScrollWhenFocusOnInvalid),
-        reset: reset,
-        getFormValues: () => instantValue,
-        elementShown: _isElementShown,
-        child: generateForm(uiSchemaModel!.layout),
+  Widget _getFormBuilder() {
+    return RendererScope(
+      renderer: widget.renderer ?? const DefaultJsonFormRenderer(),
+      child: FormBuilder(
+        key: _formKey,
+        child: FormContext(
+          onFormSubmitSaveCallback: widget.onFormSubmitSaveCallback,
+          onFormRequestCallback: widget.onFormRequestCallback,
+          showOnDependencies: _showOnDependencies,
+          jsonSchemaModel: jsonSchemaModel,
+          ritaEvaluator: ritaRuleEvaluator,
+          setValueForShowOn: setValueForShowOn,
+          checkValueForShowOn: checkValueForShowOn,
+          isRequired: (path) => _isRequired(jsonSchemaModel, path),
+          getFullFormData: () {
+            final data = _ensureProcessedShowOnValues();
+            _logger.finest('getFullFormData payload: $data');
+            return data;
+          },
+          onFormValueSaved: _onFormValueSaved,
+          onFormValueChanged: _onFormValueChanged,
+          saveAndValidate: ({bool focusOnInvalid = true, bool autoScrollWhenFocusOnInvalid = false}) =>
+              saveAndValidate(focusOnInvalid: focusOnInvalid, autoScrollWhenFocusOnInvalid: autoScrollWhenFocusOnInvalid),
+          reset: reset,
+          getFormValues: () => instantValue,
+          elementShown: _isElementShown,
+          child: generateForm(uiSchemaModel!.layout),
+        ),
       ),
     );
   }

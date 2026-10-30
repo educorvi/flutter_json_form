@@ -27,7 +27,7 @@
 
 # Configuration
 - [ ] allow to provide an onError widget to be shown when an error occurs (instead of the default error which shows which fields are invalid in the json)
-- [ ] when loading things are done by the flutter app which use the library, it would be nice if the form would already show its loading widget. This should be configurable by some way. There should also be a way to configure the loading widget
+- [x] when loading things are done by the flutter app which use the library, it would be nice if the form would already show its loading widget. This should be configurable by some way. There should also be a way to configure the loading widget
 - 
 
 
@@ -68,3 +68,21 @@ Open:
 - [ ] Implement Josn Schema Validation
 - [ ] Implement custom widget theming (first some parts of the widgets can be set but also whole rendering components like text boxes can be set. Also padding can be set for objects and arrays but also custom elements for rendering)
 - [ ] Run tests faster by first allowing them to run as widget tests by defining the test as references and then calling them in widget and integration tests and also by defining a main function which calls all tests at once so the emulator only has to build once significantly speeding up the test execution
+
+
+Theming New:
+- [ ] Make current default theme more customizable
+  - [ ] allow to specify default text, 
+  - [ ] allow to specify most options of the form builder elements 
+  - [ ] custom configs like override individual array buttons, array reorder, array delete etc.
+- [ ] Some ui rendering is still mixed with creation logic. Should be separated so we can fully reuse the logic and can fully specify the ui. Current limitations:
+  -  [ ] DefaultText is used within soem compoennts (header in form)
+  -  [ ] header is not customizable
+  -  [ ] error messages for rendering, should it can be customized that no errors should be shown
+  -  [ ] layout children logic with spacing is also hardcoded for now. Object and array are fully customizable but need deep understanding of the logic. Here a middle way should be used. So we can customize everything but put as much logic as possible within utility functions and also allow our default implementation to be very customizable
+
+
+- Code editor: flutter_code_editor: ^0.3.5, make it similar like https://github.com/rjsf-team/react-jsonschema-form on bigger screens so we see in real time the json schema, ui schema and json object and can modify it. Also use code editor to validate the json
+- Validate json schema and show validation errors in the ui
+- 
+
