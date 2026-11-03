@@ -163,11 +163,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
   }
 
   void _moveItem(int oldIndex, int newIndex) {
-    if (oldIndex < 0 ||
-        oldIndex >= items.length ||
-        newIndex < 0 ||
-        newIndex >= items.length ||
-        oldIndex == newIndex) {
+    if (oldIndex < 0 || oldIndex >= items.length || newIndex < 0 || newIndex >= items.length || oldIndex == newIndex) {
       return;
     }
 
@@ -277,9 +273,7 @@ class _FormArrayFieldState extends State<FormArrayField> {
         canReorder: canReorder,
         label: context.localize((l) => l.buttonDragHandle),
         onMoveUp: index == 0 ? null : () => _moveItem(index, index - 1),
-        onMoveDown: index == items.length - 1
-            ? null
-            : () => _moveItem(index, index + 1),
+        onMoveDown: index == items.length - 1 ? null : () => _moveItem(index, index + 1),
         testKey: Key('${parentContext.id}/items/${item.id}/drag'),
         moveUpTestKey: Key(
           '${parentContext.id}/items/${item.id}/move-up',

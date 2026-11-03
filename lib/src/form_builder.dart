@@ -23,8 +23,7 @@ import 'package:flutter_json_forms/src/json_validator.dart';
 ///
 /// [baseTheme] is the ambient Flutter theme, allowing a form to customize
 /// specific values while retaining the surrounding application's theme.
-typedef JsonFormThemeBuilder =
-    ThemeData Function(BuildContext context, ThemeData baseTheme);
+typedef JsonFormThemeBuilder = ThemeData Function(BuildContext context, ThemeData baseTheme);
 
 /// A dynamic form which generates form fields based on a JSON schema and a UI schema
 class FlutterJsonForm extends StatefulWidget {

@@ -1,7 +1,6 @@
 library;
 
-export 'src/form_builder.dart'
-    show FlutterJsonForm, FlutterJsonFormState, JsonFormThemeBuilder;
+export 'src/form_builder.dart' show FlutterJsonForm, FlutterJsonFormState, JsonFormThemeBuilder;
 
 export 'src/json_validator.dart' show setupDynamicJsonFormValidation;
 
