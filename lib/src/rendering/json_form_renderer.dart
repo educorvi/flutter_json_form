@@ -230,9 +230,12 @@ abstract class JsonFormRenderer {
   /// implementation should disable or hide the button accordingly.
   Widget buildArrayAddButton(BuildContext context, ArrayAddButtonContext ctx);
 
-  /// Builds the drag-handle that lets users reorder array items.
+  /// Builds the controls that let users reorder array items.
   ///
   /// [ctx.canReorder] is `false` when only one item is present.
+  /// [ctx.onMoveUp] and [ctx.onMoveDown] are `null` at their respective list
+  /// boundaries. Renderers may use these callbacks for directional controls
+  /// instead of a drag handle.
   Widget buildArrayReorderButton(BuildContext context, ArrayReorderButtonContext ctx);
 
   /// Builds the button that removes an array item.

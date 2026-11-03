@@ -34,3 +34,4 @@ analyzer:
   exclude:
     - "**.g.dart"
     - demo/**
+    - build/**

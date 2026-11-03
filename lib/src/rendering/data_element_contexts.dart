@@ -52,15 +52,27 @@ class ArrayReorderButtonContext {
   /// Localised accessibility label for the drag handle.
   final String label;
 
+  /// Moves this item one position earlier, or `null` at the start of the list.
+  final VoidCallback? onMoveUp;
+
+  /// Moves this item one position later, or `null` at the end of the list.
+  final VoidCallback? onMoveDown;
+
   /// Test key for the button widget.
   final Key? testKey;
+  final Key? moveUpTestKey;
+  final Key? moveDownTestKey;
 
   const ArrayReorderButtonContext({
     required this.index,
     required this.itemId,
     required this.canReorder,
     required this.label,
+    this.onMoveUp,
+    this.onMoveDown,
     this.testKey,
+    this.moveUpTestKey,
+    this.moveDownTestKey,
   });
 }
 

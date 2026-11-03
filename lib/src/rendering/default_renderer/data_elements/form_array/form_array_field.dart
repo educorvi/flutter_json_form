@@ -162,6 +162,22 @@ class _FormArrayFieldState extends State<FormArrayField> {
     _notifyItemsChanged();
   }
 
+  void _moveItem(int oldIndex, int newIndex) {
+    if (oldIndex < 0 ||
+        oldIndex >= items.length ||
+        newIndex < 0 ||
+        newIndex >= items.length ||
+        oldIndex == newIndex) {
+      return;
+    }
+
+    setState(() {
+      final item = items.removeAt(oldIndex);
+      items.insert(newIndex, item);
+    });
+    _notifyItemsChanged();
+  }
+
   void _notifyItemsChanged() {
     widget.ctx.onChanged?.call(items.map((e) => e.value).toList());
   }
@@ -260,7 +276,17 @@ class _FormArrayFieldState extends State<FormArrayField> {
         itemId: item.id,
         canReorder: canReorder,
         label: context.localize((l) => l.buttonDragHandle),
+        onMoveUp: index == 0 ? null : () => _moveItem(index, index - 1),
+        onMoveDown: index == items.length - 1
+            ? null
+            : () => _moveItem(index, index + 1),
         testKey: Key('${parentContext.id}/items/${item.id}/drag'),
+        moveUpTestKey: Key(
+          '${parentContext.id}/items/${item.id}/move-up',
+        ),
+        moveDownTestKey: Key(
+          '${parentContext.id}/items/${item.id}/move-down',
+        ),
       ),
     );
 

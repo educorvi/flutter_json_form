@@ -19,6 +19,13 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:flutter_json_forms/src/json_validator.dart';
 
+/// Builds the Material theme used by a form renderer and its controls.
+///
+/// [baseTheme] is the ambient Flutter theme, allowing a form to customize
+/// specific values while retaining the surrounding application's theme.
+typedef JsonFormThemeBuilder =
+    ThemeData Function(BuildContext context, ThemeData baseTheme);
+
 /// A dynamic form which generates form fields based on a JSON schema and a UI schema
 class FlutterJsonForm extends StatefulWidget {
   /// The [jsonSchema] used to generate the JsonForm
@@ -93,6 +100,18 @@ class FlutterJsonForm extends StatefulWidget {
   /// Defaults to `true`.
   final bool showErrors;
 
+  /// Builds the Flutter Material theme scoped to this form.
+  ///
+  /// This is useful when the host application uses a different widget library
+  /// and the form renderer's Material controls need an explicit theme bridge.
+  final JsonFormThemeBuilder? themeBuilder;
+
+  /// Adds a transparent Flutter [Material] surface around the form.
+  ///
+  /// Enable this when embedding the form in a host that does not provide a
+  /// Flutter Material ancestor.
+  final bool wrapWithMaterial;
+
   /// TODO: error widget
 
   const FlutterJsonForm({
@@ -108,6 +127,8 @@ class FlutterJsonForm extends StatefulWidget {
     this.loadingWidget,
     this.renderer,
     this.showErrors = true,
+    this.themeBuilder,
+    this.wrapWithMaterial = false,
   });
 
   @override
@@ -196,7 +217,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     _logger.info('Starting form initialization');
     try {
       _logger.fine('Initializing JavaScript engine and rule set');
-      await _initializeJsEngineAndRuleSetAsync();
+      await _initializeRuleEvaluatorAsync();
 
       if (widget.validate) {
         _logger.finer('Loading and validating schemas');
@@ -227,8 +248,8 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
     super.dispose();
   }
 
-  /// Initializes the JavaScript engine and rule set asynchronously
-  Future<void> _initializeJsEngineAndRuleSetAsync() async {
+  /// Initializes the rule evaluator and array visibility manager.
+  Future<void> _initializeRuleEvaluatorAsync() async {
     // Use Future.microtask to yield control back to the UI thread
     await Future.microtask(() {
       ritaRuleEvaluator = RitaRuleEvaluator.create();
@@ -316,9 +337,7 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
       // _ritaInitialized = false;
     });
 
-    // Initialize Rita rules bundle and evaluate
-    await ritaRuleEvaluator.initializeWithBundle();
-
+    // Evaluate Rita rules only when the schema contains any rules.
     final processed = _ensureProcessedShowOnValues();
     _logger.fine('Initial Rita payload: $processed');
     await ritaRuleEvaluator.evaluateAll(
@@ -489,6 +508,28 @@ class FlutterJsonFormState extends State<FlutterJsonForm> with SafeSetStateMixin
   /// Returns the form if there are no validation errors
   @override
   Widget build(BuildContext context) {
+    final themeBuilder = widget.themeBuilder;
+    if (themeBuilder == null && !widget.wrapWithMaterial) {
+      return _buildFormContent(context);
+    }
+
+    Widget formContent = Builder(builder: _buildFormContent);
+    if (widget.wrapWithMaterial) {
+      formContent = Material(
+        type: MaterialType.transparency,
+        child: formContent,
+      );
+    }
+    if (themeBuilder == null) {
+      return formContent;
+    }
+    return Theme(
+      data: themeBuilder(context, Theme.of(context)),
+      child: formContent,
+    );
+  }
+
+  Widget _buildFormContent(BuildContext context) {
     final renderer = widget.renderer ?? const DefaultJsonFormRenderer();
     if (isLoading) {
       if (!widget.showLoadingWidget) {

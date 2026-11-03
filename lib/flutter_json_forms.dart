@@ -1,6 +1,7 @@
 library;
 
-export 'src/form_builder.dart' show FlutterJsonForm, FlutterJsonFormState;
+export 'src/form_builder.dart'
+    show FlutterJsonForm, FlutterJsonFormState, JsonFormThemeBuilder;
 
 export 'src/json_validator.dart' show setupDynamicJsonFormValidation;
 
@@ -13,6 +14,7 @@ export 'package:form_builder_validators/form_builder_validators.dart' show FormB
 // Rendering abstraction layer
 export 'src/rendering/render_context.dart' show RenderContext;
 export 'src/rendering/helpers/render_helpers.dart' show RenderHelpers, mapEnumValuesToTitles;
+export 'src/rendering/helpers/text_field_helpers.dart' show TextFieldHelpers;
 export 'src/rendering/json_form_renderer.dart' show JsonFormRenderer;
 export 'src/rendering/ui_element_contexts.dart'
     show UiLayoutContext, UiButtonContext, UiButtonGroupContext, UiDividerContext, UiHtmlContext, UiWizardContext;

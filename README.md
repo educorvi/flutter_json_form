@@ -31,7 +31,7 @@ A [Demo](https://educorvi.github.io/flutter_json_form/) of `flutter_json_form` e
 
 ### Theming
 
-The form elements are based on Material 3 widgets and therefore inherit theming from the app's theme like Icons, Font, Colors, Borders etc.
+The form elements are based on Material 3 widgets and therefore inherit theming from the app's theme like Icons, Font, Colors, Borders etc. `FlutterJsonForm` also accepts an optional `themeBuilder` to customize the Material theme for one form while retaining the ambient theme as a base. Set `wrapWithMaterial` when embedding the form in a host that does not provide a Flutter Material ancestor.
 
 | | | |
 |---|---|---|

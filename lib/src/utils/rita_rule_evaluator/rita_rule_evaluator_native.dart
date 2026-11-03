@@ -129,6 +129,10 @@ class RitaRuleEvaluator {
   // }
 
   Future<Map<String, bool>> evaluateAll(String dataJson) async {
+    if (ritaRules.isEmpty) {
+      _results.clear();
+      return {};
+    }
     if (!_initialized) await initializeWithBundle();
     Map<String, bool> results = {};
     for (final rule in ritaRules.values) {
@@ -153,7 +157,7 @@ class RitaRuleEvaluator {
   }
 
   Future<void> dispose() async {
-    if (!_initialized) return;
+    if (_disposed) return;
     _initialized = false;
     _disposed = true;
     ritaRules.clear();
